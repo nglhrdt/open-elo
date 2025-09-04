@@ -81,7 +81,7 @@ jobs:
   deploy:
     name: Deploy Stack
     needs: build-and-push
-    runs-on: [self-hosted, devilsoft]
+    runs-on: self-hosted
     environment:
       name: production
     permissions:
