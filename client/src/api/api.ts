@@ -65,6 +65,7 @@ export async function register(data: { username: string, email: string, password
 }
 
 export async function fetchCurrentUser(): Promise<User | null> {
+  if (!localStorage.getItem('auth_token')) return null;
   const res = await fetch(`${baseUrl}/me`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('auth_token') ?? ''}`,

@@ -1,7 +1,9 @@
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { LeagueEntity } from "./league.entity";
 import { PlayerEntity } from "./player.entity";
 import { RankingEntity } from "./ranking.entity";
-import { RoleEntity } from "./role.entity";
+
+export type Role = "user" | "admin";
 
 @Entity()
 export class UserEntity {
@@ -17,17 +19,21 @@ export class UserEntity {
   @Column()
   passwordHash: string
 
+  @Column({ enum: ["user", "admin"], nullable: false, default: "user" })
+  role: Role
+
+  @OneToMany(() => LeagueEntity, league => league.owner, { lazy: true })
+  leaguesOwned: LeagueEntity[]
+
   @OneToMany(() => PlayerEntity, player => player.user, { lazy: true })
   players: PlayerEntity[]
 
   @OneToMany(() => RankingEntity, ranking => ranking.user, { lazy: true })
   rankings: RankingEntity[]
 
-  @ManyToMany(() => RoleEntity, role => role.users, { lazy: true })
-  @JoinTable({
-    name: "user_roles",
-    joinColumn: { name: "user_id", referencedColumnName: "id" },
-    inverseJoinColumn: { name: "role_id", referencedColumnName: "id" }
-  })
-  roles: RoleEntity[]
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

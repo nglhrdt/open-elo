@@ -2,12 +2,17 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Action } from "routing-controllers";
 import { Service } from "typedi";
+import { Role, UserEntity } from "../database/entity/user.entity";
 import { UserService } from "./user.service";
 
 interface JwtPayload {
   sub: string;
-  roles?: string[];
+  role: Role;
+  iat: number;
+  exp: number;
 }
+
+export type User = { id: string, username: string, email: string, role: Role }
 
 @Service()
 export class AuthService {
@@ -24,19 +29,19 @@ export class AuthService {
     if (!user) throw new Error("Invalid credentials");
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) throw new Error("Invalid credentials");
-    const token = this.sign(user.id, []); // Assuming roles are empty for simplicity
-    return { token, user: { id: user.id, username: user.username, email: user.email } };
+
+    return this.createTokenAndReturn(user);
   }
 
   async register(data: { username: string; email: string; password: string }) {
     const passwordHash = await bcrypt.hash(data.password, 12);
     const user = await this.userService.createUser({ username: data.username, email: data.email, passwordHash });
-    const token = this.sign(user.id, []); // Assuming roles are empty for simplicity
-    return { token, user: { id: user.id, username: user.username, email: user.email } };
+
+    return this.createTokenAndReturn(user);
   }
 
-  sign(userId: string, roles: string[]) {
-    return jwt.sign({ roles } as Omit<JwtPayload, "sub">, this.secret, { subject: userId, expiresIn: this.expiresIn });
+  sign(userId: string, role: Role) {
+    return jwt.sign({ role } as Omit<JwtPayload, "sub">, this.secret, { subject: userId, expiresIn: this.expiresIn });
   }
 
   parseToken(authHeader?: string) {
@@ -65,6 +70,15 @@ export class AuthService {
     const userId = (action.request as any).userId;
     if (!userId) return null;
     const user = await this.userService.getUserById(userId);
-    return user ? { id: user.id, username: user.username, email: user.email } : null;
+    return user ? this.formatUser(user) : null;
+  }
+
+  private createTokenAndReturn(user: UserEntity) {
+    const token = this.sign(user.id, user.role);
+    return { token, user: this.formatUser(user) };
+  }
+
+  private formatUser(user: UserEntity): User {
+    return { id: user.id, username: user.username, email: user.email, role: user.role };
   }
 }

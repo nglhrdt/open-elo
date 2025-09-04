@@ -1,12 +1,15 @@
 import { Service } from "typedi";
 import { FindManyOptions } from "typeorm";
 import { AppDataSource } from "../database/data-source";
-import { LeagueEntity } from "../database/entity/league.entity";
+import { LEAGUE_TYPE, LeagueEntity } from "../database/entity/league.entity";
 import { RankingEntity } from "../database/entity/ranking.entity";
 import { UserEntity } from "../database/entity/user.entity";
+import { UserService } from "./user.service";
 
 @Service()
 export class LeagueService {
+
+  constructor(private userService: UserService) { }
 
   private leagueRepository = AppDataSource.getRepository(LeagueEntity);
   private rankingRepository = AppDataSource.getRepository(RankingEntity);
@@ -15,8 +18,12 @@ export class LeagueService {
     return (await this.leagueRepository.find(options)).map(l => ({ id: l.id, name: l.name, type: l.type }));
   }
 
-  createLeague(data: { name: string }) {
-    return this.leagueRepository.save(data);
+  async createLeague(data: { name: string, type: LEAGUE_TYPE, ownerId: string }) {
+    const owner = await this.userService.getUserById(data.ownerId);
+    if (!owner) throw new Error("Owner not found");
+    const league = this.leagueRepository.create({ name: data.name, type: data.type });
+    league.owner = owner;
+    return this.leagueRepository.save(league);
   }
 
   getLeagueById(id: string) {

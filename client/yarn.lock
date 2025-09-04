@@ -950,6 +950,11 @@
   resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.85.5.tgz#c4adc126bb3a927e4d60280bf3cf62210700147c"
   integrity sha512-KO0WTob4JEApv69iYp1eGvfMSUkgw//IpMnq+//cORBzXf0smyRwPLrUvEe5qtAEGjwZTXrjxg+oJNP/C00t6w==
 
+"@tanstack/query-devtools@5.86.0":
+  version "5.86.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-devtools/-/query-devtools-5.86.0.tgz#77c90d625f4c9f92c948ecab8f5cabb4e360ccc8"
+  integrity sha512-/JDw9BP80eambEK/EsDMGAcsL2VFT+8F5KCOwierjPU7QP8Wt1GT32yJpn3qOinBM8/zS3Jy36+F0GiyJp411A==
+
 "@tanstack/react-form@^1.19.2":
   version "1.19.2"
   resolved "https://registry.yarnpkg.com/@tanstack/react-form/-/react-form-1.19.2.tgz#e92388d66fbbd95c8949daca78c6e5357e33b697"
@@ -959,6 +964,13 @@
     "@tanstack/react-store" "^0.7.3"
     decode-formdata "^0.9.0"
     devalue "^5.1.1"
+
+"@tanstack/react-query-devtools@^5.86.0":
+  version "5.86.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query-devtools/-/react-query-devtools-5.86.0.tgz#dbe074160f10b8d186b7fc21eb82237b7ff536bc"
+  integrity sha512-+50IcXI+54qHx3IDccbTala4tkToKxa0WKqP4XWlTnP1mQNfHO3dJj8wwnzpG50os69kpSbnU8C98Q/i8b6lyA==
+  dependencies:
+    "@tanstack/query-devtools" "5.86.0"
 
 "@tanstack/react-query@^5.85.5":
   version "5.85.5"

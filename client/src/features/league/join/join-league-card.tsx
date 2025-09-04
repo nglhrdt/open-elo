@@ -24,10 +24,14 @@ export function JoinLeagueCard() {
         <CardDescription>You are not part of any leage. Join one to get started.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <LeagueSelect leagues={leagues} onChange={setSelectedLeague} />
-        <JoinLeagueButton leagueId={selectedLeague} />
-        <p className="text-center">or</p>
-        <CreateLeagueDialog />
+        {
+          leagues.length === 0 ? <CreateLeagueDialog /> : (
+            <>
+              <LeagueSelect leagues={leagues} onChange={setSelectedLeague} />
+              <JoinLeagueButton leagueId={selectedLeague} />
+            </>
+          )
+        }
       </CardContent>
     </Card>
   )

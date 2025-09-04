@@ -1,6 +1,8 @@
 import { Authorized, Body, CurrentUser, Get, JsonController, Param, Post } from "routing-controllers";
 import { Service } from "typedi";
+import { LEAGUE_TYPE } from "../database/entity/league.entity";
 import { UserEntity } from "../database/entity/user.entity";
+import { User } from "../services/auth.service";
 import { LeagueService } from "../services/league.service";
 import { RankingService } from "../services/ranking.service";
 
@@ -24,8 +26,9 @@ export class LeagueController {
   }
 
   @Post("/")
-  async createLeague(@Body() body: { name: string, type: string }) {
-    return this.leagueService.createLeague({ ...body });
+  @Authorized()
+  async createLeague(@CurrentUser() user: User, @Body() body: { name: string, type: LEAGUE_TYPE }) {
+    return this.leagueService.createLeague({ name: body.name, type: body.type, ownerId: user.id });
   }
 
   @Authorized()

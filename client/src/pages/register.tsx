@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useMutation } from '@tanstack/react-query'
 import * as React from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -25,7 +25,7 @@ export function RegisterPage() {
         <CardTitle>Register</CardTitle>
         <CardAction>
           <Button variant='link'>
-            {/* <Link to={"/login"}>Login</Link> */}
+            <Link to={"/login"}>Login</Link>
           </Button>
         </CardAction>
       </CardHeader>
@@ -60,7 +60,7 @@ export function RegisterPage() {
             <Label htmlFor='password'>Password</Label>
             <Input
               id='password'
-              placeholder="password"
+              placeholder="Password"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
