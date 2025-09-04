@@ -3,6 +3,7 @@ import { LeagueSelect } from "@/components/league-select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { CreateLeagueDialog } from "../create-league-dialog/create-league-dialog";
 import { JoinLeagueButton } from "./join-league-button";
 
 export function JoinLeagueCard() {
@@ -25,6 +26,8 @@ export function JoinLeagueCard() {
       <CardContent className="flex flex-col gap-4">
         <LeagueSelect leagues={leagues} onChange={setSelectedLeague} />
         <JoinLeagueButton leagueId={selectedLeague} />
+        <p className="text-center">or</p>
+        <CreateLeagueDialog />
       </CardContent>
     </Card>
   )
