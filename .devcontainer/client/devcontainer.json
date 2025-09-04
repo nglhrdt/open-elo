@@ -1,0 +1,27 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node-postgres
+{
+	"name": "Open Elo Client",
+	"dockerComposeFile": "../docker-compose.yml",
+	"service": "client",
+	"workspaceFolder": "/workspaces/client",
+	"features": {
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1.6.3": {}
+	},
+	"forwardPorts": [
+		5173
+	],
+	"shutdownAction": "none",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"JacobPfeifer.pfeifer-hurl",
+				"ckolkman.vscode-postgres",
+				"bradlc.vscode-tailwindcss",
+				"quicktype.quicktype",
+				"esbenp.prettier-vscode",
+				"EditorConfig.EditorConfig"
+			]
+		}
+	}
+}

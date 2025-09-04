@@ -1,0 +1,48 @@
+services:
+
+  api:
+    build:
+      context: ./api
+      dockerfile: ../Dockerfile-Node-Hurl
+    volumes:
+      - ..:/workspaces:cached
+    command: sleep infinity
+    network_mode: bridge
+    links:
+      - postgres
+
+  client:
+    build:
+      context: ./client
+      dockerfile: ../Dockerfile-Node-Hurl
+    volumes:
+      - ..:/workspaces:cached
+    command: sleep infinity
+    network_mode: bridge
+    links:
+      - api
+
+  server:
+    build:
+      context: ./server
+      dockerfile: ../Dockerfile-Node-Hurl
+    volumes:
+      - ..:/workspaces:cached
+    command: sleep infinity
+    network_mode: bridge
+    links:
+      - postgres
+
+  postgres:
+    image: postgres:latest
+    restart: unless-stopped
+    network_mode: bridge
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: elo
+
+volumes:
+  postgres-data:

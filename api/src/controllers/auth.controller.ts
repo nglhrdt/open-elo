@@ -1,0 +1,31 @@
+import { Body, JsonController, Post } from "routing-controllers";
+import { Service } from "typedi";
+import { AuthService } from "../services/auth.service";
+
+@Service()
+@JsonController()
+export class AuthController {
+
+  constructor(
+    private service: AuthService,
+  ) { }
+
+  @Post('/login')
+  login(@Body() credentials: { user: string, password: string }) {
+    const { user, password } = credentials;
+    if (!user || !password) {
+      throw new Error("Missing credentials");
+    }
+    return this.service.login(credentials.user, credentials.password);
+  }
+
+  @Post('/register')
+  register(@Body() user: { username: string, email: string, password: string }) {
+    return this.service.register(user);
+  }
+
+  @Post('/logout')
+  logout() {
+    return { message: "Logged out" };
+  }
+}
