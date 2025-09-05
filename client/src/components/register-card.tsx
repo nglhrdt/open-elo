@@ -4,14 +4,14 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/componen
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useMutation } from '@tanstack/react-query'
-import * as React from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 
-export function RegisterPage() {
+export function RegisterCard() {
   const navigate = useNavigate()
-  const [username, setUsername] = React.useState('')
-  const [email, setEmail] = React.useState('')
-  const [password, setPassword] = React.useState('')
+  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const mutation = useMutation({
     mutationFn: () => register({ username, email, password }),
     onSuccess: () => {
