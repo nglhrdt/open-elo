@@ -84,6 +84,20 @@ services:
     ports:
       - '80:80'
       - '443:443'
+    
+  adminer:
+      image: adminer:latest
+      container_name: adminer
+      restart: unless-stopped
+      networks:
+        - web
+      labels:
+        - 'traefik.enable=true'
+        - 'traefik.http.routers.elo-adminer.rule=Host(`db.${DOMAIN}`)'
+        - 'traefik.http.routers.elo-adminer.entrypoints=websecure'
+        - 'traefik.http.routers.elo-adminer.tls.certresolver=letsencrypt'
+        - 'traefik.http.routers.elo-adminer.tls=true'
+        - 'traefik.http.services.elo-adminer.loadbalancer.server.port=8080'
 
 networks:
   web:
