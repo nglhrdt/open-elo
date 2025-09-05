@@ -13,8 +13,7 @@ export class UserService {
   }
 
   createUser(user: { username: string; email: string; passwordHash: string }) {
-    const isFirstUser = this.repository.count().then(count => count === 0);
-    return this.repository.save({ ...user, role: isFirstUser ? "admin" : "user" });
+    return this.repository.save({ ...user, role: "user" });
   }
 
   getUserById(id: string) {
