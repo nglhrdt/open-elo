@@ -1,4 +1,4 @@
-import { createGame, type Team } from "@/api/api";
+import { createGame, getLeagueUsers, type Team } from "@/api/api";
 import { LeagueUserSelect } from "@/components/league-user-select";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { SelectGoals } from "./select-goals";
 
@@ -22,6 +22,11 @@ type CreateGameDialogProps = {
 
 export function CreateGameDialog(props: CreateGameDialogProps) {
   const queryClient = useQueryClient()
+
+  const { data: users, isPending } = useQuery({
+    queryKey: ['league', props.leagueId, 'users'],
+    queryFn: () => getLeagueUsers(props.leagueId)
+  });
 
   const [open, setOpen] = useState(false);
 
@@ -34,14 +39,12 @@ export function CreateGameDialog(props: CreateGameDialogProps) {
     },
   })
 
-
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
   const [player1, setPlayer1] = useState<string>('');
   const [player2, setPlayer2] = useState<string>('');
   const [player3, setPlayer3] = useState<string>('');
   const [player4, setPlayer4] = useState<string>('');
-
 
   async function handleCreateButtonClick() {
     const score = `${homeScore}-${awayScore}`;
@@ -73,10 +76,12 @@ export function CreateGameDialog(props: CreateGameDialogProps) {
     return ids;
   }, [player1, player2, player3, player4]);
 
+  if (isPending || !users) return null;
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>New Game</Button>
+        <Button disabled={users.length < 4}>New Game</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
