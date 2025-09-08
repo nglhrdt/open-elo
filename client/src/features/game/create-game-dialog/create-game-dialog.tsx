@@ -1,6 +1,6 @@
-import { createGame, getLeagueUsers, type Team } from "@/api/api";
-import { LeagueUserSelect } from "@/components/league-user-select";
-import { Button } from "@/components/ui/button";
+import { createGame, getLeagueUsers, type Team } from '@/api/api';
+import { LeagueUserSelect } from '@/components/league-user-select';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -10,22 +10,22 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { SelectGoals } from "./select-goals";
+} from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
+import { SelectGoals } from './select-goals';
 
 type CreateGameDialogProps = {
   leagueId: string;
-}
+};
 
 export function CreateGameDialog(props: CreateGameDialogProps) {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   const { data: users, isPending } = useQuery({
     queryKey: ['league', props.leagueId, 'users'],
-    queryFn: () => getLeagueUsers(props.leagueId)
+    queryFn: () => getLeagueUsers(props.leagueId),
   });
 
   const [open, setOpen] = useState(false);
@@ -37,7 +37,7 @@ export function CreateGameDialog(props: CreateGameDialogProps) {
       queryClient.invalidateQueries({ queryKey: ['rankings'] });
       setOpen(false);
     },
-  })
+  });
 
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
@@ -56,8 +56,10 @@ export function CreateGameDialog(props: CreateGameDialogProps) {
     if (player4) players.push({ id: player4, team: 'away' as Team });
 
     await mutation.mutateAsync({
-      score, players, leagueId: props.leagueId
-    })
+      score,
+      players,
+      leagueId: props.leagueId,
+    });
 
     setHomeScore(0);
     setAwayScore(0);
@@ -81,7 +83,9 @@ export function CreateGameDialog(props: CreateGameDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button disabled={users.length < 4}>New Game</Button>
+        <Button variant="link" disabled={users.length < 4}>
+          New Game
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -91,23 +95,50 @@ export function CreateGameDialog(props: CreateGameDialogProps) {
           </DialogDescription>
         </DialogHeader>
         <SelectGoals goals={homeScore} onSelect={setHomeScore} />
-        <LeagueUserSelect placeholder="Player 1" value={player1} onChange={setPlayer1} leagueId={props.leagueId} selectedIds={selectedIDs} />
-        <LeagueUserSelect placeholder="Player 2" value={player2} onChange={setPlayer2} leagueId={props.leagueId} selectedIds={selectedIDs} />
+        <LeagueUserSelect
+          placeholder="Player 1"
+          value={player1}
+          onChange={setPlayer1}
+          leagueId={props.leagueId}
+          selectedIds={selectedIDs}
+        />
+        <LeagueUserSelect
+          placeholder="Player 2"
+          value={player2}
+          onChange={setPlayer2}
+          leagueId={props.leagueId}
+          selectedIds={selectedIDs}
+        />
         <p>Home</p>
         <Separator orientation="horizontal" />
         <p>Away</p>
-        <LeagueUserSelect placeholder="Player 3" value={player3} onChange={setPlayer3} leagueId={props.leagueId} selectedIds={selectedIDs} />
-        <LeagueUserSelect placeholder="Player 4" value={player4} onChange={setPlayer4} leagueId={props.leagueId} selectedIds={selectedIDs} />
+        <LeagueUserSelect
+          placeholder="Player 3"
+          value={player3}
+          onChange={setPlayer3}
+          leagueId={props.leagueId}
+          selectedIds={selectedIDs}
+        />
+        <LeagueUserSelect
+          placeholder="Player 4"
+          value={player4}
+          onChange={setPlayer4}
+          leagueId={props.leagueId}
+          selectedIds={selectedIDs}
+        />
         <SelectGoals goals={awayScore} onSelect={setAwayScore} />
-        <DialogFooter>
-          <div className="flex justify-between">
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button disabled={selectedIDs.length < 4} onClick={handleCreateButtonClick}>Create Game</Button>
-          </div>
+        <DialogFooter className="flex justify-between">
+          <DialogClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+          <Button
+            disabled={selectedIDs.length < 4}
+            onClick={handleCreateButtonClick}
+          >
+            Create Game
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
