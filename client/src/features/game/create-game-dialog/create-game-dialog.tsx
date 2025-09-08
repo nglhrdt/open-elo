@@ -104,7 +104,7 @@ export function CreateGameDialog(props: CreateGameDialogProps) {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button onClick={handleCreateButtonClick}>Create Game</Button>
+            <Button disabled={selectedIDs.length < 4} onClick={handleCreateButtonClick}>Create Game</Button>
           </div>
         </DialogFooter>
       </DialogContent>
