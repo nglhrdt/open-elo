@@ -30,6 +30,7 @@ export interface Ranking {
   position: number;
   league: League;
   user: User;
+  leagueRankings: Ranking[];
 }
 
 export interface League {
