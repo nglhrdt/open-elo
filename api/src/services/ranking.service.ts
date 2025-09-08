@@ -26,9 +26,13 @@ export class RankingService {
     );
 
     return rankings.map((r, idx) => {
-      const leagueRankings = allRankingsByLeague[idx]
-        .sort((a, b) => b.elo - a.elo);
-      const position = leagueRankings.findIndex(rank => rank.user.id === r.user.id) + 1;
+      const sortedLeagueRankings = allRankingsByLeague[idx].sort((a, b) => b.elo - a.elo);
+      // Add position to every ranking in the league
+      const leagueRankings = sortedLeagueRankings.map((rank, i) => ({
+        ...rank,
+        position: i + 1,
+      }));
+      const position = leagueRankings.find(rank => rank.user.id === r.user.id)?.position || 0;
       return {
         id: r.id,
         elo: r.elo,
@@ -37,7 +41,8 @@ export class RankingService {
           name: r.league.name,
           type: r.league.type
         },
-        position
+        position,
+        leagueRankings
       };
     });
   }

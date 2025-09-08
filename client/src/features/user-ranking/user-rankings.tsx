@@ -3,9 +3,9 @@ import { AuthContext } from "@/components/AuthContext"
 import { useQuery } from "@tanstack/react-query"
 import { useContext } from "react"
 import { JoinLeagueCard } from "../league/join/join-league-card"
-import { RankingListItem } from "./ranking-list-item"
+import { UserRanking } from "./user-ranking"
 
-export function UserRankingList() {
+export function UserRankings() {
   const { user } = useContext(AuthContext)
   const { isPending, data: rankings } = useQuery({
     queryKey: ['rankings', user?.id],
@@ -16,5 +16,5 @@ export function UserRankingList() {
 
   if (rankings?.length === 0) return <JoinLeagueCard />
 
-  return <>{rankings?.map((ranking) => <RankingListItem key={ranking.id} ranking={ranking} />)}</>
+  return <>{rankings?.map((ranking) => <UserRanking key={ranking.id} ranking={ranking} />)}</>
 }
