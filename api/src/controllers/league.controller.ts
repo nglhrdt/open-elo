@@ -15,18 +15,20 @@ export class LeagueController {
   ) {
   }
 
+  @Authorized()
   @Get("/")
   async getAllLeagues() {
     return this.leagueService.getAllLeagues();
   }
 
+  @Authorized()
   @Get("/:id")
   async getLeagueById(@Param('id') id: string) {
     return this.leagueService.getLeagueById(id);
   }
 
-  @Post("/")
   @Authorized()
+  @Post("/")
   async createLeague(@CurrentUser() user: User, @Body() body: { name: string, type: LEAGUE_TYPE }) {
     return this.leagueService.createLeague({ name: body.name, type: body.type, ownerId: user.id });
   }
@@ -37,16 +39,19 @@ export class LeagueController {
     return this.rankingService.joinUserToLeague(leagueId, user.id);
   }
 
+  @Authorized()
   @Post("/:leagueId/join/:userId")
   async addPlayerToLeague(@Param('leagueId') leagueId: string, @Param('userId') userId: string) {
     return this.rankingService.joinUserToLeague(leagueId, userId);
   }
 
+  @Authorized()
   @Get("/:leagueId/users")
   async getUsersByLeagueId(@Param('leagueId') leagueId: string) {
     return this.leagueService.getUsersByLeagueId(leagueId);
   }
 
+  @Authorized()
   @Get("/:leagueId/games")
   async getGamesByLeagueId(@Param('leagueId') leagueId: string, @QueryParam('count') count: number) {
     return this.leagueService.getGamesByLeagueId(leagueId, count);

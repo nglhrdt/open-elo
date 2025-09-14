@@ -2,6 +2,16 @@ import qs from 'qs';
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
 
+// Small helper that adds Authorization header (if token exists) and JSON Content-Type (when body is present)
+async function apiFetch(input: string, init: RequestInit = {}): Promise<Response> {
+  const url = input.startsWith('http') ? input : `${baseUrl}${input}`;
+  const token = localStorage.getItem('auth_token') ?? '';
+  const headers = new Headers(init.headers || {});
+  if (token) headers.set('Authorization', `Bearer ${token}`);
+  if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+  return fetch(url, { ...init, headers });
+}
+
 export type Team = 'home' | 'away';
 
 export interface Game {
@@ -70,11 +80,7 @@ export async function register(data: { username: string, email: string, password
 
 export async function fetchCurrentUser(): Promise<User | null> {
   if (!localStorage.getItem('auth_token')) return null;
-  const res = await fetch(`${baseUrl}/me`, {
-    headers: {
-      'Authorization': `Bearer ${localStorage.getItem('auth_token') ?? ''}`,
-    },
-  });
+  const res = await apiFetch(`/me`);
   if (!res.ok) return null;
   return res.json();
 }
@@ -82,11 +88,8 @@ export async function fetchCurrentUser(): Promise<User | null> {
 export function createUser(data: {
   username: string;
 }): Promise<void> {
-  return fetch(`${baseUrl}/users`, {
+  return apiFetch(`/users`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
     body: JSON.stringify({ ...data, email: data.username, password: '' }),
   })
     .then(response => {
@@ -102,7 +105,7 @@ export function createUser(data: {
 }
 
 export function getUsers(): Promise<User[]> {
-  return fetch(`${baseUrl}/users`)
+  return apiFetch(`/users`)
     .then(response => response.json())
     .catch(error => {
       console.error('Error fetching users:', error);
@@ -114,12 +117,8 @@ export function createLeague(data: {
   name: string;
   type: LEAGUE_TYPE;
 }): Promise<void> {
-  return fetch(`${baseUrl}/leagues`, {
+  return apiFetch(`/leagues`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('auth_token') ?? ''}`,
-    },
     body: JSON.stringify(data),
   })
     .then(response => {
@@ -135,7 +134,7 @@ export function createLeague(data: {
 }
 
 export function getLeagueById(leagueId: string): Promise<League> {
-  return fetch(`${baseUrl}/leagues/${leagueId}`)
+  return apiFetch(`/leagues/${leagueId}`)
     .then(response => response.json())
     .catch(error => {
       console.error('Error fetching leagues:', error);
@@ -144,7 +143,7 @@ export function getLeagueById(leagueId: string): Promise<League> {
 }
 
 export function getLeagues(): Promise<League[]> {
-  return fetch(`${baseUrl}/leagues`)
+  return apiFetch(`/leagues`)
     .then(response => response.json())
     .catch(error => {
       console.error('Error fetching leagues:', error);
@@ -153,7 +152,7 @@ export function getLeagues(): Promise<League[]> {
 }
 
 export function getLeagueUsers(leagueId: string): Promise<User[]> {
-  return fetch(`${baseUrl}/leagues/${leagueId}/users`)
+  return apiFetch(`/leagues/${leagueId}/users`)
     .then(response => response.json())
     .catch(error => {
       console.error('Error fetching users:', error);
@@ -162,11 +161,8 @@ export function getLeagueUsers(leagueId: string): Promise<User[]> {
 }
 
 export async function joinLeague(leagueId: string) {
-  const res = await fetch(`${baseUrl}/leagues/${leagueId}/join`, {
+  const res = await apiFetch(`/leagues/${leagueId}/join`, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${localStorage.getItem('auth_token') ?? ''}`,
-    },
     body: JSON.stringify({}),
   });
   if (!res.ok) return null;
@@ -177,11 +173,8 @@ export function addPlayerToLeague(data: {
   leagueId: string;
   userId: string;
 }): Promise<void> {
-  return fetch(`${baseUrl}/leagues/${data.leagueId}/join/${data.userId}`, {
+  return apiFetch(`/leagues/${data.leagueId}/join/${data.userId}`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
     body: JSON.stringify(data),
   })
     .then(response => {
@@ -201,11 +194,8 @@ export function createGame(data: {
   players: { id: string, team: Team }[];
   leagueId: string;
 }): Promise<void> {
-  return fetch(`${baseUrl}/games`, {
+  return apiFetch(`/games`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
     body: JSON.stringify(data),
   })
     .then(response => {
@@ -221,7 +211,7 @@ export function createGame(data: {
 }
 
 export function getLeagueGames(leagueId: string, params?: { count?: number }): Promise<Game[]> {
-  return fetch(`${baseUrl}/leagues/${leagueId}/games${params ? `${qs.stringify(params, { addQueryPrefix: true })}` : ''}`)
+  return apiFetch(`/leagues/${leagueId}/games${params ? `${qs.stringify(params, { addQueryPrefix: true })}` : ''}`)
     .then(response => response.json())
     .catch(error => {
       console.error('Error fetching games:', error);
@@ -230,7 +220,7 @@ export function getLeagueGames(leagueId: string, params?: { count?: number }): P
 }
 
 export function getUserGames(userId: string, params?: { count?: number }): Promise<Game[]> {
-  return fetch(`${baseUrl}/users/${userId}/games${params ? `${qs.stringify(params, { addQueryPrefix: true })}` : ''}`)
+  return apiFetch(`/users/${userId}/games${params ? `${qs.stringify(params, { addQueryPrefix: true })}` : ''}`)
     .then(response => response.json())
     .catch(error => {
       console.error('Error fetching games:', error);
@@ -239,11 +229,7 @@ export function getUserGames(userId: string, params?: { count?: number }): Promi
 }
 
 export async function fetchUserRankings(): Promise<Ranking[] | null> {
-  const res = await fetch(`${baseUrl}/rankings`, {
-    headers: {
-      'Authorization': `Bearer ${localStorage.getItem('auth_token') ?? ''}`,
-    },
-  });
+  const res = await apiFetch(`/rankings`);
   if (!res.ok) return null;
   return res.json();
 }

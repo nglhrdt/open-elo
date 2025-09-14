@@ -1,4 +1,4 @@
-import { Body, JsonController, Post } from "routing-controllers";
+import { Authorized, Body, JsonController, Post } from "routing-controllers";
 import { Service } from "typedi";
 import { AuthService } from "../services/auth.service";
 
@@ -25,6 +25,7 @@ export class AuthController {
   }
 
   @Post('/logout')
+  @Authorized()
   logout() {
     return { message: "Logged out" };
   }
