@@ -4,8 +4,8 @@ import { UserEntity } from "./user.entity";
 
 @Entity()
 export class PlayerEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
   @Column({ enum: ["home", "away"], nullable: false })
   team: "home" | "away";

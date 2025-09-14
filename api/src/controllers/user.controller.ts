@@ -1,4 +1,4 @@
-import { Body, Delete, Get, JsonController, Param, Post, Put } from "routing-controllers";
+import { Body, Delete, Get, JsonController, Param, Post, Put, QueryParam } from "routing-controllers";
 import { Service } from "typedi";
 import { UserService } from "../services/user.service";
 
@@ -33,5 +33,10 @@ export class UserController {
   @Delete('/:id')
   remove(@Param('id') id: number) {
     return 'Removing user...';
+  }
+
+  @Get("/:id/games")
+  getUserGames(@Param("id") id: string, @QueryParam("count") count: number) {
+    return this.userService.getUserGames(id, count);
   }
 }

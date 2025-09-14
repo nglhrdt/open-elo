@@ -1,6 +1,7 @@
 import { Service } from "typedi";
 import { FindManyOptions } from "typeorm";
 import { AppDataSource } from "../database/data-source";
+import { GameEntity } from "../database/entity/game.entity";
 import { LEAGUE_TYPE, LeagueEntity } from "../database/entity/league.entity";
 import { RankingEntity } from "../database/entity/ranking.entity";
 import { UserEntity } from "../database/entity/user.entity";
@@ -13,6 +14,7 @@ export class LeagueService {
 
   private leagueRepository = AppDataSource.getRepository(LeagueEntity);
   private rankingRepository = AppDataSource.getRepository(RankingEntity);
+  private gameRepository = AppDataSource.getRepository(GameEntity);
 
   async getAllLeagues(options: FindManyOptions<LeagueEntity> = {}) {
     return (await this.leagueRepository.find(options)).map(l => ({ id: l.id, name: l.name, type: l.type }));
@@ -46,5 +48,18 @@ export class LeagueService {
       if (r.user) unique.set(r.user.id, r.user);
     }
     return Array.from(unique.values());
+  }
+
+  async getGamesByLeagueId(id: string, count = 10): Promise<GameEntity[]> {
+    return this.gameRepository.find({
+      where: {
+        league: { id },
+      },
+      order: {
+        createdAt: "DESC",
+      },
+      take: count,
+      relations: ["players", "players.user"],
+    });
   }
 }
