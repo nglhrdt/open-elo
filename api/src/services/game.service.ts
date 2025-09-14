@@ -3,6 +3,7 @@ import { FindManyOptions, In } from "typeorm";
 import { AppDataSource } from "../database/data-source";
 import { GameEntity } from "../database/entity/game.entity";
 import { PlayerEntity } from "../database/entity/player.entity";
+import { LeagueService } from "./league.service";
 import { RankingService } from "./ranking.service";
 import { UserService } from "./user.service";
 
@@ -15,6 +16,7 @@ export class GameService {
   constructor(
     private userService: UserService,
     private rankingService: RankingService,
+    private leagueService: LeagueService,
   ) { }
 
   getAllGames(options: FindManyOptions<GameEntity> = {}) {
@@ -34,7 +36,10 @@ export class GameService {
       return player;
     });
 
-    const game = { players, score: gameData.score };
+    const league = await this.leagueService.getLeagueById(gameData.leagueId);
+    if (!league) throw new Error("League not found");
+
+    const game = { players, score: gameData.score, league };
 
     const [homeScore, awayScore] = gameData.score.split('-').map(s => parseInt(s, 10));
 

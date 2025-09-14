@@ -1,30 +1,31 @@
 import type { Game } from "@/api/api";
-import { Card } from "@/components/ui/card";
+import { useMemo } from "react";
+import { GameTeam } from "./game-team";
 
-export function GameListItem(props: { game: Game }) {
-    const { game } = props;
+type GameListItemProps = { game: Game }
 
-    return (
-        <Card>
-            <div className="grid grid-cols-3 gap-4">
-                <div className="flex flex-col gap-2 items-center">
-                    {game.players.filter(player => player.team === 'home').map(player => (
-                        <div key={player.id} className="flex items-center gap-2">
-                            <span className="font-bold">{player.user.username}</span>
-                        </div>
-                    ))}
-                </div>
-                <div className="flex flex-col items-center justify-center">
-                    {game.score}
-                </div>
-                <div className="flex flex-col gap-2 items-center">
-                    {game.players.filter(player => player.team === 'away').map(player => (
-                        <div key={player.id} className="flex items-center gap-2">
-                            <span className="font-bold">{player.user.username}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </Card>
-    );
+export function GameListItem(props: GameListItemProps) {
+  const { game } = props;
+
+  const dateString = useMemo(() => {
+    const date = new Date(game.createdAt);
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }, [game.createdAt]);
+
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      <GameTeam game={game} team={'home'} />
+      <div className="flex flex-col items-center justify-center">
+        <div className="mb-2 text-xl">{game.score}</div>
+        <div className="text-xs text-muted-foreground text-center">{dateString}</div>
+      </div>
+      <GameTeam game={game} team={'away'} />
+    </div>
+  );
 }

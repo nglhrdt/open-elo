@@ -1,4 +1,5 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { GameEntity } from "./game.entity";
 import { RankingEntity } from "./ranking.entity";
 import { UserEntity } from "./user.entity";
 
@@ -20,6 +21,9 @@ export class LeagueEntity {
 
   @OneToMany(() => RankingEntity, ranking => ranking.league, { lazy: true })
   rankings: RankingEntity[]
+
+  @OneToMany(() => GameEntity, game => game.league, { lazy: true })
+  games: GameEntity[]
 
   @ManyToOne(() => UserEntity, user => user.leaguesOwned, {
     lazy: true,

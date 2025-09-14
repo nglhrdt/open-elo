@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-import { CreateGameDialog } from '../game/create-game-dialog/create-game-dialog';
+import { CreateGameDialog } from '../game/create-game/create-game-dialog';
 import { LeagueTable } from './league-table';
 
 export function UserRanking(props: { ranking: Ranking }) {

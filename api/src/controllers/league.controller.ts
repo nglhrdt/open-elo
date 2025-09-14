@@ -1,4 +1,4 @@
-import { Authorized, Body, CurrentUser, Get, JsonController, Param, Post } from "routing-controllers";
+import { Authorized, Body, CurrentUser, Get, JsonController, Param, Post, QueryParam } from "routing-controllers";
 import { Service } from "typedi";
 import { LEAGUE_TYPE } from "../database/entity/league.entity";
 import { UserEntity } from "../database/entity/user.entity";
@@ -45,5 +45,10 @@ export class LeagueController {
   @Get("/:leagueId/users")
   async getUsersByLeagueId(@Param('leagueId') leagueId: string) {
     return this.leagueService.getUsersByLeagueId(leagueId);
+  }
+
+  @Get("/:leagueId/games")
+  async getGamesByLeagueId(@Param('leagueId') leagueId: string, @QueryParam('count') count: number) {
+    return this.leagueService.getGamesByLeagueId(leagueId, count);
   }
 }

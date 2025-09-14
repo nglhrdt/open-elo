@@ -1,3 +1,5 @@
+import qs from 'qs';
+
 const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
 
 export type Team = 'home' | 'away';
@@ -5,6 +7,7 @@ export type Team = 'home' | 'away';
 export interface Game {
   id: string;
   score: string;
+  leagueId: string;
   createdAt: Date;
   updatedAt: Date;
   players: Player[];
@@ -217,8 +220,17 @@ export function createGame(data: {
     });
 }
 
-export function getGames(): Promise<Game[]> {
-  return fetch(`${baseUrl}/games`)
+export function getLeagueGames(leagueId: string, params?: { count?: number }): Promise<Game[]> {
+  return fetch(`${baseUrl}/leagues/${leagueId}/games${params ? `${qs.stringify(params, { addQueryPrefix: true })}` : ''}`)
+    .then(response => response.json())
+    .catch(error => {
+      console.error('Error fetching games:', error);
+      throw error;
+    });
+}
+
+export function getUserGames(userId: string, params?: { count?: number }): Promise<Game[]> {
+  return fetch(`${baseUrl}/users/${userId}/games${params ? `${qs.stringify(params, { addQueryPrefix: true })}` : ''}`)
     .then(response => response.json())
     .catch(error => {
       console.error('Error fetching games:', error);
