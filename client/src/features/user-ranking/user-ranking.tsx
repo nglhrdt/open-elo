@@ -16,7 +16,7 @@ export function UserRanking(props: { ranking: Ranking }) {
       <CardHeader>
         <CardTitle>{ranking.league.name}</CardTitle>
         <CardAction>
-          <CreateGameDialog leagueId={ranking.league.id} />
+          <CreateGameDialog />
         </CardAction>
       </CardHeader>
       <CardContent>
