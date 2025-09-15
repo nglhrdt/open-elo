@@ -1,14 +1,36 @@
-import { getUsers } from "@/api/api";
+import { getLeagueUsers, type User } from "@/api/api";
+import { DataTable } from "@/components/data-table";
 import { useQuery } from "@tanstack/react-query";
-import { UserListItem } from "./user-list-item";
+import type { ColumnDef } from "@tanstack/react-table";
+import { UserGames } from "../games/user-games-dialog";
 
-export function UserList() {
-  const { data: users } = useQuery({ queryKey: ['users'], queryFn: getUsers });
+const columns: ColumnDef<User>[] = [
+  {
+    accessorKey: 'user',
+    header: 'Username',
+    cell: (info) => { return <UserGames user={info.row.original} /> },
+  },
+  {
+    accessorKey: 'email',
+    header: 'Email',
+    cell: (info) => info.row.original.role === 'guest' ? "GUEST" : info.getValue()
+  },
+];
+
+type UserListProps = {
+  leagueId: string;
+}
+
+export function UserList(props: UserListProps) {
+  const { data: users, isPending } = useQuery({
+    queryKey: ['league', props.leagueId, 'users'],
+    queryFn: () => getLeagueUsers(props.leagueId),
+  });
+
+  if (isPending) return <div>Loading...</div>
+  if (!users) return <div>No users found</div>
 
   return (
-    <div className="w-full max-w-2xl mx-auto mt-8 flex flex-col gap-4">
-      <h2>User List</h2>
-      {users?.map(user => <UserListItem key={user.id} user={user} />)}
-    </div>
-  );
+    <DataTable columns={columns} data={users} />
+  )
 }

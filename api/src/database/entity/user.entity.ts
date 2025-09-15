@@ -3,7 +3,7 @@ import { LeagueEntity } from "./league.entity";
 import { PlayerEntity } from "./player.entity";
 import { RankingEntity } from "./ranking.entity";
 
-export type Role = "user" | "admin";
+export type Role = "user" | "admin" | "guest";
 
 @Entity()
 export class UserEntity {
@@ -13,13 +13,13 @@ export class UserEntity {
   @Column({ unique: true })
   username: string
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   email: string
 
-  @Column()
+  @Column({ nullable: true })
   passwordHash: string
 
-  @Column({ enum: ["user", "admin"], nullable: false, default: "user" })
+  @Column({ enum: ["user", "admin", "guest"], nullable: false, default: "guest" })
   role: Role
 
   @OneToMany(() => LeagueEntity, league => league.owner, { lazy: true })

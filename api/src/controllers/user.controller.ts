@@ -1,5 +1,6 @@
 import { Authorized, Body, Delete, Get, JsonController, Param, Post, Put, QueryParam } from "routing-controllers";
 import { Service } from "typedi";
+import { Role } from "../database/entity/user.entity";
 import { UserService } from "../services/user.service";
 
 @Service()
@@ -24,8 +25,13 @@ export class UserController {
 
   @Authorized()
   @Post()
-  post(@Body() user: { username: string, password: string, email: string }) {
-    return this.userService.createUser({ email: user.email, username: user.username, passwordHash: user.password });
+  post(@Body() user: { username: string, password: string, email: string, role: Role }) {
+    return this.userService.createUser({
+      email: user.email,
+      username: user.username,
+      passwordHash: user.password,
+      role: user.role
+    });
   }
 
   @Authorized()

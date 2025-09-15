@@ -7,18 +7,30 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 type CreateGameDialogProps = {
   children?: React.ReactNode;
+  open?: boolean; // controlled open (optional)
+  onOpenChange?: (open: boolean) => void; // controlled handler (optional)
 };
 
 export function CreateGameDialog(props: CreateGameDialogProps) {
-  const { children } = props;
-  const [open, setOpen] = useState(false);
+  const { children, open: openProp, onOpenChange } = props;
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+
+  const isControlled = openProp !== undefined;
+  const open = isControlled ? openProp : uncontrolledOpen;
+
+  const handleOpenChange = useCallback((next: boolean) => {
+    if (!isControlled) {
+      setUncontrolledOpen(next);
+    }
+    onOpenChange?.(next);
+  }, [isControlled, onOpenChange]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button className='w-full'>
           New Game
@@ -31,9 +43,7 @@ export function CreateGameDialog(props: CreateGameDialogProps) {
             Select the final score and the players that played the game.
           </DialogDescription>
         </DialogHeader>
-        <>
-          {children}
-        </>
+        {children}
       </DialogContent>
     </Dialog>
   );

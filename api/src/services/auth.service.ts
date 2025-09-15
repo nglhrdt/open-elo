@@ -27,6 +27,9 @@ export class AuthService {
     const user = userNameUser || emailUser;
 
     if (!user) throw new Error("Invalid credentials");
+    if (user.role === "guest") throw new Error("Guest users cannot log in");
+    if (!user.passwordHash) throw new Error("User has no password set");
+
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) throw new Error("Invalid credentials");
 
@@ -35,7 +38,7 @@ export class AuthService {
 
   async register(data: { username: string; email: string; password: string }) {
     const passwordHash = await bcrypt.hash(data.password, 12);
-    const user = await this.userService.createUser({ username: data.username, email: data.email, passwordHash });
+    const user = await this.userService.createUser({ username: data.username, email: data.email, passwordHash, role: "user" });
 
     return this.createTokenAndReturn(user);
   }

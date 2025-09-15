@@ -19,7 +19,8 @@ function CreateUser() {
 
   async function handleClick() {
     await mutation.mutateAsync({
-      username
+      username,
+      role: 'guest',
     })
 
     setUsername('');

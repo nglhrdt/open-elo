@@ -1,4 +1,5 @@
 import { getLeagueUsers } from "@/api/api";
+import { CreateUserDialog } from "@/features/user/create/create-user-dialog";
 import { useQuery } from "@tanstack/react-query";
 import { UserSelect } from "./user-select";
 
@@ -22,10 +23,13 @@ export function LeagueUserSelect(props: LeagueUserSelectProps) {
   }
 
   return (
-    <UserSelect
-      users={users.filter(user => user.id === props.value || !props.selectedIds.includes(user.id))}
-      value={props.value}
-      placeholder={props.placeholder}
-      onChange={handleChange} />
+    <div className="w-full flex gap-4">
+      <UserSelect
+        users={users.filter(user => user.id === props.value || !props.selectedIds.includes(user.id))}
+        value={props.value}
+        placeholder={props.placeholder}
+        onChange={handleChange} />
+      <CreateUserDialog leagueId={props.leagueId} onUserCreated={(user) => props.onChange?.(user.id)} />
+    </div>
   )
 }
