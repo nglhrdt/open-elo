@@ -29,10 +29,10 @@ export class GameService {
   async createGame(gameData: CreateGame) {
     const users = await this.userService.getAllUsers({ where: { id: In(gameData.players.map(p => p.id)) } });
 
-    const players = users.map((u, i) => {
+    const players = users.map((u) => {
       const player = new PlayerEntity();
       player.user = u;
-      player.team = gameData.players.find(p => p.id === u.id).team;
+      player.team = gameData.players.find(p => p.id === u.id)!.team;
       return player;
     });
 
@@ -47,7 +47,14 @@ export class GameService {
     if (homeScore > awayScore) result = 'home';
     else if (awayScore > homeScore) result = 'away';
 
-    this.rankingService.updatePlayerElos(gameData.players, result, gameData.leagueId);
+    // Persist Elo before/after per player
+    const snapshot = await this.rankingService.updatePlayerElosWithSnapshot(gameData.players, result, gameData.leagueId);
+
+    for (const p of players) {
+      const s = snapshot[p.user.id];
+      p.eloBefore = s?.before ?? null;
+      p.eloAfter = s?.after ?? null;
+    }
 
     return this.repository.save(game);
   }

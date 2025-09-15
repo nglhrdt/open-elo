@@ -127,6 +127,41 @@ export class RankingService {
     await this.repository.save([...teamARankings, ...teamBRankings]);
   }
 
+  /**
+   * Updates player Elos and returns before/after snapshot per userId.
+   * Depends on existing getElo(...) and updatePlayerElos(...).
+   */
+  async updatePlayerElosWithSnapshot(
+    players: { id: string; team: 'home' | 'away' }[],
+    result: 'home' | 'away' | 'draw',
+    leagueId: string,
+  ): Promise<Record<string, { before: number; after: number }>> {
+    const snapshot: Record<string, { before: number; after: number }> = {};
+
+    // Capture 'before'
+    for (const p of players) {
+      const before = await this.getElo(p.id, leagueId); // adjust if your method name differs
+      snapshot[p.id] = { before, after: before };
+    }
+
+    // Perform the update
+    await this.updatePlayerElos(players, result, leagueId);
+
+    // Capture 'after'
+    for (const p of players) {
+      const after = await this.getElo(p.id, leagueId);
+      snapshot[p.id].after = after;
+    }
+
+    return snapshot;
+  }
+
+  getElo(playerId: string, leagueId: string) {
+    return this.repository.findOne({
+      where: { user: { id: playerId }, league: { id: leagueId } },
+    }).then(ranking => ranking ? ranking.elo : 1000);
+  }
+
   private getTeamElo(rankings: RankingEntity[]): number {
     const totalElo = rankings.reduce((sum, ranking) => sum + ranking.elo, 0);
     return totalElo / rankings.length;

@@ -10,6 +10,12 @@ export class PlayerEntity {
   @Column({ enum: ["home", "away"], nullable: false })
   team: "home" | "away";
 
+  @Column({ type: "int", nullable: true })
+  eloBefore: number | null;
+
+  @Column({ type: "int", nullable: true })
+  eloAfter: number | null;
+
   @ManyToOne(() => GameEntity, game => game.players)
   game: GameEntity;
 
