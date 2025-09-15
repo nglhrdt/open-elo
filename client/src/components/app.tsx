@@ -2,6 +2,7 @@ import { HomePage } from '@/pages/home-page';
 import { LoginPage } from '@/pages/login-page';
 import { ProtectedRoute } from '@/pages/protected-route';
 import { RegisterPage } from '@/pages/register-page';
+import { UsersPage } from '@/pages/users-page';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { BrowserRouter, Route, Routes } from "react-router";
@@ -21,6 +22,7 @@ export function App() {
               <Route element={<Layout />}>
                 <Route element={<ProtectedRoute />}>
                   <Route index element={<HomePage />} />
+                  <Route path="users" element={<UsersPage />} />
                 </Route>
                 <Route path="login" element={<LoginPage />} />
                 <Route path="register" element={<RegisterPage />} />

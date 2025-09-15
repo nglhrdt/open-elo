@@ -29,10 +29,13 @@ export interface Player {
   user: User;
 }
 
+export type UserRole = 'user' | 'admin' | 'guest';
+
 export type User = {
   id: string;
   username: string;
   email: string;
+  role: UserRole;
 }
 
 export type LEAGUE_TYPE = "TABLE_SOCCER" | "INDOOR_SOCCER";
@@ -87,10 +90,11 @@ export async function fetchCurrentUser(): Promise<User | null> {
 
 export function createUser(data: {
   username: string;
-}): Promise<void> {
+  role: UserRole;
+}): Promise<User> {
   return apiFetch(`/users`, {
     method: 'POST',
-    body: JSON.stringify({ ...data, email: data.username, password: '' }),
+    body: JSON.stringify({ username: data.username, role: data.role }),
   })
     .then(response => {
       if (!response.ok) {
