@@ -32,7 +32,7 @@ export function HomePage() {
           <UserMenu />
         </div>
       </div>
-      <div className='grid grid-cols-1 lg:grid-cols-3 grow shrink gap-4'>
+      <div className='grid grid-cols-1 lg:grid-cols-3 grow shrink gap-4 lg:gap-12'>
         <CreateGame leagueId={ranking.league.id} />
         <LeagueTable ranking={ranking} />
         <LeagueGames leagueId={ranking.league.id} />
