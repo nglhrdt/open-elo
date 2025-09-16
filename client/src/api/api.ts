@@ -25,8 +25,10 @@ export interface Game {
 
 export interface Player {
   id: number;
-  team: string;
+  team: Team;
   user: User;
+  eloBefore: number;
+  eloAfter: number;
 }
 
 export type UserRole = 'user' | 'admin' | 'guest';
