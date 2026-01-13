@@ -1,4 +1,5 @@
 import { HomePage } from '@/pages/home-page';
+import { LeaguesPage } from '@/pages/leagues-page';
 import { LoginPage } from '@/pages/login-page';
 import { ProtectedRoute } from '@/pages/protected-route';
 import { RegisterPage } from '@/pages/register-page';
@@ -23,6 +24,7 @@ export function App() {
                 <Route element={<ProtectedRoute />}>
                   <Route index element={<HomePage />} />
                   <Route path="users" element={<UsersPage />} />
+                  <Route path="leagues" element={<LeaguesPage />} />
                 </Route>
                 <Route path="login" element={<LoginPage />} />
                 <Route path="register" element={<RegisterPage />} />

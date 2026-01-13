@@ -1,40 +1,21 @@
 services:
 
-  api:
+  devcontainer:
     build:
-      context: ./api
-      dockerfile: ../Dockerfile-Node-Hurl
+      context: .
+      dockerfile: Dockerfile-Node-Hurl
     volumes:
       - ..:/workspaces:cached
     command: sleep infinity
     network_mode: bridge
     links:
       - postgres
-
-  client:
-    build:
-      context: ./client
-      dockerfile: ../Dockerfile-Node-Hurl
-    volumes:
-      - ..:/workspaces:cached
-    command: sleep infinity
-    network_mode: bridge
-    links:
-      - api
-
-  server:
-    build:
-      context: ./server
-      dockerfile: ../Dockerfile-Node-Hurl
-    volumes:
-      - ..:/workspaces:cached
-    command: sleep infinity
-    network_mode: bridge
-    links:
-      - postgres
+    ports:
+      - "3000:3000"
+      - "5173:5173"
 
   postgres:
-    image: postgres:latest
+    image: postgres:17.6
     restart: unless-stopped
     network_mode: bridge
     volumes:

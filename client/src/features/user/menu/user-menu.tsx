@@ -2,7 +2,7 @@ import { CurrentUser } from "@/components/current-user";
 import { LogoutButton } from "@/components/logout-button";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Users } from "lucide-react";
+import { Trophy, Users } from "lucide-react";
 import { Link } from "react-router";
 
 export function UserMenu() {
@@ -12,6 +12,12 @@ export function UserMenu() {
         <CurrentUser />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
+        <DropdownMenuItem>
+          <Button className="w-full flex justify-center" variant="ghost">
+            <Link to="/leagues">Leagues</Link>
+            <Trophy />
+          </Button>
+        </DropdownMenuItem>
         <DropdownMenuItem>
           <Button className="w-full flex justify-center" variant="ghost">
             <Link to="/users">Users</Link>
