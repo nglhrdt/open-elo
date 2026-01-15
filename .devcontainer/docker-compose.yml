@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-Node-Hurl
+    user: node
     volumes:
       - ..:/workspaces:cached
     command: sleep infinity
