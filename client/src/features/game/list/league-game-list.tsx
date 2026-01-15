@@ -21,7 +21,7 @@ export function LeagueGameList(props: LeagueGameListProps) {
       {games?.map((game, i) => {
         return (
           <Fragment key={game.id}>
-            <GameListItem key={game.id} game={game} />
+            <GameListItem key={game.id} game={game} leagueId={leagueId} />
             {i < games.length - 1 && <Separator orientation="horizontal" />}
           </Fragment>
         )

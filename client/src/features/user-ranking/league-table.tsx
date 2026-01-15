@@ -10,34 +10,6 @@ import {
 import { useContext } from 'react';
 import { Link } from 'react-router';
 
-const columns: ColumnDef<Ranking>[] = [
-  {
-    accessorKey: 'position',
-    header: 'Position',
-    cell: (info) => info.getValue(),
-  },
-  {
-    accessorKey: 'user',
-    header: 'Username',
-    cell: (info) => {
-      const user = info.row.original.user;
-      return (
-        <Link
-          to={`/players/${user.id}`}
-          className="text-primary hover:underline"
-        >
-          {user.username}
-        </Link>
-      );
-    },
-  },
-  {
-    accessorKey: 'elo',
-    header: 'Rating',
-    cell: (info) => info.getValue(),
-  },
-];
-
 export function LeagueTable(props: { leagueId: string }) {
   const { leagueId } = props;
   const { user } = useContext(AuthContext);
@@ -47,6 +19,34 @@ export function LeagueTable(props: { leagueId: string }) {
     queryFn: () => fetchLeagueRankings(leagueId),
     enabled: !!leagueId,
   });
+
+  const columns: ColumnDef<Ranking>[] = [
+    {
+      accessorKey: 'position',
+      header: 'Position',
+      cell: (info) => info.getValue(),
+    },
+    {
+      accessorKey: 'user',
+      header: 'Username',
+      cell: (info) => {
+        const user = info.row.original.user;
+        return (
+          <Link
+            to={`/players/${user.id}?leagueId=${leagueId}`}
+            className="text-primary hover:underline"
+          >
+            {user.username}
+          </Link>
+        );
+      },
+    },
+    {
+      accessorKey: 'elo',
+      header: 'Rating',
+      cell: (info) => info.getValue(),
+    },
+  ];
 
   if (!user) return null;
   if (isPending) return <div>Loading...</div>;

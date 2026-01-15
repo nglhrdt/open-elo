@@ -4,6 +4,7 @@ import { UserGames } from "@/features/user/games/user-games-dialog";
 type GameTeamProps = {
   game: Game;
   team: 'home' | 'away';
+  leagueId?: string;
 }
 
 function getEloChange(player?: Player): number | null {
@@ -13,7 +14,7 @@ function getEloChange(player?: Player): number | null {
 }
 
 export function GameTeam(props: GameTeamProps) {
-  const { game, team } = props;
+  const { game, team, leagueId } = props;
 
   const players = game.players.filter(p => p.team === team);
   const [homeGoals, awayGoals] = game.score.split('-').map(Number);
@@ -26,6 +27,7 @@ export function GameTeam(props: GameTeamProps) {
         key={player.user.id}
         user={player.user}
         bold={isWinner}
+        leagueId={leagueId}
       />
     ))}
     {eloChange !== null && <EloChange eloChange={eloChange} />}

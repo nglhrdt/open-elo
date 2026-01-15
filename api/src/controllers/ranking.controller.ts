@@ -13,6 +13,12 @@ export class RankingController {
     return this.rankingService.getUserRankings(user.id);
   }
 
+  @Get("/user/:userId")
+  @Authorized()
+  getRankingsByUserId(@Param("userId") userId: string) {
+    return this.rankingService.getUserRankings(userId);
+  }
+
   @Get("/league/:leagueId")
   @Authorized()
   getRankingsByLeague(@Param("leagueId") leagueId: string) {

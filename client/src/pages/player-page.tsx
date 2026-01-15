@@ -1,4 +1,4 @@
-import { getUserById, getUserGames, fetchUserRankings, type Game } from '@/api/api';
+import { getUserById, getUserGames, fetchRankingsByUserId, type Game } from '@/api/api';
 import { DataTable } from '@/components/data-table';
 import { ModeToggle } from '@/components/mode-toggle';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,8 +21,9 @@ export function PlayerPage() {
   });
 
   const { isPending: rankingsLoading, data: rankings } = useQuery({
-    queryKey: ['rankings'],
-    queryFn: () => fetchUserRankings(),
+    queryKey: ['userRankings', userId],
+    queryFn: () => fetchRankingsByUserId(userId!),
+    enabled: !!userId,
   });
 
   const { isPending: gamesLoading, data: games } = useQuery({
@@ -32,7 +33,6 @@ export function PlayerPage() {
   });
 
   const userLeagues = rankings
-    ?.filter(r => r.user?.id === userId)
     ?.map(r => r.league)
     ?.filter(Boolean)
     || [];
@@ -53,7 +53,7 @@ export function PlayerPage() {
           <div className="flex gap-2 flex-wrap">
             {homePlayers.map((p, index) => (
               <span key={p.user.id}>
-                <Link to={`/players/${p.user.id}`} className="text-primary hover:underline">
+                <Link to={`/players/${p.user.id}${selectedLeagueId ? `?leagueId=${selectedLeagueId}` : ''}`} className="text-primary hover:underline">
                   {p.user.username}
                 </Link>
                 {' '}({p.eloAfter})
@@ -79,7 +79,7 @@ export function PlayerPage() {
           <div className="flex gap-2 flex-wrap">
             {awayPlayers.map((p, index) => (
               <span key={p.user.id}>
-                <Link to={`/players/${p.user.id}`} className="text-primary hover:underline">
+                <Link to={`/players/${p.user.id}${selectedLeagueId ? `?leagueId=${selectedLeagueId}` : ''}`} className="text-primary hover:underline">
                   {p.user.username}
                 </Link>
                 {' '}({p.eloAfter})
