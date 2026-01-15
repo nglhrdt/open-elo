@@ -28,6 +28,7 @@ export function CreateUserDialog(props: CreateUserDialogProps) {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['league', props.leagueId, 'users'] });
       queryClient.invalidateQueries({ queryKey: ['rankings'] });
+      queryClient.invalidateQueries({ queryKey: ['leagueRankings', props.leagueId] });
 
       props.onUserCreated?.(user)
     },

@@ -10,6 +10,10 @@ export function JoinLeagueButton(props: { leagueId: string | null }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leagues'] });
       queryClient.invalidateQueries({ queryKey: ['rankings'] });
+      queryClient.invalidateQueries({ queryKey: ['userLeagues'] });
+      if (props.leagueId) {
+        queryClient.invalidateQueries({ queryKey: ['leagueRankings', props.leagueId] });
+      }
     },
   })
 
