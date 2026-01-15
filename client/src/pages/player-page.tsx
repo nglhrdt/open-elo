@@ -1,11 +1,12 @@
-import { fetchUserRankings, getUserGames, type Game, type Ranking } from '@/api/api';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getUserById, getUserGames, type Game } from '@/api/api';
 import { DataTable } from '@/components/data-table';
 import { ModeToggle } from '@/components/mode-toggle';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ConvertGuestDialog } from '@/features/user/convert/convert-guest-dialog';
 import { UserMenu } from '@/features/user/menu/user-menu';
 import { useQuery } from '@tanstack/react-query';
 import { type ColumnDef } from '@tanstack/react-table';
-import { useParams, Link } from 'react-router';
+import { Link, useParams } from 'react-router';
 
 const gameColumns: ColumnDef<Game>[] = [
   {
@@ -14,16 +15,48 @@ const gameColumns: ColumnDef<Game>[] = [
     cell: (info) => new Date(info.getValue() as Date).toLocaleDateString(),
   },
   {
+    id: 'homePlayers',
+    header: 'Home',
+    cell: (info) => {
+      const game = info.row.original;
+      const homePlayers = game.players.filter(p => p.team === 'home');
+      return (
+        <div className="flex gap-2 flex-wrap">
+          {homePlayers.map((p, index) => (
+            <span key={p.user.id}>
+              <Link to={`/players/${p.user.id}`} className="text-primary hover:underline">
+                {p.user.username}
+              </Link>
+              {index < homePlayers.length - 1 && ','}
+            </span>
+          ))}
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: 'score',
     header: 'Score',
     cell: (info) => info.getValue(),
   },
   {
-    id: 'players',
-    header: 'Players',
+    id: 'awayPlayers',
+    header: 'Away',
     cell: (info) => {
       const game = info.row.original;
-      return game.players.map(p => p.user.username).join(', ');
+      const awayPlayers = game.players.filter(p => p.team === 'away');
+      return (
+        <div className="flex gap-2 flex-wrap">
+          {awayPlayers.map((p, index) => (
+            <span key={p.user.id}>
+              <Link to={`/players/${p.user.id}`} className="text-primary hover:underline">
+                {p.user.username}
+              </Link>
+              {index < awayPlayers.length - 1 && ','}
+            </span>
+          ))}
+        </div>
+      );
     },
   },
   {
@@ -34,31 +67,20 @@ const gameColumns: ColumnDef<Game>[] = [
       const player = game.players.find(p => p.user.id === info.row.original.players[0].user.id);
       if (!player) return 'N/A';
       const change = player.eloAfter - player.eloBefore;
-      return change > 0 ? `+${change}` : change.toString();
+      const colorClass = change > 0 ? 'text-green-600' : change < 0 ? 'text-red-600' : '';
+      return <span className={colorClass}>{change > 0 ? `+${change}` : change.toString()}</span>;
     },
-  },
-];
-
-const rankingColumns: ColumnDef<Ranking>[] = [
-  {
-    accessorKey: 'league.name',
-    header: 'League',
-    cell: (info) => info.getValue(),
-  },
-  {
-    accessorKey: 'position',
-    header: 'Position',
-    cell: (info) => info.getValue(),
-  },
-  {
-    accessorKey: 'elo',
-    header: 'Rating',
-    cell: (info) => info.getValue(),
   },
 ];
 
 export function PlayerPage() {
   const { userId } = useParams<{ userId: string }>();
+
+  const { isPending: userLoading, data: user } = useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => getUserById(userId!),
+    enabled: !!userId,
+  });
 
   const { isPending: gamesLoading, data: games } = useQuery({
     queryKey: ['userGames', userId],
@@ -66,17 +88,11 @@ export function PlayerPage() {
     enabled: !!userId,
   });
 
-  const { isPending: rankingsLoading, data: allRankings } = useQuery({
-    queryKey: ['rankings'],
-    queryFn: fetchUserRankings,
-  });
-
   if (!userId) return <div>Invalid player</div>;
-  if (gamesLoading || rankingsLoading) return <div>Loading...</div>;
+  if (userLoading || gamesLoading) return <div>Loading...</div>;
+  if (!user) return <div>User not found</div>;
 
-  // Filter rankings to show only this user's rankings
-  const userRankings = allRankings?.filter(r => r.user && r.user.id === userId) || [];
-  const username = userRankings[0]?.user.username || 'Player';
+  const isGuest = user.role === 'guest';
 
   return (
     <div className='flex flex-col gap-4 grow shrink'>
@@ -85,7 +101,12 @@ export function PlayerPage() {
           <Link to="/" className='text-sm text-muted-foreground hover:underline'>
             ← Back to Home
           </Link>
-          <h1 className='text-2xl font-bold'>{username}</h1>
+          <div className='flex items-center gap-4'>
+            <h1 className='text-2xl font-bold'>{user.username}</h1>
+            {isGuest && (
+              <ConvertGuestDialog user={user} />
+            )}
+          </div>
         </div>
         <div className='flex items-center gap-4'>
           <ModeToggle />
@@ -93,20 +114,7 @@ export function PlayerPage() {
         </div>
       </div>
 
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8'>
-        <Card>
-          <CardHeader>
-            <CardTitle>Rankings</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {userRankings.length > 0 ? (
-              <DataTable columns={rankingColumns} data={userRankings} />
-            ) : (
-              <p className='text-muted-foreground'>No rankings yet</p>
-            )}
-          </CardContent>
-        </Card>
-
+      <div className='grid grid-cols-1 gap-4 lg:gap-8'>
         <Card>
           <CardHeader>
             <CardTitle>Recent Games</CardTitle>

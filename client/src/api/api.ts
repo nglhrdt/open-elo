@@ -119,6 +119,40 @@ export function getUsers(): Promise<User[]> {
     });
 }
 
+export function getUserById(userId: string): Promise<User> {
+  return apiFetch(`/users/${userId}`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch user');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Error fetching user:', error);
+      throw error;
+    });
+}
+
+export function convertGuestToRegistered(userId: string, data: {
+  email: string;
+  password: string;
+}): Promise<User> {
+  return apiFetch(`/users/${userId}/convert-to-registered`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to convert user');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Error converting user:', error);
+      throw error;
+    });
+}
+
 export function createLeague(data: {
   name: string;
   type: LEAGUE_TYPE;
