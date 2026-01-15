@@ -1,4 +1,4 @@
-import { HomePage } from '@/pages/home-page';
+import { HomeRedirect } from '@/pages/home-redirect';
 import { LeaguePage } from '@/pages/league-page';
 import { LeaguesPage } from '@/pages/leagues-page';
 import { LoginPage } from '@/pages/login-page';
@@ -23,7 +23,7 @@ export function App() {
             <Routes>
               <Route element={<Layout />}>
                 <Route element={<ProtectedRoute />}>
-                  <Route index element={<HomePage />} />
+                  <Route index element={<HomeRedirect />} />
                   <Route path="leagues" element={<LeaguesPage />} />
                   <Route path="leagues/:leagueId" element={<LeaguePage />} />
                   <Route path="players/:userId" element={<PlayerPage />} />
