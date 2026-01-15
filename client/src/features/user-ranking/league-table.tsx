@@ -1,7 +1,9 @@
 import type { Ranking } from '@/api/api';
+import { fetchLeagueRankings } from '@/api/api';
 import { AuthContext } from '@/components/AuthContext';
 import { DataTable } from '@/components/data-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useQuery } from '@tanstack/react-query';
 import {
   type ColumnDef
 } from '@tanstack/react-table';
@@ -36,11 +38,19 @@ const columns: ColumnDef<Ranking>[] = [
   },
 ];
 
-export function LeagueTable(props: { ranking: Ranking }) {
-  const { ranking } = props;
+export function LeagueTable(props: { leagueId: string }) {
+  const { leagueId } = props;
   const { user } = useContext(AuthContext);
 
+  const { isPending, data: rankings } = useQuery({
+    queryKey: ['leagueRankings', leagueId],
+    queryFn: () => fetchLeagueRankings(leagueId),
+    enabled: !!leagueId,
+  });
+
   if (!user) return null;
+  if (isPending) return <div>Loading...</div>;
+  if (!rankings || rankings.length === 0) return <div>No rankings found</div>;
 
   return (
     <Card>
@@ -50,7 +60,7 @@ export function LeagueTable(props: { ranking: Ranking }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <DataTable columns={columns} data={ranking.leagueRankings} />
+        <DataTable columns={columns} data={rankings} />
       </CardContent>
     </Card>
   )

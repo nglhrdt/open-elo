@@ -47,6 +47,15 @@ export class RankingService {
     });
   }
 
+  async getLeagueRankings(leagueId: string) {
+    const rankings = await this.getRankings({ where: { league: { id: leagueId } } });
+    const sortedRankings = rankings.sort((a, b) => b.elo - a.elo);
+    return sortedRankings.map((rank, i) => ({
+      ...rank,
+      position: i + 1,
+    }));
+  }
+
   async getRankings(options: FindManyOptions<RankingEntity> = {}) {
     return this.repository.find({
       relations: ["league", "user"],

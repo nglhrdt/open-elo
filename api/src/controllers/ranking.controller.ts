@@ -1,4 +1,4 @@
-import { Authorized, CurrentUser, Get, JsonController } from "routing-controllers";
+import { Authorized, CurrentUser, Get, JsonController, Param } from "routing-controllers";
 import { Service } from "typedi";
 import { RankingService } from "../services/ranking.service";
 
@@ -11,5 +11,11 @@ export class RankingController {
   @Authorized()
   getRankings(@CurrentUser() user: { id: string }) {
     return this.rankingService.getUserRankings(user.id);
+  }
+
+  @Get("/league/:leagueId")
+  @Authorized()
+  getRankingsByLeague(@Param("leagueId") leagueId: string) {
+    return this.rankingService.getLeagueRankings(leagueId);
   }
 }

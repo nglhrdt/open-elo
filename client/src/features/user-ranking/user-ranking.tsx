@@ -20,7 +20,7 @@ export function UserRanking(props: { ranking: Ranking }) {
         </CardAction>
       </CardHeader>
       <CardContent>
-        <LeagueTable ranking={ranking} />
+        <LeagueTable leagueId={ranking.league.id} />
       </CardContent>
     </Card>
   );

@@ -274,3 +274,9 @@ export async function fetchUserRankings(): Promise<Ranking[] | null> {
   if (!res.ok) return null;
   return res.json();
 }
+
+export async function fetchLeagueRankings(leagueId: string): Promise<Ranking[] | null> {
+  const res = await apiFetch(`/rankings/league/${leagueId}`);
+  if (!res.ok) return null;
+  return res.json();
+}
