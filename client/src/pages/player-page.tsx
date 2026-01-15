@@ -1,15 +1,18 @@
-import { getUserById, getUserGames, type Game } from '@/api/api';
+import { getUserById, getUserGames, fetchUserRankings, type Game } from '@/api/api';
 import { DataTable } from '@/components/data-table';
 import { ModeToggle } from '@/components/mode-toggle';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ConvertGuestDialog } from '@/features/user/convert/convert-guest-dialog';
 import { UserMenu } from '@/features/user/menu/user-menu';
+import { LeagueSelect } from '@/components/league-select';
 import { useQuery } from '@tanstack/react-query';
 import { type ColumnDef } from '@tanstack/react-table';
-import { Link, useParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 
 export function PlayerPage() {
   const { userId } = useParams<{ userId: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedLeagueId = searchParams.get('leagueId') || undefined;
 
   const { isPending: userLoading, data: user } = useQuery({
     queryKey: ['user', userId],
@@ -17,25 +20,28 @@ export function PlayerPage() {
     enabled: !!userId,
   });
 
+  const { isPending: rankingsLoading, data: rankings } = useQuery({
+    queryKey: ['rankings'],
+    queryFn: () => fetchUserRankings(),
+  });
+
   const { isPending: gamesLoading, data: games } = useQuery({
-    queryKey: ['userGames', userId],
-    queryFn: () => getUserGames(userId!, { count: 20 }),
+    queryKey: ['userGames', userId, selectedLeagueId],
+    queryFn: () => getUserGames(userId!, { count: 20, leagueId: selectedLeagueId }),
     enabled: !!userId,
   });
+
+  const userLeagues = rankings
+    ?.filter(r => r.user?.id === userId)
+    ?.map(r => r.league)
+    ?.filter(Boolean)
+    || [];
 
   const gameColumns: ColumnDef<Game>[] = [
     {
       accessorKey: 'createdAt',
       header: 'Date',
       cell: (info) => new Date(info.getValue() as Date).toLocaleDateString(),
-    },
-    {
-      id: 'league',
-      header: 'League',
-      cell: (info) => {
-        const game = info.row.original;
-        return game.league?.name || 'N/A';
-      },
     },
     {
       id: 'homePlayers',
@@ -98,8 +104,17 @@ export function PlayerPage() {
     },
   ];
 
+  const handleLeagueChange = (leagueId: string) => {
+    if (leagueId === 'all') {
+      searchParams.delete('leagueId');
+    } else {
+      searchParams.set('leagueId', leagueId);
+    }
+    setSearchParams(searchParams);
+  };
+
   if (!userId) return <div>Invalid player</div>;
-  if (userLoading || gamesLoading) return <div>Loading...</div>;
+  if (userLoading || gamesLoading || rankingsLoading) return <div>Loading...</div>;
   if (!user) return <div>User not found</div>;
 
   const isGuest = user.role === 'guest';
@@ -127,7 +142,19 @@ export function PlayerPage() {
       <div className='grid grid-cols-1 gap-4 lg:gap-8'>
         <Card>
           <CardHeader>
-            <CardTitle>Recent Games</CardTitle>
+            <div className='flex items-center justify-between'>
+              <CardTitle>Recent Games</CardTitle>
+              {userLeagues.length > 0 && (
+                <div className='w-64'>
+                  <LeagueSelect
+                    leagues={[{ id: 'all', name: 'All Leagues', type: 'TABLE_SOCCER' }, ...userLeagues]}
+                    value={selectedLeagueId || 'all'}
+                    onChange={handleLeagueChange}
+                    placeholder="Filter by league"
+                  />
+                </div>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             {games && games.length > 0 ? (

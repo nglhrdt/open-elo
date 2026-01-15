@@ -56,8 +56,8 @@ export interface League {
   id: string;
   name: string;
   type: LEAGUE_TYPE;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export async function login(data: { user: string, password: string }) {
@@ -260,7 +260,7 @@ export function getLeagueGames(leagueId: string, params?: { count?: number }): P
     });
 }
 
-export function getUserGames(userId: string, params?: { count?: number }): Promise<Game[]> {
+export function getUserGames(userId: string, params?: { count?: number; leagueId?: string }): Promise<Game[]> {
   return apiFetch(`/users/${userId}/games${params ? `${qs.stringify(params, { addQueryPrefix: true })}` : ''}`)
     .then(response => response.json())
     .catch(error => {

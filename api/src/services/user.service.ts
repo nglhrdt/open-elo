@@ -79,21 +79,25 @@ export class UserService {
     return this.repository.findOneBy({ username: username?.trim() });
   }
 
-  getUserGames(userId: string, count: number) {
-    return (
-      this.gameRepository
-        .createQueryBuilder("game")
-        // join used only to filter games by membership
-        .innerJoin("game.players", "pFilter")
-        .innerJoin("pFilter.user", "pUser", "pUser.id = :userId", { userId })
-        // joins used to load full relations
-        .leftJoinAndSelect("game.players", "players")
-        .leftJoinAndSelect("players.user", "playerUser")
-        .leftJoinAndSelect("game.league", "league")
-        .orderBy("game.createdAt", "DESC")
-        .take(count || 10)
-        .getMany()
-    );
+  getUserGames(userId: string, count: number, leagueId?: string) {
+    const query = this.gameRepository
+      .createQueryBuilder("game")
+      // join used only to filter games by membership
+      .innerJoin("game.players", "pFilter")
+      .innerJoin("pFilter.user", "pUser", "pUser.id = :userId", { userId })
+      // joins used to load full relations
+      .leftJoinAndSelect("game.players", "players")
+      .leftJoinAndSelect("players.user", "playerUser")
+      .leftJoinAndSelect("game.league", "league");
+
+    if (leagueId) {
+      query.andWhere("game.leagueId = :leagueId", { leagueId });
+    }
+
+    return query
+      .orderBy("game.createdAt", "DESC")
+      .take(count || 10)
+      .getMany();
   }
 
   async convertGuestToRegistered(

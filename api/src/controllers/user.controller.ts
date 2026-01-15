@@ -63,8 +63,8 @@ export class UserController {
 
   @Authorized()
   @Get("/:id/games")
-  getUserGames(@Param("id") id: string, @QueryParam("count") count: number) {
-    return this.userService.getUserGames(id, count);
+  getUserGames(@Param("id") id: string, @QueryParam("count") count: number, @QueryParam("leagueId") leagueId: string) {
+    return this.userService.getUserGames(id, count, leagueId);
   }
 
   @Post("/:id/convert-to-registered")
