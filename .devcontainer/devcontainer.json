@@ -35,7 +35,8 @@
 				"EditorConfig.EditorConfig",
 				"bradlc.vscode-tailwindcss",
 				"quicktype.quicktype",
-				"solomonkinard.git-blame"
+				"solomonkinard.git-blame",
+				"MateuszDrewniak.hurl-runner"
 			]
 		}
 	}
