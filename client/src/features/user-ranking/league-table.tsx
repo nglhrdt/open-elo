@@ -6,7 +6,6 @@ import {
   type ColumnDef
 } from '@tanstack/react-table';
 import { useContext } from 'react';
-import { UserGames } from '../user/games/user-games-dialog';
 
 const columns: ColumnDef<Ranking>[] = [
   {
@@ -17,7 +16,7 @@ const columns: ColumnDef<Ranking>[] = [
   {
     accessorKey: 'user',
     header: 'Username',
-    cell: (info) => { return <UserGames user={info.row.original.user} /> },
+    cell: (info) => info.row.original.user.username,
   },
   {
     accessorKey: 'elo',
