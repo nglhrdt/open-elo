@@ -6,6 +6,7 @@ import {
   type ColumnDef
 } from '@tanstack/react-table';
 import { useContext } from 'react';
+import { Link } from 'react-router';
 
 const columns: ColumnDef<Ranking>[] = [
   {
@@ -16,7 +17,17 @@ const columns: ColumnDef<Ranking>[] = [
   {
     accessorKey: 'user',
     header: 'Username',
-    cell: (info) => info.row.original.user.username,
+    cell: (info) => {
+      const user = info.row.original.user;
+      return (
+        <Link
+          to={`/players/${user.id}`}
+          className="text-primary hover:underline"
+        >
+          {user.username}
+        </Link>
+      );
+    },
   },
   {
     accessorKey: 'elo',
