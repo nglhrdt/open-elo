@@ -18,6 +18,7 @@ export interface Game {
   id: string;
   score: string;
   leagueId: string;
+  league: League;
   createdAt: Date;
   updatedAt: Date;
   players: Player[];

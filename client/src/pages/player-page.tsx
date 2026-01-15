@@ -8,71 +8,6 @@ import { useQuery } from '@tanstack/react-query';
 import { type ColumnDef } from '@tanstack/react-table';
 import { Link, useParams } from 'react-router';
 
-const gameColumns: ColumnDef<Game>[] = [
-  {
-    accessorKey: 'createdAt',
-    header: 'Date',
-    cell: (info) => new Date(info.getValue() as Date).toLocaleDateString(),
-  },
-  {
-    id: 'homePlayers',
-    header: 'Home',
-    cell: (info) => {
-      const game = info.row.original;
-      const homePlayers = game.players.filter(p => p.team === 'home');
-      return (
-        <div className="flex gap-2 flex-wrap">
-          {homePlayers.map((p, index) => (
-            <span key={p.user.id}>
-              <Link to={`/players/${p.user.id}`} className="text-primary hover:underline">
-                {p.user.username}
-              </Link>
-              {index < homePlayers.length - 1 && ','}
-            </span>
-          ))}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: 'score',
-    header: 'Score',
-    cell: (info) => info.getValue(),
-  },
-  {
-    id: 'awayPlayers',
-    header: 'Away',
-    cell: (info) => {
-      const game = info.row.original;
-      const awayPlayers = game.players.filter(p => p.team === 'away');
-      return (
-        <div className="flex gap-2 flex-wrap">
-          {awayPlayers.map((p, index) => (
-            <span key={p.user.id}>
-              <Link to={`/players/${p.user.id}`} className="text-primary hover:underline">
-                {p.user.username}
-              </Link>
-              {index < awayPlayers.length - 1 && ','}
-            </span>
-          ))}
-        </div>
-      );
-    },
-  },
-  {
-    id: 'eloChange',
-    header: 'ELO Change',
-    cell: (info) => {
-      const game = info.row.original;
-      const player = game.players.find(p => p.user.id === info.row.original.players[0].user.id);
-      if (!player) return 'N/A';
-      const change = player.eloAfter - player.eloBefore;
-      const colorClass = change > 0 ? 'text-green-600' : change < 0 ? 'text-red-600' : '';
-      return <span className={colorClass}>{change > 0 ? `+${change}` : change.toString()}</span>;
-    },
-  },
-];
-
 export function PlayerPage() {
   const { userId } = useParams<{ userId: string }>();
 
@@ -87,6 +22,81 @@ export function PlayerPage() {
     queryFn: () => getUserGames(userId!, { count: 20 }),
     enabled: !!userId,
   });
+
+  const gameColumns: ColumnDef<Game>[] = [
+    {
+      accessorKey: 'createdAt',
+      header: 'Date',
+      cell: (info) => new Date(info.getValue() as Date).toLocaleDateString(),
+    },
+    {
+      id: 'league',
+      header: 'League',
+      cell: (info) => {
+        const game = info.row.original;
+        return game.league?.name || 'N/A';
+      },
+    },
+    {
+      id: 'homePlayers',
+      header: 'Home',
+      cell: (info) => {
+        const game = info.row.original;
+        const homePlayers = game.players.filter(p => p.team === 'home');
+        return (
+          <div className="flex gap-2 flex-wrap">
+            {homePlayers.map((p, index) => (
+              <span key={p.user.id}>
+                <Link to={`/players/${p.user.id}`} className="text-primary hover:underline">
+                  {p.user.username}
+                </Link>
+                {' '}({p.eloAfter})
+                {index < homePlayers.length - 1 && ','}
+              </span>
+            ))}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'score',
+      header: 'Score',
+      cell: (info) => info.getValue(),
+    },
+    {
+      id: 'awayPlayers',
+      header: 'Away',
+      cell: (info) => {
+        const game = info.row.original;
+        const awayPlayers = game.players.filter(p => p.team === 'away');
+        return (
+          <div className="flex gap-2 flex-wrap">
+            {awayPlayers.map((p, index) => (
+              <span key={p.user.id}>
+                <Link to={`/players/${p.user.id}`} className="text-primary hover:underline">
+                  {p.user.username}
+                </Link>
+                {' '}({p.eloAfter})
+                {index < awayPlayers.length - 1 && ','}
+              </span>
+            ))}
+          </div>
+        );
+      },
+    },
+    {
+      id: 'eloChange',
+      header: 'ELO Change',
+      cell: (info) => {
+        const game = info.row.original;
+        const player = game.players.find(p => p.user.id === userId);
+        if (!player) return 'N/A';
+        const change = player.eloAfter - player.eloBefore;
+        const colorClass = change > 0 ? 'text-green-600' : change < 0 ? 'text-red-600' : '';
+        return <span className={colorClass}>{change > 0 ? `+${change}` : change.toString()}</span>;
+      },
+    },
+  ];
 
   if (!userId) return <div>Invalid player</div>;
   if (userLoading || gamesLoading) return <div>Loading...</div>;
