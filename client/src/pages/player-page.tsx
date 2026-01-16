@@ -1,13 +1,16 @@
-import { getUserById, getUserGames, fetchRankingsByUserId, type Game } from '@/api/api';
+import { fetchRankingsByUserId, getUserById, getUserGames, type Game } from '@/api/api';
 import { DataTable } from '@/components/data-table';
+import { LeagueSelect } from '@/components/league-select';
 import { ModeToggle } from '@/components/mode-toggle';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartContainer, ChartTooltip } from '@/components/ui/chart';
 import { ConvertGuestDialog } from '@/features/user/convert/convert-guest-dialog';
 import { UserMenu } from '@/features/user/menu/user-menu';
-import { LeagueSelect } from '@/components/league-select';
 import { useQuery } from '@tanstack/react-query';
 import { type ColumnDef } from '@tanstack/react-table';
+import { useMemo } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 
 export function PlayerPage() {
   const { userId } = useParams<{ userId: string }>();
@@ -32,10 +35,44 @@ export function PlayerPage() {
     enabled: !!userId,
   });
 
+  const chartData = useMemo(() => {
+    if (!games || games.length === 0) return [];
+
+    // Sort games by date to ensure chronological order
+    const sortedGames = [...games].sort((a, b) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+
+    return sortedGames.map((game, index) => {
+      const player = game.players.find(p => p.user.id === userId);
+      const homePlayers = game.players.filter(p => p.team === 'home');
+      const awayPlayers = game.players.filter(p => p.team === 'away');
+      const homeNames = homePlayers.map(p => p.user.username).join(', ');
+      const awayNames = awayPlayers.map(p => p.user.username).join(', ');
+      const eloChange = player ? player.eloAfter - player.eloBefore : 0;
+
+      return {
+        gameNumber: index + 1,
+        elo: player?.eloAfter ?? 0,
+        date: new Date(game.createdAt).toLocaleDateString(),
+        score: game.score,
+        homeTeam: homeNames,
+        awayTeam: awayNames,
+        eloChange,
+        league: game.league?.name,
+      };
+    }).filter(data => data.elo > 0);
+  }, [games, userId]);
+
   const userLeagues = rankings
     ?.map(r => r.league)
     ?.filter(Boolean)
     || [];
+
+  const selectedLeague = userLeagues.find(league => league.id === selectedLeagueId);
+  const leagueTitle = selectedLeagueId && selectedLeagueId !== 'all'
+    ? selectedLeague?.name || 'Recent Games'
+    : 'All Leagues';
 
   const gameColumns: ColumnDef<Game>[] = [
     {
@@ -143,7 +180,7 @@ export function PlayerPage() {
         <Card>
           <CardHeader>
             <div className='flex items-center justify-between'>
-              <CardTitle>Recent Games</CardTitle>
+              <CardTitle>{leagueTitle}</CardTitle>
               {userLeagues.length > 0 && (
                 <div className='w-64'>
                   <LeagueSelect
@@ -156,9 +193,79 @@ export function PlayerPage() {
               )}
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
             {games && games.length > 0 ? (
-              <DataTable columns={gameColumns} data={games} />
+              <>
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">ELO Progression</h3>
+                  <div className="h-[300px] w-full">
+                    <ChartContainer
+                      config={{
+                        elo: {
+                          label: "ELO Rating",
+                          color: "hsl(142 76% 36%)",
+                        },
+                      }}
+                      className="h-full w-full aspect-auto"
+                    >
+                      <LineChart
+                        data={chartData}
+                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis
+                          dataKey="gameNumber"
+                          label={{ value: 'Game Number', position: 'insideBottom', offset: -5 }}
+                          className="text-xs"
+                        />
+                        <YAxis
+                          label={{ value: 'ELO Rating', angle: -90, position: 'insideLeft' }}
+                          className="text-xs"
+                        />
+                        <ChartTooltip
+                          content={({ active, payload }) => {
+                            if (!active || !payload || !payload.length) return null;
+                            const data = payload[0].payload;
+                            return (
+                              <div className="rounded-lg border bg-background p-3 shadow-sm">
+                                <div className="grid gap-2">
+                                  <div className="font-semibold">Game {data.gameNumber}</div>
+                                  <div className="text-sm text-muted-foreground">{data.date}</div>
+                                  {data.league && <div className="text-sm">{data.league}</div>}
+                                  <div className="text-sm">{data.homeTeam} vs {data.awayTeam}</div>
+                                  <div className="text-sm font-medium">Score: {data.score}</div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm">ELO: {data.elo}</span>
+                                    <span className={`text-sm font-medium ${
+                                      data.eloChange > 0 ? 'text-green-600' : data.eloChange < 0 ? 'text-red-600' : ''
+                                    }`}>
+                                      ({data.eloChange > 0 ? '+' : ''}{data.eloChange})
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="elo"
+                          stroke="var(--color-elo)"
+                          strokeWidth={2}
+                          dot={{ fill: "var(--color-elo)" }}
+                          activeDot={{ r: 6 }}
+                          label={{ position: 'top', fontSize: 12 }}
+                        />
+                      </LineChart>
+                    </ChartContainer>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Recent Games</h3>
+                  <DataTable columns={gameColumns} data={games} />
+                </div>
+              </>
             ) : (
               <p className='text-muted-foreground'>No games yet</p>
             )}
