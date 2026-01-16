@@ -28,7 +28,7 @@ export function PlayerPage() {
 
   const { isPending: gamesLoading, data: games } = useQuery({
     queryKey: ['userGames', userId, selectedLeagueId],
-    queryFn: () => getUserGames(userId!, { count: 20, leagueId: selectedLeagueId }),
+    queryFn: () => getUserGames(userId!, { count: 100, leagueId: selectedLeagueId }),
     enabled: !!userId,
   });
 
