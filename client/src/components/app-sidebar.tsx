@@ -12,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { useQuery } from '@tanstack/react-query'
 import { Home, Trophy, User } from 'lucide-react'
@@ -37,17 +38,13 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link to="/">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Trophy className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Foosball Leagues</span>
-                  <span className="truncate text-xs">{user?.username || 'Guest'}</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
+            <div className="flex items-center gap-2">
+              <SidebarTrigger />
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold">Open Elo</span>
+                <span className="truncate text-xs">{user?.username || 'Guest'}</span>
+              </div>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
@@ -101,12 +98,10 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <div className="flex items-center gap-2">
-              <ModeToggle />
-              <div className="flex-1 min-w-0">
-                <LogoutButton />
-              </div>
-            </div>
+            <ModeToggle />
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <LogoutButton />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

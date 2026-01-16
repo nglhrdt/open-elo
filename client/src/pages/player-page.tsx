@@ -84,7 +84,7 @@ export function PlayerPage() {
   if (!user) return <div>User not found</div>;
 
   return (
-    <div className='flex flex-col gap-4 grow shrink'>
+    <div className='flex flex-col gap-6 grow shrink'>
       <div className='flex items-center justify-between gap-4 lg:gap-8 shrink-0'>
         <PlayerHeader user={user} />
       </div>

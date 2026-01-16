@@ -3,7 +3,7 @@ import { LogOut } from "lucide-react";
 import { useContext } from "react";
 import { useNavigate } from "react-router";
 import { AuthContext } from "./AuthContext";
-import { Button } from "./ui/button";
+import { SidebarMenuButton } from "./ui/sidebar";
 
 export function LogoutButton() {
   const navigate = useNavigate();
@@ -17,9 +17,9 @@ export function LogoutButton() {
   }
 
   return (
-    <Button onClick={handleClick} className="w-full justify-start gap-2" variant="ghost" size="sm">
+    <SidebarMenuButton onClick={handleClick} tooltip="Logout">
       <LogOut className="size-4" />
-      <span className="truncate">Logout</span>
-    </Button>
+      <span>Logout</span>
+    </SidebarMenuButton>
   );
 }
