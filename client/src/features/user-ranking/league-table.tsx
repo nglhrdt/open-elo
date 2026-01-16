@@ -63,7 +63,7 @@ export function LeagueTable(props: { leagueId: string }) {
         ) : !rankings || rankings.length === 0 ? (
           <p className='text-muted-foreground'>No rankings found</p>
         ) : (
-          <DataTable columns={columns} data={rankings} />
+          <DataTable columns={columns} data={rankings} pageSize={10} />
         )}
       </CardContent>
     </Card>

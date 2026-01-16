@@ -40,7 +40,7 @@ export function LeaguePage() {
           <UserMenu />
         </div>
       </div>
-      <div className='grid grid-cols-1 lg:grid-cols-3 grow shrink gap-4 lg:gap-12'>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-12 items-start'>
         <CreateGame leagueId={leagueId} />
         <LeagueTable leagueId={leagueId} />
         <LeagueGames leagueId={leagueId} />
