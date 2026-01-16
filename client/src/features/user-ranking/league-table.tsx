@@ -49,8 +49,6 @@ export function LeagueTable(props: { leagueId: string }) {
   ];
 
   if (!user) return null;
-  if (isPending) return <div>Loading...</div>;
-  if (!rankings || rankings.length === 0) return <div>No rankings found</div>;
 
   return (
     <Card>
@@ -60,7 +58,13 @@ export function LeagueTable(props: { leagueId: string }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <DataTable columns={columns} data={rankings} />
+        {isPending ? (
+          <div>Loading...</div>
+        ) : !rankings || rankings.length === 0 ? (
+          <p className='text-muted-foreground'>No rankings found</p>
+        ) : (
+          <DataTable columns={columns} data={rankings} />
+        )}
       </CardContent>
     </Card>
   )
