@@ -1,10 +1,8 @@
 import { getLeagueById, fetchUserRankings } from '@/api/api'
-import { ModeToggle } from '@/components/mode-toggle'
 import { CreateGame } from '@/features/game/create-game/create-game'
 import { LeagueGames } from '@/features/league/games/league-games'
 import { JoinLeagueButton } from '@/features/league/join/join-league-button'
 import { LeagueTable } from '@/features/user-ranking/league-table'
-import { UserMenu } from '@/features/user/menu/user-menu'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router'
 
@@ -36,8 +34,6 @@ export function LeaguePage() {
         </div>
         <div className='flex items-center gap-4'>
           {!isMember && <JoinLeagueButton leagueId={leagueId} />}
-          <ModeToggle />
-          <UserMenu />
         </div>
       </div>
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-12 items-start'>

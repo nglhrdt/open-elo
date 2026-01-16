@@ -17,9 +17,9 @@ export function LogoutButton() {
   }
 
   return (
-    <Button onClick={handleClick} className="w-full flex justify-center" variant="ghost">
-      Logout
-      <LogOut />
+    <Button onClick={handleClick} className="w-full justify-start gap-2" variant="ghost" size="sm">
+      <LogOut className="size-4" />
+      <span className="truncate">Logout</span>
     </Button>
   );
 }

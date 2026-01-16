@@ -1,8 +1,6 @@
 import { fetchRankingsByUserId, getUserById, getUserGames } from '@/api/api';
 import { LeagueSelect } from '@/components/league-select';
-import { ModeToggle } from '@/components/mode-toggle';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { UserMenu } from '@/features/user/menu/user-menu';
 import { EloChart } from '@/features/user/elo-chart/elo-chart';
 import { PlayerGamesTable } from '@/features/user/player-games-table/player-games-table';
 import { PlayerHeader } from '@/features/user/player-header/player-header';
@@ -89,10 +87,6 @@ export function PlayerPage() {
     <div className='flex flex-col gap-4 grow shrink'>
       <div className='flex items-center justify-between gap-4 lg:gap-8 shrink-0'>
         <PlayerHeader user={user} />
-        <div className='flex items-center gap-4'>
-          <ModeToggle />
-          <UserMenu />
-        </div>
       </div>
 
       <div className='grid grid-cols-1 gap-4 lg:gap-8'>
