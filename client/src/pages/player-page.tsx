@@ -5,13 +5,16 @@ import { EloChart } from '@/features/user/elo-chart/elo-chart';
 import { PlayerGamesTable } from '@/features/user/player-games-table/player-games-table';
 import { PlayerHeader } from '@/features/user/player-header/player-header';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router';
 
 export function PlayerPage() {
   const { userId } = useParams<{ userId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectedLeagueId = searchParams.get('leagueId') || undefined;
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [showAll, setShowAll] = useState(false);
 
   const { isPending: userLoading, data: user } = useQuery({
     queryKey: ['user', userId],
@@ -39,7 +42,12 @@ export function PlayerPage() {
       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
 
-    return sortedGames.map((game, index) => {
+    // Get games based on showAll setting
+    const startIndex = showAll ? 0 : pageIndex * pageSize;
+    const endIndex = showAll ? sortedGames.length : startIndex + pageSize;
+    const displayGames = sortedGames.slice(startIndex, endIndex);
+
+    return displayGames.map((game, index) => {
       const player = game.players.find(p => p.user.id === userId);
       const homePlayers = game.players.filter(p => p.team === 'home');
       const awayPlayers = game.players.filter(p => p.team === 'away');
@@ -48,7 +56,7 @@ export function PlayerPage() {
       const eloChange = player ? player.eloAfter - player.eloBefore : 0;
 
       return {
-        gameNumber: index + 1,
+        gameNumber: startIndex + index + 1,
         elo: player?.eloAfter ?? 0,
         date: new Date(game.createdAt).toLocaleDateString(),
         score: game.score,
@@ -58,7 +66,7 @@ export function PlayerPage() {
         league: game.league?.name,
       };
     }).filter(data => data.elo > 0);
-  }, [games, userId]);
+  }, [games, userId, pageIndex, pageSize, showAll]);
 
   const userLeagues = rankings
     ?.map(r => r.league)
@@ -77,6 +85,12 @@ export function PlayerPage() {
       searchParams.set('leagueId', leagueId);
     }
     setSearchParams(searchParams);
+    setPageIndex(0); // Reset to first page when changing league
+  };
+
+  const handlePaginationChange = (newPageIndex: number, newPageSize: number) => {
+    setPageIndex(newPageIndex);
+    setPageSize(newPageSize);
   };
 
   if (!userId) return <div>Invalid player</div>;
@@ -109,8 +123,24 @@ export function PlayerPage() {
           <CardContent className="space-y-6">
             {games && games.length > 0 ? (
               <>
-                <EloChart data={chartData} />
-                <PlayerGamesTable games={games} userId={userId} selectedLeagueId={selectedLeagueId} />
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">ELO Progression</h3>
+                    <button
+                      onClick={() => setShowAll(!showAll)}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      {showAll ? 'Show Page Only' : 'Show All Games'}
+                    </button>
+                  </div>
+                  <EloChart data={chartData} showLabels={!showAll} />
+                </div>
+                <PlayerGamesTable
+                  games={games}
+                  userId={userId}
+                  selectedLeagueId={selectedLeagueId}
+                  onPaginationChange={handlePaginationChange}
+                />
               </>
             ) : (
               <p className='text-muted-foreground'>No games yet</p>

@@ -14,12 +14,12 @@ interface ChartDataPoint {
 
 interface EloChartProps {
   data: ChartDataPoint[];
+  showLabels?: boolean;
 }
 
-export function EloChart({ data }: EloChartProps) {
+export function EloChart({ data, showLabels = true }: EloChartProps) {
   return (
     <div>
-      <h3 className="text-lg font-semibold mb-4">ELO Progression</h3>
       <div className="h-[300px] w-full">
         <ChartContainer
           config={{
@@ -76,7 +76,7 @@ export function EloChart({ data }: EloChartProps) {
               strokeWidth={2}
               dot={{ fill: "var(--color-elo)" }}
               activeDot={{ r: 6 }}
-              label={{ position: 'top', fontSize: 12 }}
+              label={showLabels ? { position: 'top', fontSize: 12 } : false}
             />
           </LineChart>
         </ChartContainer>
