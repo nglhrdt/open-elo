@@ -21,24 +21,38 @@ export default defineConfig({
         manualChunks: (id) => {
           // Node modules
           if (id.includes('node_modules')) {
-            // React core - MUST be first to avoid multiple instances
-            if (id.includes('react/') || id.includes('react-dom/')) {
-              return 'react-vendor';
-            }
-            // React ecosystem libraries that depend on React
-            if (id.includes('react-router') || id.includes('react-redux') || id.includes('react-is')) {
+            // React core and ALL React-based libraries MUST be together
+            if (
+              id.includes('react') ||
+              id.includes('redux') ||
+              id.includes('@radix-ui') ||
+              id.includes('@floating-ui') ||
+              id.includes('use-sync-external-store') ||
+              id.includes('use-callback-ref') ||
+              id.includes('use-sidecar')
+            ) {
               return 'react-vendor';
             }
             // Tanstack Query
-            if (id.includes('@tanstack/react-query')) {
-              return 'query-vendor';
+            if (id.includes('@tanstack')) {
+              return 'react-vendor';
             }
-            // Charts and related dependencies
-            if (id.includes('recharts') || id.includes('redux')) {
-              return 'ui-vendor';
+            // Charts - keep with React to avoid circular deps
+            if (id.includes('recharts') || id.includes('d3-')) {
+              return 'react-vendor';
             }
-            // Other node modules
-            return 'vendor';
+            // Pure utility libraries only
+            if (
+              id.includes('clsx') ||
+              id.includes('class-variance-authority') ||
+              id.includes('tailwind-merge') ||
+              id.includes('lucide-react') ||
+              id.includes('qs')
+            ) {
+              return 'vendor';
+            }
+            // Everything else with React
+            return 'react-vendor';
           }
 
           // Feature-based splitting for source code
@@ -57,6 +71,6 @@ export default defineConfig({
         },
       },
     },
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 1000,
   },
 })
