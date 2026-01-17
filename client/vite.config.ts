@@ -13,6 +13,7 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    dedupe: ['react', 'react-dom'],
   },
   build: {
     rollupOptions: {
@@ -20,16 +21,20 @@ export default defineConfig({
         manualChunks: (id) => {
           // Node modules
           if (id.includes('node_modules')) {
-            // React ecosystem
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            // React core - MUST be first to avoid multiple instances
+            if (id.includes('react/') || id.includes('react-dom/')) {
+              return 'react-vendor';
+            }
+            // React ecosystem libraries that depend on React
+            if (id.includes('react-router') || id.includes('react-redux') || id.includes('react-is')) {
               return 'react-vendor';
             }
             // Tanstack Query
             if (id.includes('@tanstack/react-query')) {
               return 'query-vendor';
             }
-            // Charts
-            if (id.includes('recharts')) {
+            // Charts and related dependencies
+            if (id.includes('recharts') || id.includes('redux')) {
               return 'ui-vendor';
             }
             // Other node modules
