@@ -60,6 +60,33 @@ export class GameService {
   }
 
   getGameById(id: string) {
-    throw new Error("Method not implemented.");
+    return this.repository.findOne({
+      where: { id },
+      relations: ["players", "players.user", "league"]
+    });
+  }
+
+  async deleteGame(id: string) {
+    const game = await this.getGameById(id);
+    if (!game) throw new Error("Game not found");
+
+    // Revert ELO to before values
+    const eloRevertSnapshot: Record<string, number> = {};
+    for (const player of game.players) {
+      if (player.eloBefore !== null) {
+        eloRevertSnapshot[player.user.id] = player.eloBefore;
+      }
+    }
+
+    await this.rankingService.revertEloToSnapshot(eloRevertSnapshot, game.league.id);
+
+    // Delete players first to avoid foreign key constraint violation
+    const playerRepository = AppDataSource.getRepository(PlayerEntity);
+    await playerRepository.remove(game.players);
+
+    // Delete the game
+    await this.repository.remove(game);
+
+    return { success: true };
   }
 }

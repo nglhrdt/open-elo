@@ -171,6 +171,23 @@ export class RankingService {
     }).then(ranking => ranking ? ranking.elo : 1000);
   }
 
+  /**
+   * Revert ELO ratings to specific values (used when deleting a game)
+   */
+  async revertEloToSnapshot(snapshot: Record<string, number>, leagueId: string) {
+    const userIds = Object.keys(snapshot);
+    const rankings = await this.getRankingByUserIdsAndLeagueId(userIds, leagueId);
+
+    for (const ranking of rankings) {
+      const revertValue = snapshot[ranking.user.id];
+      if (revertValue !== undefined) {
+        ranking.elo = revertValue;
+      }
+    }
+
+    await this.repository.save(rankings);
+  }
+
   private getTeamElo(rankings: RankingEntity[]): number {
     const totalElo = rankings.reduce((sum, ranking) => sum + ranking.elo, 0);
     return totalElo / rankings.length;

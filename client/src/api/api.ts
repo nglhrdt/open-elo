@@ -251,6 +251,22 @@ export function createGame(data: {
     });
 }
 
+export function deleteGame(gameId: string): Promise<void> {
+  return apiFetch(`/games/${gameId}`, {
+    method: 'DELETE',
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to delete game');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Error deleting game:', error);
+      throw error;
+    });
+}
+
 export function getLeagueGames(leagueId: string, params?: { count?: number }): Promise<Game[]> {
   return apiFetch(`/leagues/${leagueId}/games${params ? `${qs.stringify(params, { addQueryPrefix: true })}` : ''}`)
     .then(response => response.json())
