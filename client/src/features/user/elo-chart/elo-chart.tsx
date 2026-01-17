@@ -18,6 +18,12 @@ interface EloChartProps {
 }
 
 export function EloChart({ data, showLabels = true }: EloChartProps) {
+  // Calculate Y-axis domain for better visualization
+  const minElo = data.length > 0 ? Math.min(...data.map(d => d.elo)) : 0;
+  const maxElo = data.length > 0 ? Math.max(...data.map(d => d.elo)) : 0;
+  const padding = Math.max(20, (maxElo - minElo) * 0.1);
+  const yDomain = [Math.floor(minElo - padding), Math.ceil(maxElo + padding)];
+
   return (
     <div>
       <div className="h-[300px] w-full">
@@ -41,6 +47,7 @@ export function EloChart({ data, showLabels = true }: EloChartProps) {
               className="text-xs"
             />
             <YAxis
+              domain={yDomain}
               label={{ value: 'ELO Rating', angle: -90, position: 'insideLeft' }}
               className="text-xs"
             />
