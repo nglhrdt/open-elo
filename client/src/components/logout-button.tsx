@@ -12,8 +12,8 @@ export function LogoutButton() {
 
   async function handleClick() {
     logout();
-    queryCLient.invalidateQueries();
-    navigate("/");
+    queryCLient.clear();
+    navigate("/login");
   }
 
   return (

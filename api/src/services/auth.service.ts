@@ -3,11 +3,13 @@ import jwt from "jsonwebtoken";
 import { Action } from "routing-controllers";
 import { Service } from "typedi";
 import { Role, UserEntity } from "../database/entity/user.entity";
+import { TokenService } from "./token.service";
 import { UserService } from "./user.service";
 
 interface JwtPayload {
   sub: string;
   role: Role;
+  leagueId?: string; // For token-based guest logins
   iat: number;
   exp: number;
 }
@@ -19,7 +21,10 @@ export class AuthService {
   private secret = process.env.JWT_SECRET || "dev_secret";
   private expiresIn = 1000 * 60; // 1 minute for demo purposes
 
-  constructor(private userService: UserService) { }
+  constructor(
+    private userService: UserService,
+    private tokenService: TokenService,
+  ) { }
 
   async login(username: string, password: string) {
     const userNameUser = await this.userService.findByUsername(username);
@@ -43,8 +48,36 @@ export class AuthService {
     return this.createTokenAndReturn(user);
   }
 
-  sign(userId: string, role: Role) {
-    return jwt.sign({ role } as Omit<JwtPayload, "sub">, this.secret, { subject: userId, expiresIn: this.expiresIn });
+  async loginWithToken(tokenString: string) {
+    const accessToken = await this.tokenService.getTokenByString(tokenString);
+
+    if (!accessToken) {
+      throw new Error("Invalid or expired token");
+    }
+
+    // Create a guest user for this token login
+    const timestamp = Date.now();
+    const guestUsername = `guest_${accessToken.league.name}_${timestamp}`.substring(0, 50);
+    
+    const guestUser = await this.userService.createUser({
+      username: guestUsername,
+      email: null,
+      passwordHash: null,
+      role: "guest"
+    });
+
+    // Don't create a ranking for token-based guests
+    // They can view and create games but won't appear in league rankings
+
+    return this.createTokenAndReturn(guestUser, accessToken.league.id);
+  }
+
+  sign(userId: string, role: Role, leagueId?: string) {
+    const payload: Omit<JwtPayload, "sub" | "iat" | "exp"> = { role };
+    if (leagueId) {
+      payload.leagueId = leagueId;
+    }
+    return jwt.sign(payload, this.secret, { subject: userId, expiresIn: this.expiresIn });
   }
 
   parseToken(authHeader?: string) {
@@ -62,6 +95,8 @@ export class AuthService {
     const payload = this.parseToken(action.request.headers.authorization);
     if (!payload) return false;
     (action.request as any).userId = payload.sub;
+    (action.request as any).userRole = (payload as any).role;
+    (action.request as any).leagueId = (payload as any).leagueId;
     (action.request as any).roles = (payload as any).roles || [];
     if (roles.length) {
       return roles.some(r => (payload as any).roles?.includes(r));
@@ -76,8 +111,8 @@ export class AuthService {
     return user ? this.formatUser(user) : null;
   }
 
-  private createTokenAndReturn(user: UserEntity) {
-    const token = this.sign(user.id, user.role);
+  private createTokenAndReturn(user: UserEntity, leagueId?: string) {
+    const token = this.sign(user.id, user.role, leagueId);
     return { token, user: this.formatUser(user) };
   }
 

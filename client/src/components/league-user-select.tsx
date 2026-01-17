@@ -18,7 +18,7 @@ export function LeagueUserSelect(props: LeagueUserSelectProps) {
     props?.onChange?.(val);
   };
 
-  if (!users || isPending) {
+  if (!users || isPending || !Array.isArray(users)) {
     return <div>Loading...</div>;
   }
 

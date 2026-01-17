@@ -15,6 +15,7 @@ const LoginPage = lazy(() => import('@/pages/login-page').then(m => ({ default: 
 const PlayerPage = lazy(() => import('@/pages/player-page').then(m => ({ default: m.PlayerPage })));
 const ProtectedRoute = lazy(() => import('@/pages/protected-route').then(m => ({ default: m.ProtectedRoute })));
 const RegisterPage = lazy(() => import('@/pages/register-page').then(m => ({ default: m.RegisterPage })));
+const TokensPage = lazy(() => import('@/pages/tokens-page').then(m => ({ default: m.TokensPage })));
 
 const queryClient = new QueryClient()
 
@@ -32,6 +33,7 @@ export function App() {
                     <Route path="leagues" element={<LeaguesPage />} />
                     <Route path="leagues/:leagueId" element={<LeaguePage />} />
                     <Route path="players/:userId" element={<PlayerPage />} />
+                    <Route path="tokens" element={<TokensPage />} />
                   </Route>
                   <Route path="login" element={<LoginPage />} />
                   <Route path="register" element={<RegisterPage />} />
