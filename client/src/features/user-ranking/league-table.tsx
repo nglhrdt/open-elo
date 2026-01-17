@@ -1,34 +1,52 @@
 import type { Ranking } from '@/api/api';
+import { fetchLeagueRankings } from '@/api/api';
 import { AuthContext } from '@/components/AuthContext';
 import { DataTable } from '@/components/data-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useQuery } from '@tanstack/react-query';
 import {
   type ColumnDef
 } from '@tanstack/react-table';
 import { useContext } from 'react';
-import { UserGames } from '../user/games/user-games-dialog';
+import { Link } from 'react-router';
 
-const columns: ColumnDef<Ranking>[] = [
-  {
-    accessorKey: 'position',
-    header: 'Position',
-    cell: (info) => info.getValue(),
-  },
-  {
-    accessorKey: 'user',
-    header: 'Username',
-    cell: (info) => { return <UserGames user={info.row.original.user} /> },
-  },
-  {
-    accessorKey: 'elo',
-    header: 'Rating',
-    cell: (info) => info.getValue(),
-  },
-];
-
-export function LeagueTable(props: { ranking: Ranking }) {
-  const { ranking } = props;
+export function LeagueTable(props: { leagueId: string }) {
+  const { leagueId } = props;
   const { user } = useContext(AuthContext);
+
+  const { isPending, data: rankings } = useQuery({
+    queryKey: ['leagueRankings', leagueId],
+    queryFn: () => fetchLeagueRankings(leagueId),
+    enabled: !!leagueId,
+  });
+
+  const columns: ColumnDef<Ranking>[] = [
+    {
+      accessorKey: 'position',
+      header: 'Position',
+      cell: (info) => info.getValue(),
+    },
+    {
+      accessorKey: 'user',
+      header: 'Username',
+      cell: (info) => {
+        const user = info.row.original.user;
+        return (
+          <Link
+            to={`/players/${user.id}?leagueId=${leagueId}`}
+            className="text-primary hover:underline"
+          >
+            {user.username}
+          </Link>
+        );
+      },
+    },
+    {
+      accessorKey: 'elo',
+      header: 'Rating',
+      cell: (info) => info.getValue(),
+    },
+  ];
 
   if (!user) return null;
 
@@ -40,7 +58,13 @@ export function LeagueTable(props: { ranking: Ranking }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <DataTable columns={columns} data={ranking.leagueRankings} />
+        {isPending ? (
+          <div>Loading...</div>
+        ) : !rankings || rankings.length === 0 ? (
+          <p className='text-muted-foreground'>No rankings found</p>
+        ) : (
+          <DataTable columns={columns} data={rankings} pageSize={10} />
+        )}
       </CardContent>
     </Card>
   )

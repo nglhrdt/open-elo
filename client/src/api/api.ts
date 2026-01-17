@@ -18,6 +18,7 @@ export interface Game {
   id: string;
   score: string;
   leagueId: string;
+  league: League;
   createdAt: Date;
   updatedAt: Date;
   players: Player[];
@@ -55,8 +56,8 @@ export interface League {
   id: string;
   name: string;
   type: LEAGUE_TYPE;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export async function login(data: { user: string, password: string }) {
@@ -115,6 +116,40 @@ export function getUsers(): Promise<User[]> {
     .then(response => response.json())
     .catch(error => {
       console.error('Error fetching users:', error);
+      throw error;
+    });
+}
+
+export function getUserById(userId: string): Promise<User> {
+  return apiFetch(`/users/${userId}`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to fetch user');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Error fetching user:', error);
+      throw error;
+    });
+}
+
+export function convertGuestToRegistered(userId: string, data: {
+  email: string;
+  password: string;
+}): Promise<User> {
+  return apiFetch(`/users/${userId}/convert-to-registered`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to convert user');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Error converting user:', error);
       throw error;
     });
 }
@@ -225,7 +260,7 @@ export function getLeagueGames(leagueId: string, params?: { count?: number }): P
     });
 }
 
-export function getUserGames(userId: string, params?: { count?: number }): Promise<Game[]> {
+export function getUserGames(userId: string, params?: { count?: number; leagueId?: string }): Promise<Game[]> {
   return apiFetch(`/users/${userId}/games${params ? `${qs.stringify(params, { addQueryPrefix: true })}` : ''}`)
     .then(response => response.json())
     .catch(error => {
@@ -236,6 +271,18 @@ export function getUserGames(userId: string, params?: { count?: number }): Promi
 
 export async function fetchUserRankings(): Promise<Ranking[] | null> {
   const res = await apiFetch(`/rankings`);
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function fetchRankingsByUserId(userId: string): Promise<Ranking[] | null> {
+  const res = await apiFetch(`/rankings/user/${userId}`);
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function fetchLeagueRankings(leagueId: string): Promise<Ranking[] | null> {
+  const res = await apiFetch(`/rankings/league/${leagueId}`);
   if (!res.ok) return null;
   return res.json();
 }

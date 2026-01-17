@@ -1,6 +1,0 @@
-POST http://localhost:3000/auth/login
-Content-Type: application/json
-{
-  "username": "nglhrdt",
-  "password": "password"
-}

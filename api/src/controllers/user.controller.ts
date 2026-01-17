@@ -1,4 +1,14 @@
-import { Authorized, Body, Delete, Get, JsonController, Param, Post, Put, QueryParam } from "routing-controllers";
+import {
+  Authorized,
+  Body,
+  Delete,
+  Get,
+  JsonController,
+  Param,
+  Post,
+  Put,
+  QueryParam,
+} from "routing-controllers";
 import { Service } from "typedi";
 import { Role } from "../database/entity/user.entity";
 import { UserService } from "../services/user.service";
@@ -6,49 +16,66 @@ import { UserService } from "../services/user.service";
 @Service()
 @JsonController("/users")
 export class UserController {
-
-  constructor(
-    private userService: UserService,
-  ) { }
+  constructor(private userService: UserService) {}
 
   @Authorized()
   @Get()
-  getAll() {
+  getAllUsers() {
     return this.userService.getAllUsers();
   }
 
   @Authorized()
-  @Get('/:id')
-  getOne(@Param('id') id: string) {
+  @Get("/:id")
+  getUserById(@Param("id") id: string) {
     return this.userService.getUserById(id);
   }
 
   @Authorized()
   @Post()
-  post(@Body() user: { username: string, password: string, email: string, role: Role }) {
+  createUser(
+    @Body()
+    user: {
+      username: string;
+      password: string;
+      email: string;
+      role: Role;
+    },
+  ) {
     return this.userService.createUser({
       email: user.email,
       username: user.username,
       passwordHash: user.password,
-      role: user.role
+      role: user.role,
     });
   }
 
   @Authorized()
-  @Put('/:id')
-  put(@Param('id') id: number, @Body() user: any) {
-    return 'Updating a user...';
+  @Put("/:id")
+  updateUser(@Param("id") id: number, @Body() user: any) {
+    return "Updating a user...";
   }
 
   @Authorized()
-  @Delete('/:id')
-  remove(@Param('id') id: number) {
-    return 'Removing user...';
+  @Delete("/:id")
+  deleteUser(@Param("id") id: number) {
+    return "Removing user...";
   }
 
   @Authorized()
   @Get("/:id/games")
-  getUserGames(@Param("id") id: string, @QueryParam("count") count: number) {
-    return this.userService.getUserGames(id, count);
+  getUserGames(@Param("id") id: string, @QueryParam("count") count: number, @QueryParam("leagueId") leagueId: string) {
+    return this.userService.getUserGames(id, count, leagueId);
+  }
+
+  @Post("/:id/convert-to-registered")
+  convertGuestToRegistered(
+    @Param("id") userId: string,
+    @Body() body: { email: string; password: string },
+  ) {
+    return this.userService.convertGuestToRegistered(
+      userId,
+      body.email,
+      body.password,
+    );
   }
 }

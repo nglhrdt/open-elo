@@ -34,7 +34,7 @@ export function HomePage() {
       </div>
       <div className='grid grid-cols-1 lg:grid-cols-3 grow shrink gap-4 lg:gap-12'>
         <CreateGame leagueId={ranking.league.id} />
-        <LeagueTable ranking={ranking} />
+        <LeagueTable leagueId={ranking.league.id} />
         <LeagueGames leagueId={ranking.league.id} />
       </div>
     </div>

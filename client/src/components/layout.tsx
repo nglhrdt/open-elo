@@ -1,11 +1,16 @@
 import { Outlet } from "react-router";
+import { AppSidebar } from './app-sidebar';
+import { SidebarProvider, SidebarInset } from './ui/sidebar';
 
 export function Layout() {
   return (
-    <div className="min-h-svh w-full flex flex-col">
-      <div className="mx-auto grow shrink w-full max-w-screen-xl px-4 py-6 flex flex-col">
-        <Outlet />
-      </div>
-    </div>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <div className="flex flex-1 flex-col gap-4 p-4 lg:p-8 max-w-7xl mx-auto w-full">
+          <Outlet />
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

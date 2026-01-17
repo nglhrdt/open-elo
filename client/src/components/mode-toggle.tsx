@@ -1,12 +1,12 @@
 import { Moon, Sun } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { SidebarMenuButton } from "@/components/ui/sidebar"
 import { useContext } from "react"
 import { ThemeContext } from "./theme-context"
 
@@ -16,11 +16,13 @@ export function ModeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
+        <SidebarMenuButton tooltip="Toggle theme">
+          <div className="relative size-4">
+            <Sun className="absolute size-4 scale-100 transition-transform dark:scale-0" />
+            <Moon className="absolute size-4 scale-0 transition-transform dark:scale-100" />
+          </div>
+          <span>Theme</span>
+        </SidebarMenuButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => setTheme("light")}>

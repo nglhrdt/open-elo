@@ -1,9 +1,9 @@
 # Login to get token
-POST http://localhost:3000/login
+POST {{base_url}}/login
 Content-Type: application/json
 {
-  "username": "nglhrdt",
-  "password": "password"
+  "user": "{{username}}",
+  "password": "{{password}}"
 }
 
 HTTP/1.1 200
@@ -11,5 +11,5 @@ HTTP/1.1 200
 TOKEN: jsonpath "$.token"
 
 # Use token
-GET http://localhost:3000/me
+GET {{base_url}}/me
 Authorization: Bearer {{TOKEN}}

@@ -2,6 +2,7 @@
   "name": "ots-api",
   "version": "0.0.1",
   "description": "Open Table Soccer API",
+  "license": "MIT",
   "type": "commonjs",
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

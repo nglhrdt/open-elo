@@ -1,6 +1,8 @@
 {
 	"name": "Open Elo",
+	"remoteUser": "node",
 	"dockerComposeFile": "docker-compose.yml",
+	"updateRemoteUserUID": true,
 	"service": "devcontainer",
 	"workspaceFolder": "/workspaces",
 	"features": {
@@ -35,7 +37,8 @@
 				"EditorConfig.EditorConfig",
 				"bradlc.vscode-tailwindcss",
 				"quicktype.quicktype",
-				"solomonkinard.git-blame"
+				"solomonkinard.git-blame",
+				"MateuszDrewniak.hurl-runner"
 			]
 		}
 	}
