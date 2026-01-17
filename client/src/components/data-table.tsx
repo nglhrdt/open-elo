@@ -15,17 +15,20 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { useEffect } from 'react';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   pageSize?: number;
+  onPaginationChange?: (pageIndex: number, pageSize: number) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   pageSize = 10,
+  onPaginationChange,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -38,6 +41,11 @@ export function DataTable<TData, TValue>({
       },
     },
   });
+
+  useEffect(() => {
+    const state = table.getState().pagination;
+    onPaginationChange?.(state.pageIndex, state.pageSize);
+  }, [table.getState().pagination.pageIndex, table.getState().pagination.pageSize, onPaginationChange]);
 
   return (
     <div className="space-y-4">

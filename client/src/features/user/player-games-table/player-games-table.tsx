@@ -7,9 +7,10 @@ interface PlayerGamesTableProps {
   games: Game[];
   userId: string;
   selectedLeagueId?: string;
+  onPaginationChange?: (pageIndex: number, pageSize: number) => void;
 }
 
-export function PlayerGamesTable({ games, userId, selectedLeagueId }: PlayerGamesTableProps) {
+export function PlayerGamesTable({ games, userId, selectedLeagueId, onPaginationChange }: PlayerGamesTableProps) {
   const gameColumns: ColumnDef<Game>[] = [
     {
       accessorKey: 'createdAt',
@@ -80,7 +81,7 @@ export function PlayerGamesTable({ games, userId, selectedLeagueId }: PlayerGame
   return (
     <div>
       <h3 className="text-lg font-semibold mb-4">Recent Games</h3>
-      <DataTable columns={gameColumns} data={games} />
+      <DataTable columns={gameColumns} data={games} onPaginationChange={onPaginationChange} />
     </div>
   );
 }
