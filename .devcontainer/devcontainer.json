@@ -38,7 +38,9 @@
 				"bradlc.vscode-tailwindcss",
 				"quicktype.quicktype",
 				"solomonkinard.git-blame",
-				"MateuszDrewniak.hurl-runner"
+				"MateuszDrewniak.hurl-runner",
+				"GitHub.vscode-github-actions",
+				"ms-vscode.makefile-tools"
 			]
 		}
 	}

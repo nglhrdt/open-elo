@@ -17,8 +17,45 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
+  check-changes:
+    name: Check for changes
+    runs-on: ubuntu-latest
+    outputs:
+      api-changed: ${{ steps.check.outputs.api-changed }}
+      client-changed: ${{ steps.check.outputs.client-changed }}
+      any-changed: ${{ steps.check.outputs.any-changed }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check for changes
+        id: check
+        run: |
+          API_CHANGED="false"
+          CLIENT_CHANGED="false"
+          
+          if ! git diff --quiet HEAD^ HEAD -- api/**; then
+            API_CHANGED="true"
+          fi
+          
+          if ! git diff --quiet HEAD^ HEAD -- client/**; then
+            CLIENT_CHANGED="true"
+          fi
+          
+          echo "api-changed=$API_CHANGED" >> $GITHUB_OUTPUT
+          echo "client-changed=$CLIENT_CHANGED" >> $GITHUB_OUTPUT
+          
+          if [ "$API_CHANGED" = "true" ] || [ "$CLIENT_CHANGED" = "true" ]; then
+            echo "any-changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "any-changed=false" >> $GITHUB_OUTPUT
+          fi
+
   build-and-push:
     name: Build ${{ matrix.service }} image
+    needs: check-changes
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -32,22 +69,36 @@ jobs:
             dockerfile: client/Dockerfile
             image: open-elo-client
     steps:
+      - name: Check if build needed
+        id: should-build
+        run: |
+          if [ "${{ matrix.service }}" = "api" ]; then
+            echo "build=${{ needs.check-changes.outputs.api-changed }}" >> $GITHUB_OUTPUT
+          else
+            echo "build=${{ needs.check-changes.outputs.client-changed }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout
+        if: steps.should-build.outputs.build == 'true'
         uses: actions/checkout@v4
 
       - name: Prep vars
+        if: steps.should-build.outputs.build == 'true'
         id: prep
         run: |
           echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_ENV
           echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/${{ matrix.image }}" >> $GITHUB_ENV
 
       - name: Set up QEMU
+        if: steps.should-build.outputs.build == 'true'
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
+        if: steps.should-build.outputs.build == 'true'
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
+        if: steps.should-build.outputs.build == 'true'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -55,6 +106,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels)
+        if: steps.should-build.outputs.build == 'true'
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -64,6 +116,7 @@ jobs:
             type=raw,value=sha-${{ github.sha }}
 
       - name: Build & Push
+        if: steps.should-build.outputs.build == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.context }}
@@ -75,12 +128,19 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Summary
+        if: steps.should-build.outputs.build == 'true'
         run: |
           echo "Pushed: ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
 
+      - name: Skipped
+        if: steps.should-build.outputs.build == 'false'
+        run: |
+          echo "Skipped ${{ matrix.service }}: no changes detected" >> $GITHUB_STEP_SUMMARY
+
   deploy:
     name: Deploy Stack
-    needs: build-and-push
+    needs: [check-changes, build-and-push]
+    if: needs.check-changes.outputs.any-changed == 'true'
     runs-on: self-hosted
     environment:
       name: production
