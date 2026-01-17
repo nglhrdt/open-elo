@@ -60,6 +60,17 @@ export interface League {
   updatedAt?: Date;
 }
 
+export interface Token {
+  id: string;
+  token: string;
+  expiresAt: string;
+  revoked: boolean;
+  owner: User;
+  league: League;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export async function login(data: { user: string, password: string }) {
   const res = await fetch(`${baseUrl}/login`, {
     method: "POST",
@@ -69,6 +80,18 @@ export async function login(data: { user: string, password: string }) {
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error("Login failed");
+  return res.json();
+}
+
+export async function loginWithToken(data: { token: string }) {
+  const res = await fetch(`${baseUrl}/login/token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) throw new Error("Invalid or expired token");
   return res.json();
 }
 
@@ -301,4 +324,49 @@ export async function fetchLeagueRankings(leagueId: string): Promise<Ranking[] |
   const res = await apiFetch(`/rankings/league/${leagueId}`);
   if (!res.ok) return null;
   return res.json();
+}
+
+export function getTokens(): Promise<Token[]> {
+  return apiFetch(`/tokens`)
+    .then(response => response.json())
+    .catch(error => {
+      console.error('Error fetching tokens:', error);
+      throw error;
+    });
+}
+
+export function createToken(data: {
+  leagueId: string;
+  validityDays: number;
+}): Promise<Token> {
+  return apiFetch(`/tokens`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to create token');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Error creating token:', error);
+      throw error;
+    });
+}
+
+export function revokeToken(tokenId: string): Promise<Token> {
+  return apiFetch(`/tokens/${tokenId}`, {
+    method: 'DELETE',
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to revoke token');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Error revoking token:', error);
+      throw error;
+    });
 }

@@ -1,27 +1,50 @@
-import { login, type User } from '@/api/api'
+import { login, loginWithToken, type User } from '@/api/api'
 import { AuthContext } from '@/components/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 
 export function LoginCard() {
   const [user, setUser] = useState('')
   const [password, setPassword] = useState('')
+  const [token, setToken] = useState('')
+  const [isTokenLogin, setIsTokenLogin] = useState(false)
   const auth = useContext(AuthContext)
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
-  const mutation = useMutation({
+  const passwordMutation = useMutation({
     mutationFn: () => login({ user, password }),
     onSuccess: (data: { token: string, user: User }) => {
+      localStorage.setItem('auth_token', data.token)
       auth.setToken(data.token)
       auth.setUser(data.user)
+      queryClient.setQueryData(['current-user'], data.user)
       navigate('/')
     },
   })
+
+  const tokenMutation = useMutation({
+    mutationFn: () => loginWithToken({ token }),
+    onSuccess: (data: { token: string, user: User }) => {
+      localStorage.setItem('auth_token', data.token)
+      auth.setToken(data.token)
+      auth.setUser(data.user)
+      queryClient.setQueryData(['current-user'], data.user)
+      navigate('/')
+    },
+  })
+
+  const mutation = isTokenLogin ? tokenMutation : passwordMutation
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    mutation.mutate()
+  }
 
   return (
     <Card>
@@ -34,32 +57,69 @@ export function LoginCard() {
         </CardAction>
       </CardHeader>
       <CardContent>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault()
-            mutation.mutate()
-          }}
-          className='flex flex-col gap-4'
-        >
-          <div className='flex flex-col gap-1'>
-            <Label htmlFor='username'>Username</Label>
-            <Input
-              id='username'
-              placeholder="Username"
-              value={user}
-              onChange={e => setUser(e.target.value)}
-            />
-          </div>
-          <div className='flex flex-col gap-1'>
-            <Label htmlFor='password'>Password</Label>
-            <Input
-              id='password'
-              placeholder="password"
-              type="Password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-            />
-          </div>
+        <div className="mb-4 flex gap-2 border-b">
+          <button
+            type="button"
+            onClick={() => setIsTokenLogin(false)}
+            className={`px-4 py-2 font-medium transition-colors ${
+              !isTokenLogin
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Password
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsTokenLogin(true)}
+            className={`px-4 py-2 font-medium transition-colors ${
+              isTokenLogin
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Token
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
+          {!isTokenLogin ? (
+            <>
+              <div className='flex flex-col gap-1'>
+                <Label htmlFor='username'>Username</Label>
+                <Input
+                  id='username'
+                  placeholder="Username"
+                  value={user}
+                  onChange={e => setUser(e.target.value)}
+                />
+              </div>
+              <div className='flex flex-col gap-1'>
+                <Label htmlFor='password'>Password</Label>
+                <Input
+                  id='password'
+                  placeholder="password"
+                  type="Password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                />
+              </div>
+            </>
+          ) : (
+            <div className='flex flex-col gap-1'>
+              <Label htmlFor='token'>Access Token</Label>
+              <Input
+                id='token'
+                placeholder="Paste your access token"
+                value={token}
+                onChange={e => setToken(e.target.value)}
+                className="font-mono text-sm"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Use a token generated by another user to join their league.
+              </p>
+            </div>
+          )}
 
           <div className='pt-4 flex justify-end'>
             <Button disabled={mutation.isPending}>

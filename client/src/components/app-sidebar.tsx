@@ -15,7 +15,7 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { useQuery } from '@tanstack/react-query'
-import { Home, Trophy, User } from 'lucide-react'
+import { Home, Key, Trophy, User } from 'lucide-react'
 import { useContext } from 'react'
 import { Link, useLocation } from 'react-router'
 import { LogoutButton } from './logout-button'
@@ -32,6 +32,7 @@ export function AppSidebar() {
   })
 
   const leagues = rankings?.map(r => r.league) ?? []
+  const isTokenUser = user?.role === 'guest'
 
   return (
     <Sidebar collapsible="icon">
@@ -49,35 +50,47 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Main</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={location.pathname === '/leagues'}>
-                  <Link to="/leagues">
-                    <Home />
-                    <span>All Leagues</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              {user && (
+        {!isTokenUser && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Main</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={location.pathname === `/players/${user.id}`}>
-                    <Link to={`/players/${user.id}`}>
-                      <User />
-                      <span>My Profile</span>
+                  <SidebarMenuButton asChild isActive={location.pathname === '/leagues'}>
+                    <Link to="/leagues">
+                      <Home />
+                      <span>All Leagues</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                {user && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={location.pathname === `/players/${user.id}`}>
+                      <Link to={`/players/${user.id}`}>
+                        <User />
+                        <span>My Profile</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+                {user && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={location.pathname === '/tokens'}>
+                      <Link to="/tokens">
+                        <Key />
+                        <span>Tokens</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {leagues.length > 0 && (
           <SidebarGroup>
-            <SidebarGroupLabel>My Leagues</SidebarGroupLabel>
+            <SidebarGroupLabel>{isTokenUser ? 'League' : 'My Leagues'}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {leagues.map((league) => (
