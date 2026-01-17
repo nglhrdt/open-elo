@@ -1,4 +1,4 @@
-import { Authorized, Body, Get, JsonController, Post } from "routing-controllers";
+import { Authorized, Body, Delete, Get, JsonController, Param, Post } from "routing-controllers";
 import { Service } from "typedi";
 import { CreateGame, GameService } from "../services/game.service";
 
@@ -20,5 +20,11 @@ export class GameController {
   @Authorized()
   async createGame(@Body() gameData: CreateGame) {
     return this.gameService.createGame(gameData);
+  }
+
+  @Delete("/:id")
+  @Authorized()
+  async deleteGame(@Param("id") id: string) {
+    return this.gameService.deleteGame(id);
   }
 }

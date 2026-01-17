@@ -38,8 +38,8 @@ export function LeaguePage() {
       </div>
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-12 items-start'>
         <CreateGame leagueId={leagueId} />
-        <LeagueTable leagueId={leagueId} />
         <LeagueGames leagueId={leagueId} />
+        <LeagueTable leagueId={leagueId} />
       </div>
     </div>
   )
