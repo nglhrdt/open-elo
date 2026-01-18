@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   QueryParam,
+  Req,
 } from "routing-controllers";
 import { Service } from "typedi";
 import { Role } from "../database/entity/user.entity";
@@ -51,7 +52,11 @@ export class UserController {
 
   @Authorized()
   @Put("/:id")
-  updateUser(@Param("id") id: string, @Body() body: { username: string }) {
+  updateUser(@Param("id") id: string, @Body() body: { username: string }, @Req() request: any) {
+    const currentUserId = request.userId;
+    if (currentUserId !== id) {
+      throw new Error("You can only update your own profile");
+    }
     return this.userService.updateUser(id, { username: body.username });
   }
 
