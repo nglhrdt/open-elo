@@ -39,6 +39,7 @@ export type User = {
   username: string;
   email: string;
   role: UserRole;
+  leagueId?: string;
 }
 
 export type LEAGUE_TYPE = "TABLE_SOCCER" | "INDOOR_SOCCER";
@@ -173,6 +174,25 @@ export function convertGuestToRegistered(userId: string, data: {
     })
     .catch(error => {
       console.error('Error converting user:', error);
+      throw error;
+    });
+}
+
+export function updateUser(userId: string, data: {
+  username: string;
+}): Promise<User> {
+  return apiFetch(`/users/${userId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to update user');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Error updating user:', error);
       throw error;
     });
 }

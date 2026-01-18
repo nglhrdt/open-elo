@@ -1,4 +1,4 @@
-import { Authorized, CurrentUser, Get, JsonController } from "routing-controllers";
+import { Authorized, CurrentUser, Get, JsonController, Req } from "routing-controllers";
 import { Service } from "typedi";
 
 @Service()
@@ -6,7 +6,11 @@ import { Service } from "typedi";
 export class ProfileController {
   @Authorized()
   @Get("/")
-  me(@CurrentUser() user: any) {
+  me(@CurrentUser() user: any, @Req() request: any) {
+    const leagueId = request.leagueId;
+    if (leagueId) {
+      return { ...user, leagueId };
+    }
     return user;
   }
 }
