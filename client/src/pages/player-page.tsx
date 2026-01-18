@@ -39,7 +39,7 @@ export function PlayerPage() {
 
     // Sort games by date to ensure chronological order
     const sortedGames = [...games].sort((a, b) =>
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
     // Get games based on showAll setting
