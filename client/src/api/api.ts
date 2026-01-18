@@ -39,6 +39,7 @@ export type User = {
   username: string;
   email: string;
   role: UserRole;
+  leagueId?: string;
 }
 
 export type LEAGUE_TYPE = "TABLE_SOCCER" | "INDOOR_SOCCER";

@@ -1,4 +1,4 @@
-import { fetchUserRankings } from '@/api/api'
+import { fetchUserRankings, getLeagueById } from '@/api/api'
 import { AuthContext } from '@/components/AuthContext'
 import {
   Sidebar,
@@ -31,8 +31,17 @@ export function AppSidebar() {
     enabled: !!user,
   })
 
+  const { data: tokenLeague } = useQuery({
+    queryKey: ['tokenLeague', user?.leagueId],
+    queryFn: () => getLeagueById(user!.leagueId!),
+    enabled: !!user?.leagueId,
+  })
+
   const leagues = rankings?.map(r => r.league) ?? []
   const isTokenUser = user?.role === 'guest'
+
+  // For token users, show the league from their token
+  const displayLeagues = isTokenUser && tokenLeague ? [tokenLeague] : leagues
 
   return (
     <Sidebar collapsible="icon">
@@ -88,12 +97,12 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        {leagues.length > 0 && (
+        {displayLeagues.length > 0 && (
           <SidebarGroup>
             <SidebarGroupLabel>{isTokenUser ? 'League' : 'My Leagues'}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {leagues.map((league) => (
+                {displayLeagues.map((league) => (
                   <SidebarMenuItem key={league.id}>
                     <SidebarMenuButton asChild isActive={location.pathname === `/leagues/${league.id}`}>
                       <Link to={`/leagues/${league.id}`}>
