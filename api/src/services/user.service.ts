@@ -144,4 +144,36 @@ export class UserService {
       }
     });
   }
+
+  async updateUser(userId: string, data: { username?: string }) {
+    const trimmedUsername = data.username?.trim();
+
+    if (!trimmedUsername) throw new Error("Username is required");
+
+    return this.repository.manager.transaction(async (mgr) => {
+      const repo = mgr.getRepository(UserEntity);
+
+      // Find the user
+      const user = await repo.findOneBy({ id: userId });
+      if (!user) throw new Error("User not found");
+
+      // Check if username is already in use by another user
+      const existingUser = await repo.findOneBy({ username: trimmedUsername });
+      if (existingUser && existingUser.id !== userId) {
+        throw new Error("Username already in use");
+      }
+
+      // Update the username
+      user.username = trimmedUsername;
+
+      try {
+        return await repo.save(user);
+      } catch (e: any) {
+        if (e?.code === "23505") {
+          throw new Error("Username already in use");
+        }
+        throw e;
+      }
+    });
+  }
 }

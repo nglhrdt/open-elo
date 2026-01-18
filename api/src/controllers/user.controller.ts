@@ -51,8 +51,8 @@ export class UserController {
 
   @Authorized()
   @Put("/:id")
-  updateUser(@Param("id") id: number, @Body() user: any) {
-    return "Updating a user...";
+  updateUser(@Param("id") id: string, @Body() body: { username: string }) {
+    return this.userService.updateUser(id, { username: body.username });
   }
 
   @Authorized()

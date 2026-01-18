@@ -177,6 +177,25 @@ export function convertGuestToRegistered(userId: string, data: {
     });
 }
 
+export function updateUser(userId: string, data: {
+  username: string;
+}): Promise<User> {
+  return apiFetch(`/users/${userId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to update user');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Error updating user:', error);
+      throw error;
+    });
+}
+
 export function createLeague(data: {
   name: string;
   type: LEAGUE_TYPE;
