@@ -28,6 +28,18 @@ export function LeaguePage() {
   const isGuest = user?.role === 'guest'
   const isOwner = user?.id === league?.owner?.id
 
+  // Calculate days remaining until season ends
+  const getDaysRemaining = () => {
+    if (!league?.seasonEndDate) return null;
+    const endDate = new Date(league.seasonEndDate);
+    const today = new Date();
+    const diffTime = endDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const daysRemaining = getDaysRemaining();
+
   if (!leagueId) return <div>Invalid league</div>
   if (leagueLoading) return <div>Loading...</div>
   if (!league) return <div>League not found</div>
@@ -40,7 +52,17 @@ export function LeaguePage() {
           {league.seasonEnabled && league.currentSeasonNumber && (
             <p className='text-sm text-muted-foreground'>
               Season {league.currentSeasonNumber}
-              {league.seasonEndDate && ` • Ends ${new Date(league.seasonEndDate).toLocaleDateString()}`}
+              {league.seasonEndDate && (
+                <>
+                  {' • Ends '}
+                  {new Date(league.seasonEndDate).toLocaleDateString()}
+                  {daysRemaining !== null && (
+                    <span className={daysRemaining <= 7 ? 'text-orange-500 font-medium' : ''}>
+                      {' '}({daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} left)
+                    </span>
+                  )}
+                </>
+              )}
             </p>
           )}
         </div>
