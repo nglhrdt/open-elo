@@ -10,6 +10,9 @@ export class GameEntity {
   @Column()
   score: string;
 
+  @Column({ default: 1 })
+  seasonNumber: number;
+
   @OneToMany(() => PlayerEntity, player => player.game, { eager: true, cascade: true })
   players: PlayerEntity[];
 

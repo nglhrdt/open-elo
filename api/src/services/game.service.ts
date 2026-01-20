@@ -39,7 +39,7 @@ export class GameService {
     const league = await this.leagueService.getLeagueById(gameData.leagueId);
     if (!league) throw new Error("League not found");
 
-    const game = { players, score: gameData.score, league };
+    const game = { players, score: gameData.score, league, seasonNumber: league.currentSeasonNumber };
 
     const [homeScore, awayScore] = gameData.score.split('-').map(s => parseInt(s, 10));
 

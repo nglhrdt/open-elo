@@ -178,9 +178,14 @@ export class LeagueService {
   }
 
   async getGamesByLeagueId(id: string, count = 10): Promise<GameEntity[]> {
+    // Get the league to access current season
+    const league = await this.leagueRepository.findOne({ where: { id } });
+    if (!league) return [];
+
     return this.gameRepository.find({
       where: {
         league: { id },
+        seasonNumber: league.currentSeasonNumber,
       },
       order: {
         createdAt: "DESC",
