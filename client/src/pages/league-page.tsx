@@ -4,14 +4,18 @@ import { LeagueGames } from '@/features/league/games/league-games'
 import { JoinLeagueButton } from '@/features/league/join/join-league-button'
 import { SeasonSettings } from '@/features/league/settings/season-settings'
 import { LeagueTable } from '@/features/user-ranking/league-table'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { Settings } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router'
 import { AuthContext } from '@/components/AuthContext'
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 
 export function LeaguePage() {
   const { leagueId } = useParams<{ leagueId: string }>()
   const { user } = useContext(AuthContext)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const { isPending: leagueLoading, data: league } = useQuery({
     queryKey: ['league', leagueId],
@@ -48,7 +52,22 @@ export function LeaguePage() {
     <div className='flex flex-col gap-4 grow shrink'>
       <div className='flex items-center justify-between gap-4 lg:gap-8 shrink-0'>
         <div className='flex flex-col gap-2'>
-          <h1 className='text-2xl font-bold'>{league.name}</h1>
+          <div className='flex items-center gap-3'>
+            <h1 className='text-2xl font-bold'>{league.name}</h1>
+            {isOwner && (
+              <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Settings />
+                    Settings
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <SeasonSettings league={league} />
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
           {league.seasonEnabled && league.currentSeasonNumber && (
             <p className='text-sm text-muted-foreground'>
               Season {league.currentSeasonNumber}
@@ -75,11 +94,6 @@ export function LeaguePage() {
         <LeagueGames leagueId={leagueId} />
         <LeagueTable leagueId={leagueId} />
       </div>
-      {isOwner && (
-        <div className='mt-8'>
-          <SeasonSettings league={league} />
-        </div>
-      )}
     </div>
   )
 }
