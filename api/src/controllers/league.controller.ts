@@ -1,4 +1,4 @@
-import { Authorized, Body, CurrentUser, Get, JsonController, Param, Post, QueryParam } from "routing-controllers";
+import { Authorized, Body, CurrentUser, Get, JsonController, Param, Post, Put, QueryParam } from "routing-controllers";
 import { Service } from "typedi";
 import { LEAGUE_TYPE } from "../database/entity/league.entity";
 import { UserEntity } from "../database/entity/user.entity";
@@ -34,6 +34,16 @@ export class LeagueController {
   }
 
   @Authorized()
+  @Put("/:id")
+  async updateLeague(
+    @Param('id') id: string,
+    @CurrentUser() user: User,
+    @Body() body: { seasonEnabled?: boolean, seasonEndDate?: string }
+  ) {
+    return this.leagueService.updateLeagueSeasonSettings(id, user.id, body);
+  }
+
+  @Authorized()
   @Post("/:leagueId/join")
   async joinLeague(@Param('leagueId') leagueId: string, @CurrentUser() user: UserEntity) {
     return this.rankingService.joinUserToLeague(leagueId, user.id);
@@ -56,4 +66,10 @@ export class LeagueController {
   async getGamesByLeagueId(@Param('leagueId') leagueId: string, @QueryParam('count') count: number) {
     return this.leagueService.getGamesByLeagueId(leagueId, count);
   }
+
+  @Post("/stop-seasons")
+  async stopSeasons() {
+    return this.leagueService.processEndedSeasons();
+  }
 }
+

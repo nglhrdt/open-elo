@@ -15,17 +15,30 @@ export class RankingService {
   ) { }
 
   async getUserRankings(userId: string) {
-    const rankings = await this.getRankings({ where: { user: { id: userId } } });
+    // First get user's rankings to know which leagues they're in
+    const userRankings = await this.repository
+      .createQueryBuilder("ranking")
+      .innerJoinAndSelect("ranking.league", "league")
+      .innerJoinAndSelect("ranking.user", "user")
+      .where("user.id = :userId", { userId })
+      .andWhere("ranking.seasonNumber = league.currentSeasonNumber")
+      .getMany();
 
-    // Get all rankings for each league the user is in
-    const leagueIds = rankings.map(r => r.league.id);
+    // Get all rankings for each league the user is in (current season only)
+    const leagueIds = userRankings.map(r => r.league.id);
     const allRankingsByLeague = await Promise.all(
       leagueIds.map(leagueId =>
-        this.getRankings({ where: { league: { id: leagueId } } })
+        this.repository
+          .createQueryBuilder("ranking")
+          .innerJoinAndSelect("ranking.league", "league")
+          .innerJoinAndSelect("ranking.user", "user")
+          .where("league.id = :leagueId", { leagueId })
+          .andWhere("ranking.seasonNumber = league.currentSeasonNumber")
+          .getMany()
       )
     );
 
-    return rankings.map((r, idx) => {
+    return userRankings.map((r, idx) => {
       const sortedLeagueRankings = allRankingsByLeague[idx].sort((a, b) => b.elo - a.elo);
       // Add position to every ranking in the league
       const leagueRankings = sortedLeagueRankings.map((rank, i) => ({
@@ -48,7 +61,14 @@ export class RankingService {
   }
 
   async getLeagueRankings(leagueId: string) {
-    const rankings = await this.getRankings({ where: { league: { id: leagueId } } });
+    const rankings = await this.repository
+      .createQueryBuilder("ranking")
+      .innerJoinAndSelect("ranking.league", "league")
+      .innerJoinAndSelect("ranking.user", "user")
+      .where("league.id = :leagueId", { leagueId })
+      .andWhere("ranking.seasonNumber = league.currentSeasonNumber")
+      .getMany();
+
     const sortedRankings = rankings.sort((a, b) => b.elo - a.elo);
     return sortedRankings.map((rank, i) => ({
       ...rank,
@@ -78,6 +98,7 @@ export class RankingService {
     const ranking = this.repository.create();
     ranking.league = league;
     ranking.user = user;
+    ranking.seasonNumber = league.currentSeasonNumber;
 
     return this.repository.save(ranking);
   }

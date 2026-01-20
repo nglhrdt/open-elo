@@ -2,6 +2,7 @@ import { getLeagueById, fetchUserRankings } from '@/api/api'
 import { CreateGame } from '@/features/game/create-game/create-game'
 import { LeagueGames } from '@/features/league/games/league-games'
 import { JoinLeagueButton } from '@/features/league/join/join-league-button'
+import { SeasonSettings } from '@/features/league/settings/season-settings'
 import { LeagueTable } from '@/features/user-ranking/league-table'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router'
@@ -25,6 +26,7 @@ export function LeaguePage() {
 
   const isMember = rankings?.some(r => r.league.id === leagueId) ?? false
   const isGuest = user?.role === 'guest'
+  const isOwner = user?.id === league?.owner?.id
 
   if (!leagueId) return <div>Invalid league</div>
   if (leagueLoading) return <div>Loading...</div>
@@ -35,6 +37,12 @@ export function LeaguePage() {
       <div className='flex items-center justify-between gap-4 lg:gap-8 shrink-0'>
         <div className='flex flex-col gap-2'>
           <h1 className='text-2xl font-bold'>{league.name}</h1>
+          {league.seasonEnabled && league.currentSeasonNumber && (
+            <p className='text-sm text-muted-foreground'>
+              Season {league.currentSeasonNumber}
+              {league.seasonEndDate && ` • Ends ${new Date(league.seasonEndDate).toLocaleDateString()}`}
+            </p>
+          )}
         </div>
         <div className='flex items-center gap-4'>
           {!isMember && !isGuest && <JoinLeagueButton leagueId={leagueId} />}
@@ -45,6 +53,11 @@ export function LeaguePage() {
         <LeagueGames leagueId={leagueId} />
         <LeagueTable leagueId={leagueId} />
       </div>
+      {isOwner && (
+        <div className='mt-8'>
+          <SeasonSettings league={league} />
+        </div>
+      )}
     </div>
   )
 }

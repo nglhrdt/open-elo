@@ -57,6 +57,10 @@ export interface League {
   id: string;
   name: string;
   type: LEAGUE_TYPE;
+  seasonEnabled?: boolean;
+  seasonEndDate?: Date | null;
+  currentSeasonNumber?: number;
+  owner?: User;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -222,6 +226,23 @@ export function getLeagueById(leagueId: string): Promise<League> {
     .then(response => response.json())
     .catch(error => {
       console.error('Error fetching leagues:', error);
+      throw error;
+    });
+}
+
+export function updateLeague(leagueId: string, data: { seasonEnabled?: boolean, seasonEndDate?: string }): Promise<League> {
+  return apiFetch(`/leagues/${leagueId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Failed to update league');
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Error updating league:', error);
       throw error;
     });
 }

@@ -19,6 +19,15 @@ export class LeagueEntity {
   @Column({ enum: ["TABLE_SOCCER", "INDOOR_SOCCER"], nullable: false })
   type: LEAGUE_TYPE;
 
+  @Column({ default: false })
+  seasonEnabled: boolean;
+
+  @Column({ nullable: true })
+  seasonEndDate: Date;
+
+  @Column({ default: 1 })
+  currentSeasonNumber: number;
+
   @OneToMany(() => RankingEntity, ranking => ranking.league, { lazy: true })
   rankings: RankingEntity[]
 

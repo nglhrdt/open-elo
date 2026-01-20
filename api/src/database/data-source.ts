@@ -3,6 +3,7 @@ import { GameEntity } from "./entity/game.entity"
 import { LeagueEntity } from "./entity/league.entity"
 import { PlayerEntity } from "./entity/player.entity"
 import { RankingEntity } from "./entity/ranking.entity"
+import { SeasonHistoryEntity } from "./entity/season-history.entity"
 import { TokenEntity } from "./entity/token.entity"
 import { UserEntity } from "./entity/user.entity"
 
@@ -15,7 +16,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME || "elo",
   synchronize: true,
   logging: true,
-  entities: [GameEntity, LeagueEntity, PlayerEntity, RankingEntity, TokenEntity, UserEntity],
+  entities: [GameEntity, LeagueEntity, PlayerEntity, RankingEntity, SeasonHistoryEntity, TokenEntity, UserEntity],
   migrations: [],
   subscribers: [],
 })

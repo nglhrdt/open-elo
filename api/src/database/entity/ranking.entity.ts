@@ -10,6 +10,9 @@ export class RankingEntity {
   @Column({ default: 1000 })
   elo: number;
 
+  @Column({ default: 1 })
+  seasonNumber: number;
+
   @ManyToOne(() => LeagueEntity, league => league.rankings)
   league: LeagueEntity;
 
