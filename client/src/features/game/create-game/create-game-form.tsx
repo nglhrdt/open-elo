@@ -23,6 +23,7 @@ export function CreateGameForm(props: CreateGameProps) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['games'] });
       queryClient.invalidateQueries({ queryKey: ['rankings'] });
+      queryClient.invalidateQueries({ queryKey: ['leagueRankings', props.leagueId] });
 
       setHomeScore(0);
       setAwayScore(0);
