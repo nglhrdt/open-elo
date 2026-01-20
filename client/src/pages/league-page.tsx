@@ -5,9 +5,12 @@ import { JoinLeagueButton } from '@/features/league/join/join-league-button'
 import { LeagueTable } from '@/features/user-ranking/league-table'
 import { useQuery } from '@tanstack/react-query'
 import { useParams } from 'react-router'
+import { AuthContext } from '@/components/AuthContext'
+import { useContext } from 'react'
 
 export function LeaguePage() {
   const { leagueId } = useParams<{ leagueId: string }>()
+  const { user } = useContext(AuthContext)
 
   const { isPending: leagueLoading, data: league } = useQuery({
     queryKey: ['league', leagueId],
@@ -21,6 +24,7 @@ export function LeaguePage() {
   })
 
   const isMember = rankings?.some(r => r.league.id === leagueId) ?? false
+  const isGuest = user?.role === 'guest'
 
   if (!leagueId) return <div>Invalid league</div>
   if (leagueLoading) return <div>Loading...</div>
@@ -33,7 +37,7 @@ export function LeaguePage() {
           <h1 className='text-2xl font-bold'>{league.name}</h1>
         </div>
         <div className='flex items-center gap-4'>
-          {!isMember && <JoinLeagueButton leagueId={leagueId} />}
+          {!isMember && !isGuest && <JoinLeagueButton leagueId={leagueId} />}
         </div>
       </div>
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-12 items-start'>

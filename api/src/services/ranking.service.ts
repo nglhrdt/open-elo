@@ -71,6 +71,10 @@ export class RankingService {
       throw new Error("User or League not found");
     }
 
+    if (user.role === "guest") {
+      throw new Error("Guest users cannot join leagues. Please register to join.");
+    }
+
     const ranking = this.repository.create();
     ranking.league = league;
     ranking.user = user;
