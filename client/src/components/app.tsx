@@ -6,6 +6,7 @@ import { AuthProvider } from './auth-provider';
 import { Layout } from './layout';
 import { LoadingSpinner } from './loading-spinner';
 import { ThemeProvider } from './theme-provider';
+import { ReleaseNotesDialog } from './release-notes-dialog';
 
 // Lazy load page components
 const HomeRedirect = lazy(() => import('@/pages/home-redirect').then(m => ({ default: m.HomeRedirect })));
@@ -24,6 +25,7 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
+          <ReleaseNotesDialog />
           <BrowserRouter>
             <Suspense fallback={<LoadingSpinner />}>
               <Routes>
