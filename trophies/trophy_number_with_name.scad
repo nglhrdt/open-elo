@@ -1,8 +1,9 @@
-$fn=512;
+$fn=256;
 base_height = 2;
 foot_depth = 4.5;
 foot_width = 24;
-rank = 1;
+rank = 3;
+player_name = "FabianG";
 
 trophy_number();
 
@@ -23,10 +24,14 @@ module trophy_number() {
                         circle(foot_width);
                 }
             }
+            
         }
-        
         translate([0,- foot_width + 2, foot_depth / 2]) rotate([-90,0,0]) foot();
+        
     }
+    linear_extrude(foot_depth + 0.4) 
+    translate([0, -15.5]) 
+    text(player_name, size = 5,  halign = "center", valign = "center"); 
 }
 
 module foot() {

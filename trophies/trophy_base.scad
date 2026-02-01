@@ -1,4 +1,4 @@
-$fn=60;
+$fn=128;
 base_width = 50;
 base_depth = 30;
 height= 10;
@@ -10,6 +10,7 @@ socket_height = (base_width - top_width) / 2;
 foot_depth = 5;
 foot_width = 25;
 season_number = 1;
+league_name = "ADS";
 
 tropy_base();
 
@@ -19,6 +20,7 @@ module tropy_base() {
         translate([0, 0, socket_height]) foot();    
     }
     season_text();
+    league_text();
 }
 
 module socket() {
@@ -47,9 +49,22 @@ module socket() {
 
 module season_text() {
     season = str("SEASON", " ",  season_number);
+    rotate([0,0,180]) {
+        translate([0, -(base_depth / 2) + (height / 2) - top_height, top_height + socket_height / 2]) {
+            rotate([45, 0, 0]) {
+                linear_extrude(0.5) {
+                    text(season, size = 5, halign = "center", valign = "center" );
+                }
+            }
+        }   
+    }
+}
+
+module league_text() {
+    season = str(league_name);
     translate([0, -(base_depth / 2) + (height / 2) - top_height, top_height + socket_height / 2]) {
         rotate([45, 0, 0]) {
-            linear_extrude(1) {
+            linear_extrude(0.5) {
                 text(season, size = 5, halign = "center", valign = "center" );
             }
         }
