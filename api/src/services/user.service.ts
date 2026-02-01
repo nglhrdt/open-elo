@@ -79,7 +79,17 @@ export class UserService {
     return this.repository.findOneBy({ username: username?.trim() });
   }
 
-  getUserGames(userId: string, count: number, leagueId?: string) {
+  async getUserGames(
+    userId: string,
+    options: {
+      count?: number;
+      leagueId?: string;
+      skip?: number;
+      take?: number;
+      seasonNumber?: number;
+    } = {},
+  ) {
+    const { count, leagueId, skip, take, seasonNumber } = options;
     const query = this.gameRepository
       .createQueryBuilder("game")
       // join used only to filter games by membership
@@ -94,10 +104,30 @@ export class UserService {
       query.andWhere("game.leagueId = :leagueId", { leagueId });
     }
 
-    return query
-      .orderBy("game.createdAt", "DESC")
-      .take(count || 10)
-      .getMany();
+    if (seasonNumber !== undefined) {
+      query.andWhere("game.seasonNumber = :seasonNumber", { seasonNumber });
+    }
+
+    query.orderBy("game.createdAt", "DESC");
+
+    // Get total count before applying pagination
+    const total = await query.getCount();
+
+    if (skip !== undefined) {
+      query.skip(skip);
+    }
+
+    if (take !== undefined) {
+      query.take(take);
+    } else if (count !== undefined) {
+      query.take(count);
+    } else {
+      query.take(10);
+    }
+
+    const data = await query.getMany();
+
+    return { data, total };
   }
 
   async convertGuestToRegistered(

@@ -11,10 +11,12 @@ type UserGameListProps = {
 
 export function UserGameList(props: UserGameListProps) {
   const { userId, count = 10 } = props;
-  const { isPending, data: games } = useQuery({
+  const { isPending, data: gamesResponse } = useQuery({
     queryKey: ['games', userId, count],
     queryFn: () => getUserGames(userId, { count })
   });
+
+  const games = gamesResponse?.data || [];
 
   if (isPending) return <div>Loading...</div>;
   if (!games || games.length === 0) return <div className="p-8 text-center">No games found</div>;

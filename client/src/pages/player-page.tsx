@@ -1,6 +1,7 @@
 import { fetchRankingsByUserId, getUserById, getUserGames } from '@/api/api';
 import { LeagueSelect } from '@/components/league-select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EloChart } from '@/features/user/elo-chart/elo-chart';
 import { PlayerGamesTable } from '@/features/user/player-games-table/player-games-table';
 import { PlayerHeader } from '@/features/user/player-header/player-header';
@@ -14,7 +15,7 @@ export function PlayerPage() {
   const selectedLeagueId = searchParams.get('leagueId') || undefined;
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [showAll, setShowAll] = useState(false);
+  const [selectedSeason, setSelectedSeason] = useState<number | 'all' | 'current'>('current');
 
   const { isPending: userLoading, data: user } = useQuery({
     queryKey: ['user', userId],
@@ -28,26 +29,66 @@ export function PlayerPage() {
     enabled: !!userId,
   });
 
-  const { isPending: gamesLoading, data: games } = useQuery({
-    queryKey: ['userGames', userId, selectedLeagueId],
-    queryFn: () => getUserGames(userId!, { count: 100, leagueId: selectedLeagueId }),
+  // Fetch all games to determine available seasons (lightweight query)
+  const { data: allGamesResponse } = useQuery({
+    queryKey: ['userGamesMetadata', userId, selectedLeagueId],
+    queryFn: () => getUserGames(userId!, { count: 10000, leagueId: selectedLeagueId }),
     enabled: !!userId,
   });
+
+  const allGames = allGamesResponse?.data || [];
+
+  const userLeagues = rankings
+    ?.map(r => r.league)
+    ?.filter(Boolean)
+    || [];
+
+  // Determine available seasons from all games
+  const availableSeasons = useMemo(() => {
+    if (!allGames || allGames.length === 0) return [];
+    const seasons = [...new Set(allGames.map(g => g.seasonNumber))].sort((a, b) => b - a);
+    return seasons;
+  }, [allGames]);
+
+  // Get current season from selected league or from games
+  const currentSeasonNumber = useMemo(() => {
+    if (selectedLeagueId && selectedLeagueId !== 'all') {
+      const league = userLeagues.find(l => l.id === selectedLeagueId);
+      if (league?.currentSeasonNumber) {
+        return league.currentSeasonNumber;
+      }
+    }
+    // If no league selected or 'all', use the highest season number from games
+    return availableSeasons[0] || 1;
+  }, [selectedLeagueId, userLeagues, availableSeasons]);
+
+  const { isPending: gamesLoading, data: gamesResponse } = useQuery({
+    queryKey: ['userGames', userId, selectedLeagueId, selectedSeason, pageIndex, pageSize, currentSeasonNumber],
+    queryFn: () => {
+      const params: { leagueId?: string; seasonNumber?: number; skip: number; take: number } = {
+        skip: pageIndex * pageSize,
+        take: pageSize,
+        leagueId: selectedLeagueId,
+      };
+      // Set seasonNumber based on selection
+      if (selectedSeason === 'current') {
+        params.seasonNumber = currentSeasonNumber;
+      } else if (selectedSeason !== 'all') {
+        params.seasonNumber = selectedSeason;
+      }
+      // Don't set seasonNumber if 'all' is selected
+      return getUserGames(userId!, params);
+    },
+    enabled: !!userId && availableSeasons.length > 0,
+  });
+
+  const games = gamesResponse?.data || [];
+  const totalGames = gamesResponse?.total || 0;
 
   const chartData = useMemo(() => {
     if (!games || games.length === 0) return [];
 
-    // Sort games by date to ensure chronological order
-    const sortedGames = [...games].sort((a, b) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
-    // Get games based on showAll setting
-    const startIndex = showAll ? 0 : pageIndex * pageSize;
-    const endIndex = showAll ? sortedGames.length : startIndex + pageSize;
-    const displayGames = sortedGames.slice(startIndex, endIndex);
-
-    return displayGames.map((game, index) => {
+    return games.map((game, index) => {
       const player = game.players.find(p => p.user.id === userId);
       const homePlayers = game.players.filter(p => p.team === 'home');
       const awayPlayers = game.players.filter(p => p.team === 'away');
@@ -56,7 +97,7 @@ export function PlayerPage() {
       const eloChange = player ? player.eloAfter - player.eloBefore : 0;
 
       return {
-        gameNumber: startIndex + index + 1,
+        gameNumber: pageIndex * pageSize + index + 1,
         elo: player?.eloAfter ?? 0,
         date: new Date(game.createdAt).toLocaleDateString(),
         score: game.score,
@@ -66,12 +107,7 @@ export function PlayerPage() {
         league: game.league?.name,
       };
     }).filter(data => data.elo > 0);
-  }, [games, userId, pageIndex, pageSize, showAll]);
-
-  const userLeagues = rankings
-    ?.map(r => r.league)
-    ?.filter(Boolean)
-    || [];
+  }, [games, userId, pageIndex, pageSize]);
 
   const selectedLeague = userLeagues.find(league => league.id === selectedLeagueId);
   const leagueTitle = selectedLeagueId && selectedLeagueId !== 'all'
@@ -86,6 +122,7 @@ export function PlayerPage() {
     }
     setSearchParams(searchParams);
     setPageIndex(0); // Reset to first page when changing league
+    setSelectedSeason('current'); // Reset to current season when changing league
   };
 
   const handlePaginationChange = (newPageIndex: number, newPageSize: number) => {
@@ -108,37 +145,62 @@ export function PlayerPage() {
           <CardHeader>
             <div className='flex items-center justify-between'>
               <CardTitle>{leagueTitle}</CardTitle>
-              {userLeagues.length > 0 && (
-                <div className='w-64'>
-                  <LeagueSelect
-                    leagues={[{ id: 'all', name: 'All Leagues', type: 'TABLE_SOCCER' }, ...userLeagues]}
-                    value={selectedLeagueId || 'all'}
-                    onChange={handleLeagueChange}
-                    placeholder="Filter by league"
-                  />
-                </div>
-              )}
+              <div className='flex items-center gap-2'>
+                {userLeagues.length > 0 && (
+                  <div className='w-48'>
+                    <LeagueSelect
+                      leagues={[{ id: 'all', name: 'All Leagues', type: 'TABLE_SOCCER' }, ...userLeagues]}
+                      value={selectedLeagueId || 'all'}
+                      onChange={handleLeagueChange}
+                      placeholder="Filter by league"
+                    />
+                  </div>
+                )}
+                {availableSeasons.length > 0 && (
+                  <Select
+                    value={selectedSeason === 'current' ? currentSeasonNumber.toString() : selectedSeason.toString()}
+                    onValueChange={(value) => {
+                      if (value === 'all') {
+                        setSelectedSeason('all');
+                      } else {
+                        setSelectedSeason(parseInt(value));
+                      }
+                      setPageIndex(0);
+                    }}
+                  >
+                    <SelectTrigger className="w-48">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={currentSeasonNumber.toString()}>
+                        Season {currentSeasonNumber} (Current)
+                      </SelectItem>
+                      {availableSeasons
+                        .filter(s => s !== currentSeasonNumber)
+                        .map(season => (
+                          <SelectItem key={season} value={season.toString()}>
+                            Season {season}
+                          </SelectItem>
+                        ))}
+                      <SelectItem value="all">All Seasons</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
             {games && games.length > 0 ? (
               <>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">ELO Progression</h3>
-                    <button
-                      onClick={() => setShowAll(!showAll)}
-                      className="text-sm text-primary hover:underline"
-                    >
-                      {showAll ? 'Show Page Only' : 'Show All Games'}
-                    </button>
-                  </div>
-                  <EloChart data={chartData} showLabels={!showAll} />
+                  <h3 className="text-lg font-semibold">ELO Progression</h3>
+                  <EloChart data={chartData} showLabels={true} />
                 </div>
                 <PlayerGamesTable
                   games={games}
                   userId={userId}
                   selectedLeagueId={selectedLeagueId}
+                  totalCount={totalGames}
                   onPaginationChange={handlePaginationChange}
                 />
               </>
