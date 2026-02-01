@@ -264,9 +264,8 @@ export class UserService {
         }
       }
 
-      // Soft delete: set deleted flag and rename username to UUID
+      // Soft delete: set deleted flag
       user.deleted = true;
-      user.username = user.id; // Change username to UUID to avoid conflicts
       await userRepo.save(user);
 
       // Delete current season rankings
