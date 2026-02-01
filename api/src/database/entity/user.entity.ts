@@ -22,6 +22,9 @@ export class UserEntity {
   @Column({ enum: ["user", "admin", "guest"], nullable: false, default: "guest" })
   role: Role
 
+  @Column({ default: false })
+  deleted: boolean
+
   @OneToMany(() => LeagueEntity, league => league.owner, { lazy: true })
   leaguesOwned: LeagueEntity[]
 

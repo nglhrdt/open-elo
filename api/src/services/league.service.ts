@@ -165,6 +165,7 @@ export class LeagueService {
       .innerJoinAndSelect("ranking.league", "league")
       .where("league.id = :id", { id })
       .andWhere("ranking.seasonNumber = league.currentSeasonNumber")
+      .andWhere("user.deleted = :deleted", { deleted: false })
       .getMany();
 
     if (rankings.length === 0) return [];

@@ -43,19 +43,21 @@ export function DataTable<TData, TValue>({
     ...(!manualPagination && { getPaginationRowModel: getPaginationRowModel() }),
     manualPagination,
     pageCount: manualPagination && totalCount !== undefined ? Math.ceil(totalCount / pageSize) : undefined,
-    state: pageIndex !== undefined ? {
-      pagination: {
-        pageIndex,
-        pageSize,
+    ...(pageIndex !== undefined && {
+      state: {
+        pagination: {
+          pageIndex,
+          pageSize,
+        },
       },
-    } : undefined,
-    onPaginationChange: pageIndex !== undefined ? (updater) => {
-      const currentState = { pageIndex, pageSize };
-      const newState = typeof updater === 'function'
-        ? updater(currentState)
-        : updater;
-      onPaginationChange?.(newState.pageIndex, newState.pageSize);
-    } : undefined,
+      onPaginationChange: (updater) => {
+        const currentState = { pageIndex, pageSize };
+        const newState = typeof updater === 'function'
+          ? updater(currentState)
+          : updater;
+        onPaginationChange?.(newState.pageIndex, newState.pageSize);
+      },
+    }),
     initialState: {
       pagination: {
         pageSize,
@@ -67,8 +69,8 @@ export function DataTable<TData, TValue>({
 
   useEffect(() => {
     // Only call onPaginationChange if we're not using controlled state (pageIndex is undefined)
-    if (pageIndex === undefined) {
-      onPaginationChange?.(paginationState.pageIndex, paginationState.pageSize);
+    if (pageIndex === undefined && onPaginationChange) {
+      onPaginationChange(paginationState.pageIndex, paginationState.pageSize);
     }
   }, [paginationState.pageIndex, paginationState.pageSize, pageIndex, onPaginationChange]);
 

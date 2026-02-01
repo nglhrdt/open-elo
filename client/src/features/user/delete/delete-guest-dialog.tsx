@@ -32,9 +32,6 @@ export function DeleteGuestDialog({ user }: DeleteGuestDialogProps) {
       setOpen(false);
       navigate('/leagues');
     },
-    onError: (error: Error) => {
-      // Error will be displayed in the UI
-    },
   });
 
   return (

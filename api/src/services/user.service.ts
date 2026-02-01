@@ -3,6 +3,7 @@ import { Service } from "typedi";
 import { FindManyOptions } from "typeorm";
 import { AppDataSource } from "../database/data-source";
 import { GameEntity } from "../database/entity/game.entity";
+import { RankingEntity } from "../database/entity/ranking.entity";
 import { Role, UserEntity } from "../database/entity/user.entity";
 
 @Service()
@@ -11,7 +12,12 @@ export class UserService {
   private gameRepository = AppDataSource.getRepository(GameEntity);
 
   getAllUsers(options: FindManyOptions<UserEntity> = {}) {
-    return this.repository.find(options);
+    // Filter out deleted users by default
+    const defaultOptions: FindManyOptions<UserEntity> = {
+      where: { deleted: false },
+      ...options,
+    };
+    return this.repository.find(defaultOptions);
   }
 
   createUser(user: {
@@ -211,11 +217,11 @@ export class UserService {
     return this.repository.manager.transaction(async (mgr) => {
       const userRepo = mgr.getRepository(UserEntity);
       const gameRepo = mgr.getRepository(GameEntity);
+      const rankingRepo = mgr.getRepository(RankingEntity);
 
       // Find the user
       const user = await userRepo.findOne({
         where: { id: userId },
-        relations: ["rankings", "rankings.league"],
       });
       if (!user) throw new Error("User not found");
 
@@ -224,8 +230,19 @@ export class UserService {
         throw new Error("Only guest users can be deleted");
       }
 
-      // Get all leagues the user is a member of
-      const leagues = user.rankings?.map(r => r.league).filter(Boolean) || [];
+      // Check if user is already deleted
+      if (user.deleted) {
+        throw new Error("User is already deleted");
+      }
+
+      // Get all rankings for this user with their leagues
+      const rankings = await rankingRepo.find({
+        where: { user: { id: userId } },
+        relations: ["league"],
+      });
+
+      // Get all unique leagues the user is a member of
+      const leagues = rankings.map(r => r.league).filter(Boolean);
 
       // Check if user has games in current season of any league
       for (const league of leagues) {
@@ -247,8 +264,17 @@ export class UserService {
         }
       }
 
-      // Delete the user (this will cascade to rankings in current season)
-      await userRepo.remove(user);
+      // Soft delete: set deleted flag and rename username to UUID
+      user.deleted = true;
+      user.username = user.id; // Change username to UUID to avoid conflicts
+      await userRepo.save(user);
+
+      // Delete current season rankings
+      for (const ranking of rankings) {
+        if (ranking.league && ranking.seasonNumber === ranking.league.currentSeasonNumber) {
+          await rankingRepo.remove(ranking);
+        }
+      }
 
       return { success: true, message: "User deleted successfully" };
     });
