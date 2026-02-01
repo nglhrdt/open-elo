@@ -108,19 +108,6 @@ export function LeaguePage() {
                 </SelectContent>
               </Select>
             )}
-            {isOwner && (
-              <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Settings />
-                    Settings
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <SeasonSettings league={league} />
-                </DialogContent>
-              </Dialog>
-            )}
           </div>
           {league.seasonEnabled && league.currentSeasonNumber && (
             <p className='text-sm text-muted-foreground'>
@@ -141,12 +128,25 @@ export function LeaguePage() {
         </div>
         <div className='flex items-center gap-4'>
           {!isMember && !isGuest && <JoinLeagueButton leagueId={leagueId} />}
+          {isOwner && (
+            <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Settings />
+                  Settings
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <SeasonSettings league={league} />
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </div>
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-12 items-start'>
-        {isCurrentSeason && <CreateGame leagueId={leagueId} />}
-        <LeagueGames leagueId={leagueId} seasonNumber={selectedSeason} />
         <LeagueTable leagueId={leagueId} seasonNumber={selectedSeason} />
+        <LeagueGames leagueId={leagueId} seasonNumber={selectedSeason} />
+        {isCurrentSeason && <CreateGame leagueId={leagueId} />}
       </div>
     </div>
   )
