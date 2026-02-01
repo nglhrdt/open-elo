@@ -21,6 +21,8 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   pageSize?: number;
+  totalCount?: number;
+  manualPagination?: boolean;
   onPaginationChange?: (pageIndex: number, pageSize: number) => void;
 }
 
@@ -28,13 +30,17 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   pageSize = 10,
+  totalCount,
+  manualPagination = false,
   onPaginationChange,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    ...(!manualPagination && { getPaginationRowModel: getPaginationRowModel() }),
+    manualPagination,
+    pageCount: manualPagination && totalCount !== undefined ? Math.ceil(totalCount / pageSize) : undefined,
     initialState: {
       pagination: {
         pageSize,

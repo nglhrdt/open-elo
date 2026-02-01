@@ -17,6 +17,7 @@ export type Team = 'home' | 'away';
 export interface Game {
   id: string;
   score: string;
+  seasonNumber: number;
   leagueId: string;
   league: League;
   createdAt: Date;
@@ -340,7 +341,7 @@ export function getLeagueGames(leagueId: string, params?: { count?: number }): P
     });
 }
 
-export function getUserGames(userId: string, params?: { count?: number; leagueId?: string }): Promise<Game[]> {
+export function getUserGames(userId: string, params?: { count?: number; leagueId?: string; seasonNumber?: number; skip?: number; take?: number }): Promise<{ data: Game[]; total: number }> {
   return apiFetch(`/users/${userId}/games${params ? `${qs.stringify(params, { addQueryPrefix: true })}` : ''}`)
     .then(response => response.json())
     .catch(error => {
