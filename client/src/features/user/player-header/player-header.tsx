@@ -1,6 +1,7 @@
 import { type User } from '@/api/api';
 import { AuthContext } from '@/components/AuthContext';
 import { ConvertGuestDialog } from '@/features/user/convert/convert-guest-dialog';
+import { DeleteGuestDialog } from '@/features/user/delete/delete-guest-dialog';
 import { RenameUserDialog } from '@/features/user/rename/rename-user-dialog';
 import { useContext } from 'react';
 
@@ -18,7 +19,10 @@ export function PlayerHeader({ user }: PlayerHeaderProps) {
     <div className='flex items-center gap-4'>
       <h1 className='text-2xl font-bold'>{user.username}</h1>
       {isGuest && (
-        <ConvertGuestDialog user={user} />
+        <>
+          <ConvertGuestDialog user={user} />
+          <DeleteGuestDialog user={user} />
+        </>
       )}
       {isRegistered && isOwnProfile && (
         <RenameUserDialog user={user} />

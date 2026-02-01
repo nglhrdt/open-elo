@@ -62,8 +62,8 @@ export class UserController {
 
   @Authorized()
   @Delete("/:id")
-  deleteUser(@Param("id") id: number) {
-    return "Removing user...";
+  deleteUser(@Param("id") id: string) {
+    return this.userService.deleteUser(id);
   }
 
   @Authorized()

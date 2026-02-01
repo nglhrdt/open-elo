@@ -202,6 +202,24 @@ export function updateUser(userId: string, data: {
     });
 }
 
+export function deleteUser(userId: string): Promise<{ success: boolean; message: string }> {
+  return apiFetch(`/users/${userId}`, {
+    method: 'DELETE',
+  })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(err => {
+          throw new Error(err.message || 'Failed to delete user');
+        });
+      }
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Error deleting user:', error);
+      throw error;
+    });
+}
+
 export function createLeague(data: {
   name: string;
   type: LEAGUE_TYPE;
