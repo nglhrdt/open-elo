@@ -1,6 +1,7 @@
 import { getLeagueUsers } from "@/api/api";
 import { CreateUserDialog } from "@/features/user/create/create-user-dialog";
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { UserSelect } from "./user-select";
 
 type LeagueUserSelectProps = {
@@ -14,6 +15,13 @@ type LeagueUserSelectProps = {
 export function LeagueUserSelect(props: LeagueUserSelectProps) {
   const { data: users, isPending } = useQuery({ queryKey: ['league', props.leagueId, 'users'], queryFn: () => getLeagueUsers(props.leagueId) });
 
+  const filteredUsers = useMemo(() => {
+    if (!users || !Array.isArray(users)) return [];
+    return users
+      .filter(user => user.id === props.value || !props.selectedIds.includes(user.id))
+      .sort((a, b) => a.username.localeCompare(b.username));
+  }, [users, props.value, props.selectedIds]);
+
   const handleChange = (val: string) => {
     props?.onChange?.(val);
   };
@@ -25,7 +33,7 @@ export function LeagueUserSelect(props: LeagueUserSelectProps) {
   return (
     <div className="w-full flex gap-4">
       <UserSelect
-        users={users.filter(user => user.id === props.value || !props.selectedIds.includes(user.id))}
+        users={filteredUsers}
         value={props.value}
         placeholder={props.placeholder}
         onChange={handleChange} />
