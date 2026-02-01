@@ -251,10 +251,16 @@ export function getLeagueById(leagueId: string): Promise<League> {
 
 export function getAvailableSeasons(leagueId: string): Promise<number[]> {
   return apiFetch(`/leagues/${leagueId}/seasons`)
-    .then(response => response.json())
-    .catch(error => {
-      console.error('Error fetching available seasons:', error);
-      throw error;
+    .then(response => {
+      if (!response.ok) {
+        // Return empty array if endpoint doesn't exist (404) or other errors
+        return [];
+      }
+      return response.json();
+    })
+    .catch(() => {
+      // Silently return empty array on any error (e.g., endpoint not deployed yet)
+      return [];
     });
 }
 

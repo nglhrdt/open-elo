@@ -29,11 +29,17 @@ export function LeaguePage() {
     enabled: !!leagueId,
   })
 
-  // Fetch available seasons from the new endpoint
+  // Fetch available seasons from the new endpoint (fallback to empty array on error)
   const { data: availableSeasons = [] } = useQuery({
     queryKey: ['availableSeasons', leagueId],
     queryFn: () => getAvailableSeasons(leagueId!),
     enabled: !!leagueId,
+    retry: false,
+    meta: {
+      errorHandler: () => {
+        // Silently fail - endpoint might not exist in production yet
+      }
+    }
   })
 
   const { data: rankings } = useQuery({
