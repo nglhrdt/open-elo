@@ -21,6 +21,7 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   pageSize?: number;
+  pageIndex?: number;
   totalCount?: number;
   manualPagination?: boolean;
   onPaginationChange?: (pageIndex: number, pageSize: number) => void;
@@ -30,6 +31,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   pageSize = 10,
+  pageIndex,
   totalCount,
   manualPagination = false,
   onPaginationChange,
@@ -41,6 +43,19 @@ export function DataTable<TData, TValue>({
     ...(!manualPagination && { getPaginationRowModel: getPaginationRowModel() }),
     manualPagination,
     pageCount: manualPagination && totalCount !== undefined ? Math.ceil(totalCount / pageSize) : undefined,
+    state: pageIndex !== undefined ? {
+      pagination: {
+        pageIndex,
+        pageSize,
+      },
+    } : undefined,
+    onPaginationChange: pageIndex !== undefined ? (updater) => {
+      const currentState = { pageIndex, pageSize };
+      const newState = typeof updater === 'function'
+        ? updater(currentState)
+        : updater;
+      onPaginationChange?.(newState.pageIndex, newState.pageSize);
+    } : undefined,
     initialState: {
       pagination: {
         pageSize,
@@ -48,10 +63,14 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const paginationState = table.getState().pagination;
+
   useEffect(() => {
-    const state = table.getState().pagination;
-    onPaginationChange?.(state.pageIndex, state.pageSize);
-  }, [table.getState().pagination.pageIndex, table.getState().pagination.pageSize, onPaginationChange]);
+    // Only call onPaginationChange if we're not using controlled state (pageIndex is undefined)
+    if (pageIndex === undefined) {
+      onPaginationChange?.(paginationState.pageIndex, paginationState.pageSize);
+    }
+  }, [paginationState.pageIndex, paginationState.pageSize, pageIndex, onPaginationChange]);
 
   return (
     <div className="space-y-4">

@@ -7,11 +7,12 @@ interface PlayerGamesTableProps {
   games: Game[];
   userId: string;
   selectedLeagueId?: string;
+  pageIndex?: number;
   totalCount?: number;
   onPaginationChange?: (pageIndex: number, pageSize: number) => void;
 }
 
-export function PlayerGamesTable({ games, userId, selectedLeagueId, totalCount, onPaginationChange }: PlayerGamesTableProps) {
+export function PlayerGamesTable({ games, userId, selectedLeagueId, pageIndex, totalCount, onPaginationChange }: PlayerGamesTableProps) {
   const gameColumns: ColumnDef<Game>[] = [
     {
       accessorKey: 'createdAt',
@@ -85,6 +86,7 @@ export function PlayerGamesTable({ games, userId, selectedLeagueId, totalCount, 
       <DataTable
         columns={gameColumns}
         data={games}
+        pageIndex={pageIndex}
         manualPagination={totalCount !== undefined}
         totalCount={totalCount}
         onPaginationChange={onPaginationChange}

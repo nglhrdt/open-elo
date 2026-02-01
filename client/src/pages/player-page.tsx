@@ -200,6 +200,7 @@ export function PlayerPage() {
                   games={games}
                   userId={userId}
                   selectedLeagueId={selectedLeagueId}
+                  pageIndex={pageIndex}
                   totalCount={totalGames}
                   onPaginationChange={handlePaginationChange}
                 />
