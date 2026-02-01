@@ -63,8 +63,14 @@ export class LeagueController {
 
   @Authorized()
   @Get("/:leagueId/games")
-  async getGamesByLeagueId(@Param('leagueId') leagueId: string, @QueryParam('count') count: number) {
-    return this.leagueService.getGamesByLeagueId(leagueId, count);
+  async getGamesByLeagueId(@Param('leagueId') leagueId: string, @QueryParam('count') count: number, @QueryParam('seasonNumber') seasonNumber: number) {
+    return this.leagueService.getGamesByLeagueId(leagueId, count, seasonNumber);
+  }
+
+  @Authorized()
+  @Get("/:leagueId/seasons")
+  async getAvailableSeasons(@Param('leagueId') leagueId: string) {
+    return this.leagueService.getAvailableSeasons(leagueId);
   }
 
   @Post("/stop-seasons")

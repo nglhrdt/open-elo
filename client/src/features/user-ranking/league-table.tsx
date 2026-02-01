@@ -10,13 +10,13 @@ import {
 import { useContext } from 'react';
 import { Link } from 'react-router';
 
-export function LeagueTable(props: { leagueId: string }) {
-  const { leagueId } = props;
+export function LeagueTable(props: { leagueId: string; seasonNumber?: number }) {
+  const { leagueId, seasonNumber } = props;
   const { user } = useContext(AuthContext);
 
   const { isPending, data: rankings } = useQuery({
-    queryKey: ['leagueRankings', leagueId],
-    queryFn: () => fetchLeagueRankings(leagueId),
+    queryKey: ['leagueRankings', leagueId, seasonNumber],
+    queryFn: () => fetchLeagueRankings(leagueId, seasonNumber),
     enabled: !!leagueId,
   });
 

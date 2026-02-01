@@ -178,15 +178,17 @@ export class LeagueService {
     return Array.from(unique.values());
   }
 
-  async getGamesByLeagueId(id: string, count = 10): Promise<GameEntity[]> {
+  async getGamesByLeagueId(id: string, count = 10, seasonNumber?: number): Promise<GameEntity[]> {
     // Get the league to access current season
     const league = await this.leagueRepository.findOne({ where: { id } });
     if (!league) return [];
 
+    const targetSeason = seasonNumber ?? league.currentSeasonNumber;
+
     return this.gameRepository.find({
       where: {
         league: { id },
-        seasonNumber: league.currentSeasonNumber,
+        seasonNumber: targetSeason,
       },
       order: {
         createdAt: "DESC",
@@ -194,5 +196,16 @@ export class LeagueService {
       take: count,
       relations: ["players", "players.user"],
     });
+  }
+
+  async getAvailableSeasons(leagueId: string): Promise<number[]> {
+    const result = await this.gameRepository
+      .createQueryBuilder('game')
+      .select('DISTINCT game.seasonNumber', 'seasonNumber')
+      .where('game.leagueId = :leagueId', { leagueId })
+      .orderBy('game.seasonNumber', 'DESC')
+      .getRawMany();
+
+    return result.map(r => r.seasonNumber);
   }
 }

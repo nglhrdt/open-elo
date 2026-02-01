@@ -60,13 +60,19 @@ export class RankingService {
     });
   }
 
-  async getLeagueRankings(leagueId: string) {
+  async getLeagueRankings(leagueId: string, seasonNumber?: number) {
+    const league = await this.leagueService.getLeagueById(leagueId);
+    if (!league) throw new Error("League not found");
+
+    const targetSeason = seasonNumber ?? league.currentSeasonNumber;
+
     const rankings = await this.repository
       .createQueryBuilder("ranking")
       .innerJoinAndSelect("ranking.league", "league")
       .innerJoinAndSelect("ranking.user", "user")
       .where("league.id = :leagueId", { leagueId })
-      .andWhere("ranking.seasonNumber = league.currentSeasonNumber")
+      .andWhere("ranking.seasonNumber = :seasonNumber", { seasonNumber: targetSeason })
+      .andWhere("user.deleted = :deleted", { deleted: false })
       .getMany();
 
     const sortedRankings = rankings.sort((a, b) => b.elo - a.elo);

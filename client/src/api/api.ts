@@ -249,6 +249,15 @@ export function getLeagueById(leagueId: string): Promise<League> {
     });
 }
 
+export function getAvailableSeasons(leagueId: string): Promise<number[]> {
+  return apiFetch(`/leagues/${leagueId}/seasons`)
+    .then(response => response.json())
+    .catch(error => {
+      console.error('Error fetching available seasons:', error);
+      throw error;
+    });
+}
+
 export function updateLeague(leagueId: string, data: { seasonEnabled?: boolean, seasonEndDate?: string }): Promise<League> {
   return apiFetch(`/leagues/${leagueId}`, {
     method: 'PUT',
@@ -350,7 +359,7 @@ export function deleteGame(gameId: string): Promise<void> {
     });
 }
 
-export function getLeagueGames(leagueId: string, params?: { count?: number }): Promise<Game[]> {
+export function getLeagueGames(leagueId: string, params?: { count?: number; seasonNumber?: number }): Promise<Game[]> {
   return apiFetch(`/leagues/${leagueId}/games${params ? `${qs.stringify(params, { addQueryPrefix: true })}` : ''}`)
     .then(response => response.json())
     .catch(error => {
@@ -380,8 +389,9 @@ export async function fetchRankingsByUserId(userId: string): Promise<Ranking[] |
   return res.json();
 }
 
-export async function fetchLeagueRankings(leagueId: string): Promise<Ranking[] | null> {
-  const res = await apiFetch(`/rankings/league/${leagueId}`);
+export async function fetchLeagueRankings(leagueId: string, seasonNumber?: number): Promise<Ranking[] | null> {
+  const params = seasonNumber ? `?${qs.stringify({ seasonNumber })}` : '';
+  const res = await apiFetch(`/rankings/league/${leagueId}${params}`);
   if (!res.ok) return null;
   return res.json();
 }

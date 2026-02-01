@@ -17,17 +17,18 @@ import { GameListItem } from "./game-list-item";
 type LeagueGameListProps = {
   leagueId: string;
   count?: number;
+  seasonNumber?: number;
 }
 
 export function LeagueGameList(props: LeagueGameListProps) {
-  const { leagueId, count = 10 } = props;
+  const { leagueId, count = 10, seasonNumber } = props;
   const queryClient = useQueryClient();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [gameToDelete, setGameToDelete] = useState<string | null>(null);
 
   const { data: games } = useQuery({
-    queryKey: ['games', leagueId, count],
-    queryFn: () => getLeagueGames(leagueId, { count })
+    queryKey: ['games', leagueId, count, seasonNumber],
+    queryFn: () => getLeagueGames(leagueId, { count, seasonNumber })
   });
 
   const deleteMutation = useMutation({
