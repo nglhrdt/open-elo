@@ -70,11 +70,11 @@ export class UserController {
   @Get("/:id/games")
   getUserGames(
     @Param("id") id: string,
-    @QueryParam("count") count: number,
-    @QueryParam("leagueId") leagueId: string,
-    @QueryParam("skip") skip: number,
-    @QueryParam("take") take: number,
-    @QueryParam("seasonNumber") seasonNumber: number,
+    @QueryParam("count") count?: number,
+    @QueryParam("leagueId") leagueId?: string,
+    @QueryParam("skip") skip?: number,
+    @QueryParam("take") take?: number,
+    @QueryParam("seasonNumber") seasonNumber?: number,
   ) {
     return this.userService.getUserGames(id, { count, leagueId, skip, take, seasonNumber });
   }

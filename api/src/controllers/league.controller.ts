@@ -63,7 +63,7 @@ export class LeagueController {
 
   @Authorized()
   @Get("/:leagueId/games")
-  async getGamesByLeagueId(@Param('leagueId') leagueId: string, @QueryParam('count') count: number, @QueryParam('seasonNumber') seasonNumber: number) {
+  async getGamesByLeagueId(@Param('leagueId') leagueId: string, @QueryParam('count') count?: number, @QueryParam('seasonNumber') seasonNumber?: number) {
     return this.leagueService.getGamesByLeagueId(leagueId, count, seasonNumber);
   }
 

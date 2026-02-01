@@ -21,7 +21,7 @@ export class RankingController {
 
   @Get("/league/:leagueId")
   @Authorized()
-  getRankingsByLeague(@Param("leagueId") leagueId: string, @QueryParam("seasonNumber") seasonNumber: number) {
+  getRankingsByLeague(@Param("leagueId") leagueId: string, @QueryParam("seasonNumber") seasonNumber?: number) {
     return this.rankingService.getLeagueRankings(leagueId, seasonNumber);
   }
 }
