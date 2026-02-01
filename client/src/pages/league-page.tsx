@@ -90,37 +90,6 @@ export function LeaguePage() {
         <div className='flex flex-col gap-2'>
           <div className='flex items-center gap-3'>
             <h1 className='text-2xl font-bold'>{league.name}</h1>
-            {isOwner && (
-              <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Settings />
-                    Settings
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <SeasonSettings league={league} />
-                </DialogContent>
-              </Dialog>
-            )}
-          </div>
-          <div className='flex items-center gap-4'>
-            {league.seasonEnabled && league.currentSeasonNumber && (
-              <p className='text-sm text-muted-foreground'>
-                Season {league.currentSeasonNumber}
-                {league.seasonEndDate && (
-                  <>
-                    {' • Ends '}
-                    {new Date(league.seasonEndDate).toLocaleDateString()}
-                    {daysRemaining !== null && (
-                      <span className={daysRemaining <= 7 ? 'text-orange-500 font-medium' : ''}>
-                        {' '}({daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} left)
-                      </span>
-                    )}
-                  </>
-                )}
-              </p>
-            )}
             {availableSeasons.length > 0 && (
               <Select
                 value={selectedSeason?.toString()}
@@ -139,7 +108,36 @@ export function LeaguePage() {
                 </SelectContent>
               </Select>
             )}
+            {isOwner && (
+              <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Settings />
+                    Settings
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <SeasonSettings league={league} />
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
+          {league.seasonEnabled && league.currentSeasonNumber && (
+            <p className='text-sm text-muted-foreground'>
+              Season {league.currentSeasonNumber}
+              {league.seasonEndDate && (
+                <>
+                  {' • Ends '}
+                  {new Date(league.seasonEndDate).toLocaleDateString()}
+                  {daysRemaining !== null && (
+                    <span className={daysRemaining <= 7 ? 'text-orange-500 font-medium' : ''}>
+                      {' '}({daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} left)
+                    </span>
+                  )}
+                </>
+              )}
+            </p>
+          )}
         </div>
         <div className='flex items-center gap-4'>
           {!isMember && !isGuest && <JoinLeagueButton leagueId={leagueId} />}
