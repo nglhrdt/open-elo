@@ -1,8 +1,8 @@
 import { updateLeague, type League } from '@/api/api';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
@@ -37,15 +37,15 @@ export function SeasonSettings({ league }: SeasonSettingsProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Season Settings</CardTitle>
-        <CardDescription>
+    <>
+      <DialogHeader>
+        <DialogTitle>Season Settings</DialogTitle>
+        <DialogDescription>
           Configure seasonal play for this league. When a season ends, rankings are saved and all
           player ELOs are reset to 1000.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+        </DialogDescription>
+      </DialogHeader>
+      <div className="space-y-4">
         <div className="flex items-center space-x-2">
           <input
             type="checkbox"
@@ -82,7 +82,7 @@ export function SeasonSettings({ league }: SeasonSettingsProps) {
         <Button onClick={handleSave} disabled={mutation.isPending}>
           {mutation.isPending ? 'Saving...' : 'Save Settings'}
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </>
   );
 }
