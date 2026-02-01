@@ -109,10 +109,10 @@ export function LeaguePage() {
               </Select>
             )}
           </div>
-          {league.seasonEnabled && league.currentSeasonNumber && (
+          {league.seasonEnabled && selectedSeason && (
             <p className='text-sm text-muted-foreground'>
-              Season {league.currentSeasonNumber}
-              {league.seasonEndDate && (
+              Season {selectedSeason}
+              {isCurrentSeason && league.seasonEndDate && (
                 <>
                   {' • Ends '}
                   {new Date(league.seasonEndDate).toLocaleDateString()}
