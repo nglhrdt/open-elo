@@ -5,7 +5,7 @@ const baseUrl = import.meta.env.VITE_API_BASE_URL || '/api';
 // Small helper that adds Authorization header (if token exists) and JSON Content-Type (when body is present)
 async function apiFetch(input: string, init: RequestInit = {}): Promise<Response> {
   const url = input.startsWith('http') ? input : `${baseUrl}${input}`;
-  const token = localStorage.getItem('auth_token') ?? '';
+  const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token') || '';
   const headers = new Headers(init.headers || {});
   if (token) headers.set('Authorization', `Bearer ${token}`);
   if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
@@ -114,7 +114,8 @@ export async function register(data: { username: string, email: string, password
 }
 
 export async function fetchCurrentUser(): Promise<User | null> {
-  if (!localStorage.getItem('auth_token')) return null;
+  const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+  if (!token) return null;
   const res = await apiFetch(`/me`);
   if (!res.ok) return null;
   return res.json();

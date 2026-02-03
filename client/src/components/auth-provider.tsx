@@ -14,10 +14,12 @@ export function AuthProvider({ children, ...props }: AuthProviderProps) {
     setUser(null)
     setToken(null)
     localStorage.removeItem("auth_token")
+    sessionStorage.removeItem("auth_token")
+    localStorage.removeItem("stay_signed_in")
   }
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("auth_token")
+    const savedToken = localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token")
     if (savedToken) {
       setToken(savedToken)
       // Optionally, fetch user data with the token here
@@ -26,7 +28,13 @@ export function AuthProvider({ children, ...props }: AuthProviderProps) {
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem("auth_token", token)
+      // Update the appropriate storage based on stay_signed_in preference
+      const staySignedIn = localStorage.getItem("stay_signed_in") === "true"
+      if (staySignedIn) {
+        localStorage.setItem("auth_token", token)
+      } else {
+        sessionStorage.setItem("auth_token", token)
+      }
     }
   }, [token])
 
