@@ -15,11 +15,6 @@ interface PlayerGamesTableProps {
 export function PlayerGamesTable({ games, userId, selectedLeagueId, pageIndex, totalCount, onPaginationChange }: PlayerGamesTableProps) {
   const gameColumns: ColumnDef<Game>[] = [
     {
-      accessorKey: 'createdAt',
-      header: 'Date',
-      cell: (info) => new Date(info.getValue() as Date).toLocaleDateString(),
-    },
-    {
       id: 'homePlayers',
       header: 'Home',
       cell: (info) => {
