@@ -19,7 +19,7 @@ export type User = { id: string, username: string, email: string, role: Role }
 @Service()
 export class AuthService {
   private secret = process.env.JWT_SECRET || "dev_secret";
-  private expiresIn = 1000 * 60; // 1 minute for demo purposes
+  private expiresIn = 1000 * 60 * 60 * 24 * 30; // 30 days
 
   constructor(
     private userService: UserService,
@@ -58,7 +58,7 @@ export class AuthService {
     // Create a guest user for this token login
     const timestamp = Date.now();
     const guestUsername = `guest_${accessToken.league.name}_${timestamp}`.substring(0, 50);
-    
+
     const guestUser = await this.userService.createUser({
       username: guestUsername,
       email: null,

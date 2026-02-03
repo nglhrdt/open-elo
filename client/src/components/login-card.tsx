@@ -2,6 +2,7 @@ import { login, loginWithToken, type User } from '@/api/api'
 import { AuthContext } from '@/components/AuthContext'
 import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -13,6 +14,7 @@ export function LoginCard() {
   const [password, setPassword] = useState('')
   const [token, setToken] = useState('')
   const [isTokenLogin, setIsTokenLogin] = useState(false)
+  const [staySignedIn, setStaySignedIn] = useState(true)
   const auth = useContext(AuthContext)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -20,7 +22,13 @@ export function LoginCard() {
   const passwordMutation = useMutation({
     mutationFn: () => login({ user, password }),
     onSuccess: (data: { token: string, user: User }) => {
-      localStorage.setItem('auth_token', data.token)
+      if (staySignedIn) {
+        localStorage.setItem('auth_token', data.token)
+        localStorage.setItem('stay_signed_in', 'true')
+      } else {
+        sessionStorage.setItem('auth_token', data.token)
+        localStorage.removeItem('stay_signed_in')
+      }
       auth.setToken(data.token)
       auth.setUser(data.user)
       queryClient.setQueryData(['current-user'], data.user)
@@ -31,7 +39,13 @@ export function LoginCard() {
   const tokenMutation = useMutation({
     mutationFn: () => loginWithToken({ token }),
     onSuccess: (data: { token: string, user: User }) => {
-      localStorage.setItem('auth_token', data.token)
+      if (staySignedIn) {
+        localStorage.setItem('auth_token', data.token)
+        localStorage.setItem('stay_signed_in', 'true')
+      } else {
+        sessionStorage.setItem('auth_token', data.token)
+        localStorage.removeItem('stay_signed_in')
+      }
       auth.setToken(data.token)
       auth.setUser(data.user)
       queryClient.setQueryData(['current-user'], data.user)
@@ -120,6 +134,20 @@ export function LoginCard() {
               </p>
             </div>
           )}
+
+          <div className='flex items-center space-x-2'>
+            <Checkbox
+              id='stay-signed-in'
+              checked={staySignedIn}
+              onCheckedChange={(checked) => setStaySignedIn(checked === true)}
+            />
+            <Label
+              htmlFor='stay-signed-in'
+              className='text-sm font-normal cursor-pointer'
+            >
+              Stay signed in
+            </Label>
+          </div>
 
           <div className='pt-4 flex justify-end'>
             <Button disabled={mutation.isPending}>
