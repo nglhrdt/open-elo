@@ -15,7 +15,7 @@ export function UserGames(props: UserGamesProps) {
   const playerUrl = leagueId ? `/players/${user.id}?leagueId=${leagueId}` : `/players/${user.id}`;
 
   return (
-    <Link to={playerUrl} className="cursor-pointer">
+    <Link to={playerUrl}>
       <Button variant="link">
         <span className={userUsernameStyle}>{user.username}</span>
       </Button>
