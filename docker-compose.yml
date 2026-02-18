@@ -6,7 +6,7 @@ services:
     container_name: api
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.elo-api-path.rule=(Host(`elo.${DOMAIN}`) || Host(`${SECOND_DOMAIN}`)) && PathPrefix(`/api`)'
+      - 'traefik.http.routers.elo-api-path.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)'
       - 'traefik.http.routers.elo-api-path.entrypoints=websecure'
       - 'traefik.http.routers.elo-api-path.tls.certresolver=letsencrypt'
       - 'traefik.http.routers.elo-api-path.tls=true'
@@ -36,7 +36,7 @@ services:
       - web
     labels:
       - 'traefik.enable=true'
-      - 'traefik.http.routers.elo-client.rule=Host(`elo.${DOMAIN}`) || Host(`${SECOND_DOMAIN}`)'
+      - 'traefik.http.routers.elo-client.rule=Host(`${DOMAIN}`)'
       - 'traefik.http.services.elo-client.loadbalancer.server.port=80'
       - 'traefik.http.routers.elo-client.entrypoints=websecure'
       - 'traefik.http.routers.elo-client.tls.certresolver=letsencrypt'

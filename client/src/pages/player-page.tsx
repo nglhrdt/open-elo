@@ -206,7 +206,7 @@ export function PlayerPage() {
                 />
               </>
             ) : (
-              <p className='text-muted-foreground'>No games yet</p>
+              <p className='text-muted-foreground'>No games played yet</p>
             )}
           </CardContent>
         </Card>
