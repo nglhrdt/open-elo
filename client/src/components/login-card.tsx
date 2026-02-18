@@ -112,7 +112,7 @@ export function LoginCard() {
                 <Label htmlFor='password'>Password</Label>
                 <Input
                   id='password'
-                  placeholder="password"
+                  placeholder="Password"
                   type="Password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
