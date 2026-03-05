@@ -1,29 +1,25 @@
 import type { User } from "@/api/api";
-import { useState } from "react";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 type UserSelectProps = {
   users: User[];
-  blackList?: string[];
   placeholder?: string;
   value?: string;
   onChange?: (userID: string) => void;
 };
 
 export function UserSelect(props: UserSelectProps) {
-  const [internalValue, setInternalValue] = useState<string | undefined>(props?.value);
-
-  const value = props?.value !== undefined ? props.value : internalValue;
-
-  const handleChange = (val: string) => {
-    setInternalValue(val);
-    props?.onChange?.(val);
-  };
-
   return (
-    <Select value={value} onValueChange={handleChange}>
+    <Select value={props.value} onValueChange={props.onChange}>
       <SelectTrigger className="w-full">
-        <SelectValue placeholder={props?.placeholder ?? "Select a user"} />
+        <SelectValue placeholder={props.placeholder ?? "Select a user"} />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
