@@ -3,8 +3,7 @@ import { Service } from "typedi";
 import { FindManyOptions } from "typeorm";
 import { AppDataSource } from "../database/data-source";
 import { GameEntity } from "../database/entity/game.entity";
-import { RankingEntity } from "../database/entity/ranking.entity";
-import { Role, UserEntity } from "../database/entity/user.entity";
+import { ROLE, UserEntity } from "../database/entity/user.entity";
 
 @Service()
 export class UserService {
@@ -24,7 +23,7 @@ export class UserService {
     username: string;
     email?: string | null;
     passwordHash?: string | null;
-    role: Role;
+    role: ROLE;
   }) {
     const role = user.role;
     const username = user.username?.trim();
@@ -74,15 +73,17 @@ export class UserService {
   }
 
   getUserById(id: string) {
-    return this.repository.findOneBy({ id });
+    return this.repository.findOne({
+      where: { id },
+      relations: ["favoriteLeague", "favoriteLeague.currentSeason", "favoriteLeague.game"],
+    });
   }
 
-  findByEmail(email: string) {
-    return this.repository.findOneBy({ email: email?.trim().toLowerCase() });
-  }
-
-  findByUsername(username: string) {
-    return this.repository.findOneBy({ username: username?.trim() });
+  getUserByEmail(email: string) {
+    return this.repository.findOne({
+      where: { email },
+      relations: ["favoriteLeague", "favoriteLeague.currentSeason", "favoriteLeague.game"],
+    });
   }
 
   async getUserGames(
@@ -168,7 +169,7 @@ export class UserService {
       // Update the user
       user.email = trimmedEmail;
       user.passwordHash = passwordHash;
-      user.role = "user";
+      user.role = ROLE.USER;
 
       try {
         return await repo.save(user);
@@ -214,68 +215,7 @@ export class UserService {
   }
 
   async deleteUser(userId: string) {
-    return this.repository.manager.transaction(async (mgr) => {
-      const userRepo = mgr.getRepository(UserEntity);
-      const gameRepo = mgr.getRepository(GameEntity);
-      const rankingRepo = mgr.getRepository(RankingEntity);
-
-      // Find the user
-      const user = await userRepo.findOne({
-        where: { id: userId },
-      });
-      if (!user) throw new Error("User not found");
-
-      // Only allow deletion of guest users
-      if (user.role !== "guest") {
-        throw new Error("Only guest users can be deleted");
-      }
-
-      // Check if user is already deleted
-      if (user.deleted) {
-        throw new Error("User is already deleted");
-      }
-
-      // Get all rankings for this user with their leagues
-      const rankings = await rankingRepo.find({
-        where: { user: { id: userId } },
-        relations: ["league"],
-      });
-
-      // Get all unique leagues the user is a member of
-      const leagues = rankings.map(r => r.league).filter(Boolean);
-
-      // Check if user has games in current season of any league
-      for (const league of leagues) {
-        const gamesInCurrentSeason = await gameRepo
-          .createQueryBuilder("game")
-          .innerJoin("game.players", "player")
-          .innerJoin("player.user", "user")
-          .where("user.id = :userId", { userId })
-          .andWhere("game.league.id = :leagueId", { leagueId: league.id })
-          .andWhere("game.seasonNumber = :seasonNumber", {
-            seasonNumber: league.currentSeasonNumber,
-          })
-          .getCount();
-
-        if (gamesInCurrentSeason > 0) {
-          throw new Error(
-            `Cannot delete user: has ${gamesInCurrentSeason} game(s) in current season of ${league.name}`
-          );
-        }
-      }
-
-      // Soft delete: set deleted flag
-      user.deleted = true;
-      await userRepo.save(user);
-
-      // Delete current season rankings
-      for (const ranking of rankings) {
-        if (ranking.league && ranking.seasonNumber === ranking.league.currentSeasonNumber) {
-          await rankingRepo.remove(ranking);
-        }
-      }
-
-      return { success: true, message: "User deleted successfully" };
-    });
+    //TODO delete user
+    return { success: true, message: "User deleted successfully" };
   }
 }

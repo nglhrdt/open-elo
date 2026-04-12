@@ -8,9 +8,9 @@ import { AuthController } from "./controllers/auth.controller";
 import { GameController } from "./controllers/game.controller";
 import { HealthController } from "./controllers/health.controller";
 import { LeagueController } from "./controllers/league.controller";
+import { MatchController } from "./controllers/match.controller";
 import { ProfileController } from "./controllers/profile.controller";
-import { RankingController } from "./controllers/ranking.controller";
-import { TokenController } from "./controllers/token.controller";
+import { SeasonController } from "./controllers/season.controller";
 import { UserController } from "./controllers/user.controller";
 import { AuthService } from "./services/auth.service";
 
@@ -32,7 +32,16 @@ async function main() {
         preflightContinue: false,
         optionsSuccessStatus: 204,
       },
-      controllers: [AuthController, GameController, HealthController, LeagueController, ProfileController, RankingController, TokenController, UserController],
+      controllers: [
+        AuthController,
+        GameController,
+        HealthController,
+        LeagueController,
+        MatchController,
+        ProfileController,
+        SeasonController,
+        UserController
+      ],
       middlewares: [],
       interceptors: [],
     }).listen(3000);

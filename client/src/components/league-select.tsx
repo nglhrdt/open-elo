@@ -29,7 +29,7 @@ export function LeagueSelect(props: LeagueSelectProps) {
         <SelectGroup>
           {props.leagues.map((league) => (
             <SelectItem key={league.id} value={league.id}>
-              {league.name} ({league.type})
+              {league.name} ({league.game})
             </SelectItem>
           ))}
         </SelectGroup>

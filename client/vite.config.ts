@@ -23,19 +23,15 @@ export default defineConfig({
           if (id.includes('node_modules')) {
             return 'vendor';
           }
-
           // Feature-based splitting for source code only
-          if (id.includes('/src/features/game/')) {
-            return 'game-features';
+          if (id.includes('/src/features/match/')) {
+            return 'match-features';
           }
           if (id.includes('/src/features/league/')) {
             return 'league-features';
           }
           if (id.includes('/src/features/user/')) {
             return 'user-features';
-          }
-          if (id.includes('/src/features/user-ranking/')) {
-            return 'ranking-features';
           }
         },
       },

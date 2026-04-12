@@ -1,166 +1,86 @@
-import { login, loginWithToken, type User } from '@/api/api'
-import { AuthContext } from '@/components/AuthContext'
-import { Button } from '@/components/ui/button'
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useContext, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { login, type User } from '@/api/api';
+import { AuthContext } from '@/components/AuthContext';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useContext, useState } from 'react';
+import { Link, useNavigate } from 'react-router';
 
 export function LoginCard() {
-  const [user, setUser] = useState('')
-  const [password, setPassword] = useState('')
-  const [token, setToken] = useState('')
-  const [isTokenLogin, setIsTokenLogin] = useState(false)
-  const [staySignedIn, setStaySignedIn] = useState(true)
-  const auth = useContext(AuthContext)
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const passwordMutation = useMutation({
-    mutationFn: () => login({ user, password }),
-    onSuccess: (data: { token: string, user: User }) => {
-      if (staySignedIn) {
-        localStorage.setItem('auth_token', data.token)
-        localStorage.setItem('stay_signed_in', 'true')
-      } else {
-        sessionStorage.setItem('auth_token', data.token)
-        localStorage.removeItem('stay_signed_in')
-      }
-      auth.setToken(data.token)
-      auth.setUser(data.user)
-      queryClient.setQueryData(['current-user'], data.user)
-      navigate('/')
+  const auth = useContext(AuthContext);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const loginMutation = useMutation({
+    mutationFn: () => login({ email, password }),
+    onSuccess: (data: { token: string; user: User }) => {
+      sessionStorage.setItem('auth_token', data.token);
+      auth.setToken(data.token);
+      auth.setUser(data.user);
+      queryClient.setQueryData(['current-user'], data.user);
+      navigate('/');
     },
-  })
-
-  const tokenMutation = useMutation({
-    mutationFn: () => loginWithToken({ token }),
-    onSuccess: (data: { token: string, user: User }) => {
-      if (staySignedIn) {
-        localStorage.setItem('auth_token', data.token)
-        localStorage.setItem('stay_signed_in', 'true')
-      } else {
-        sessionStorage.setItem('auth_token', data.token)
-        localStorage.removeItem('stay_signed_in')
-      }
-      auth.setToken(data.token)
-      auth.setUser(data.user)
-      queryClient.setQueryData(['current-user'], data.user)
-      navigate('/')
-    },
-  })
-
-  const mutation = isTokenLogin ? tokenMutation : passwordMutation
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    mutation.mutate()
-  }
+    e.preventDefault();
+    loginMutation.mutate();
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Login</CardTitle>
         <CardAction>
-          <Button variant='link'>
-            <Link to={"/register"}>Register</Link>
+          <Button variant="link">
+            <Link to={'/register'}>Register</Link>
           </Button>
         </CardAction>
       </CardHeader>
       <CardContent>
-        <div className="mb-4 flex gap-2 border-b">
-          <button
-            type="button"
-            onClick={() => setIsTokenLogin(false)}
-            className={`px-4 py-2 font-medium transition-colors ${
-              !isTokenLogin
-                ? 'border-b-2 border-primary text-primary'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Password
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsTokenLogin(true)}
-            className={`px-4 py-2 font-medium transition-colors ${
-              isTokenLogin
-                ? 'border-b-2 border-primary text-primary'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            Token
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
-          {!isTokenLogin ? (
-            <>
-              <div className='flex flex-col gap-1'>
-                <Label htmlFor='username'>Username</Label>
-                <Input
-                  id='username'
-                  placeholder="Username"
-                  value={user}
-                  onChange={e => setUser(e.target.value)}
-                />
-              </div>
-              <div className='flex flex-col gap-1'>
-                <Label htmlFor='password'>Password</Label>
-                <Input
-                  id='password'
-                  placeholder="Password"
-                  type="Password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                />
-              </div>
-            </>
-          ) : (
-            <div className='flex flex-col gap-1'>
-              <Label htmlFor='token'>Access Token</Label>
-              <Input
-                id='token'
-                placeholder="Paste your access token"
-                value={token}
-                onChange={e => setToken(e.target.value)}
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Use a token generated by another user to join their league.
-              </p>
-            </div>
-          )}
-
-          <div className='flex items-center space-x-2'>
-            <Checkbox
-              id='stay-signed-in'
-              checked={staySignedIn}
-              onCheckedChange={(checked) => setStaySignedIn(checked === true)}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
-            <Label
-              htmlFor='stay-signed-in'
-              className='text-sm font-normal cursor-pointer'
-            >
-              Stay signed in
-            </Label>
           </div>
-
-          <div className='pt-4 flex justify-end'>
-            <Button disabled={mutation.isPending}>
-              {mutation.isPending ? 'Logging in...' : 'Login'}
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              placeholder="Password"
+              type="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <div className="pt-4 flex justify-end">
+            <Button disabled={loginMutation.isPending}>
+              {loginMutation.isPending ? 'Logging in...' : 'Login'}
             </Button>
           </div>
-          {mutation.isError && (
+          {loginMutation.isError && (
             <div className="text-red-300 text-sm">
-              {(mutation.error as Error).message}
+              {(loginMutation.error as Error).message}
             </div>
           )}
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

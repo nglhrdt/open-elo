@@ -1,211 +1,169 @@
+import { startOfDay } from "date-fns";
 import { Service } from "typedi";
-import { FindManyOptions, LessThanOrEqual } from "typeorm";
+import { FindManyOptions, Not } from "typeorm";
 import { AppDataSource } from "../database/data-source";
 import { GameEntity } from "../database/entity/game.entity";
-import { LEAGUE_TYPE, LeagueEntity } from "../database/entity/league.entity";
-import { RankingEntity } from "../database/entity/ranking.entity";
-import { SeasonHistoryEntity } from "../database/entity/season-history.entity";
+import { LeagueEntity } from "../database/entity/league.entity";
+import { MemberEntity } from "../database/entity/member.entity";
+import { SeasonEntity } from "../database/entity/season.entity";
 import { UserEntity } from "../database/entity/user.entity";
-import { UserService } from "./user.service";
+import { LeagueDTO, UserDTO } from "../dtos";
+import { CreateLeagueDTO } from "../dtos/league/create-league.dto";
 
 @Service()
 export class LeagueService {
-
-  constructor(private userService: UserService) { }
-
   private leagueRepository = AppDataSource.getRepository(LeagueEntity);
-  private rankingRepository = AppDataSource.getRepository(RankingEntity);
+  private userRepository = AppDataSource.getRepository(UserEntity);
   private gameRepository = AppDataSource.getRepository(GameEntity);
-  private seasonHistoryRepository = AppDataSource.getRepository(SeasonHistoryEntity);
+  private memberRepository = AppDataSource.getRepository(MemberEntity);
+  private seasonRepository = AppDataSource.getRepository(SeasonEntity);
 
-  async getAllLeagues(options: FindManyOptions<LeagueEntity> = {}) {
-    return (await this.leagueRepository.find(options)).map(l => ({ id: l.id, name: l.name, type: l.type }));
-  }
-
-  async createLeague(data: { name: string, type: LEAGUE_TYPE, ownerId: string }) {
-    const owner = await this.userService.getUserById(data.ownerId);
-    if (!owner) throw new Error("Owner not found");
-    const league = this.leagueRepository.create({ name: data.name, type: data.type });
-    league.owner = owner;
-    return this.leagueRepository.save(league);
+  async getAllLeagues(
+    options: FindManyOptions<LeagueEntity> = {},
+  ): Promise<LeagueDTO[]> {
+    const leagues = await this.leagueRepository.find({
+      ...options,
+      relations: ["owner", "game", "members", "members.user", "seasons", "currentSeason"],
+    });
+    return leagues.map((league) => this.toDTO(league));
   }
 
   async getLeagueById(id: string) {
     const league = await this.leagueRepository.findOne({
       where: { id },
-      relations: ['owner']
+      relations: ["owner", "game", "currentSeason", "members", "members.user", "seasons"],
     });
-
-    if (!league) return null;
-
-    // Ensure owner is properly loaded and formatted
-    const owner = await league.owner;
-    return {
-      ...league,
-      owner
-    };
+    return league ? this.toDTO(league) : null;
   }
 
-  async updateLeagueSeasonSettings(
-    leagueId: string,
-    userId: string,
-    settings: { seasonEnabled?: boolean, seasonEndDate?: string }
-  ) {
+  async createLeague({ dto, user }: { dto: CreateLeagueDTO, user: UserDTO }) {
+    const owner = await this.userRepository.findOne({
+      where: { id: user.id },
+    });
+    if (!owner) throw new Error("Owner not found");
+
+    const game = await this.gameRepository.findOne({
+      where: { game: dto.game },
+    });
+    if (!game) throw new Error("Game not found");
+
+    const league = await this.leagueRepository.save({
+      name: dto.name,
+      game,
+      owner,
+    });
+
+    await this.memberRepository.save({
+      league,
+      user: owner,
+    });
+
+    if (!owner.favoriteLeague) {
+      owner.favoriteLeague = league;
+      await this.userRepository.save(owner);
+    }
+
+    const season = await this.seasonRepository.save({
+      league,
+      seasonNumber: 1,
+      startAt: startOfDay(new Date()),
+    });
+
+    league.currentSeason = season;
+    await this.leagueRepository.save(league);
+
+    return league.id;
+  }
+
+  async joinLeague({ leagueId, user }: { leagueId: string; user: UserDTO }) {
     const league = await this.leagueRepository.findOne({
       where: { id: leagueId },
-      relations: ['owner']
+      relations: ["members", "members.user"],
     });
-
     if (!league) throw new Error("League not found");
 
-    const owner = await league.owner;
-    if (owner.id !== userId) {
-      throw new Error("Only the league owner can update season settings");
-    }
+    const existingMember = league.members.find((member) => member.user.id === user.id);
+    if (existingMember) throw new Error("User is already a member of the league");
 
-    if (settings.seasonEnabled !== undefined) {
-      league.seasonEnabled = settings.seasonEnabled;
-    }
+    const userEntity = await this.userRepository.findOne({ where: { id: user.id } });
+    if (!userEntity) throw new Error("User not found");
 
-    if (settings.seasonEndDate !== undefined) {
-      league.seasonEndDate = settings.seasonEndDate ? new Date(settings.seasonEndDate) : null;
-    }
-
-    return this.leagueRepository.save(league);
-  }
-
-  async processEndedSeasons() {
-    const now = new Date();
-
-    // Find all leagues with seasons that have ended
-    const endedLeagues = await this.leagueRepository.find({
-      where: {
-        seasonEnabled: true,
-        seasonEndDate: LessThanOrEqual(now)
-      },
-      relations: ['owner']
+    const member = await this.memberRepository.save({
+      league,
+      user: userEntity,
     });
 
-    const results = [];
+    return member;
+  }
 
-    for (const league of endedLeagues) {
-      try {
-        // Get current season rankings
-        const rankings = await this.rankingRepository.find({
-          where: {
-            league: { id: league.id },
-            seasonNumber: league.currentSeasonNumber
+  async getUserJoinedLeagues(id: string) {
+    const leagues = await this.leagueRepository.find({
+      where: {
+        members: {
+          user: {
+            id,
           },
-          relations: ['user'],
-          order: { elo: 'DESC' }
-        });
-
-        // Persist season history
-        const seasonRankings = rankings.map((r, index) => ({
-          userId: r.user.id,
-          username: r.user.username,
-          elo: r.elo,
-          position: index + 1
-        }));
-
-        const seasonHistory = this.seasonHistoryRepository.create({
-          seasonNumber: league.currentSeasonNumber,
-          endDate: league.seasonEndDate,
-          rankings: seasonRankings,
-          league: league
-        });
-
-        await this.seasonHistoryRepository.save(seasonHistory);
-
-        // Start new season
-        league.currentSeasonNumber += 1;
-        league.seasonEndDate = null; // No end date for new season
-        await this.leagueRepository.save(league);
-
-        // Create new rankings for all players with reset ELO
-        const newRankings = rankings.map(r => {
-          const newRanking = this.rankingRepository.create({
-            elo: 1000,
-            seasonNumber: league.currentSeasonNumber,
-            league: league,
-            user: r.user
-          });
-          return newRanking;
-        });
-
-        await this.rankingRepository.save(newRankings);
-
-        results.push({
-          leagueId: league.id,
-          leagueName: league.name,
-          previousSeason: league.currentSeasonNumber - 1,
-          newSeason: league.currentSeasonNumber,
-          playersReset: newRankings.length
-        });
-      } catch (error) {
-        results.push({
-          leagueId: league.id,
-          leagueName: league.name,
-          error: error.message
-        });
-      }
-    }
-
-    return {
-      processed: results.length,
-      results
-    };
-  }
-
-  async getUsersByLeagueId(id: string): Promise<UserEntity[]> {
-    // Fetch rankings (with users) for the league - current season only
-    const rankings = await this.rankingRepository
-      .createQueryBuilder("ranking")
-      .innerJoinAndSelect("ranking.user", "user")
-      .innerJoinAndSelect("ranking.league", "league")
-      .where("league.id = :id", { id })
-      .andWhere("ranking.seasonNumber = league.currentSeasonNumber")
-      .andWhere("user.deleted = :deleted", { deleted: false })
-      .getMany();
-
-    if (rankings.length === 0) return [];
-
-    // Extract and de-duplicate users
-    const unique = new Map<string, UserEntity>();
-    for (const r of rankings) {
-      if (r.user) unique.set(r.user.id, r.user);
-    }
-    return Array.from(unique.values());
-  }
-
-  async getGamesByLeagueId(id: string, count = 10, seasonNumber?: number): Promise<GameEntity[]> {
-    // Get the league to access current season
-    const league = await this.leagueRepository.findOne({ where: { id } });
-    if (!league) return [];
-
-    const targetSeason = seasonNumber ?? league.currentSeasonNumber;
-
-    return this.gameRepository.find({
-      where: {
-        league: { id },
-        seasonNumber: targetSeason,
+        },
+        owner: {
+          id: Not(id),
+        },
       },
-      order: {
-        createdAt: "DESC",
-      },
-      take: count,
-      relations: ["players", "players.user"],
+      relations: ["game", "owner", "currentSeason", "members", "members.user", "seasons"],
     });
+    return leagues.map((league) => this.toDTO(league));
   }
 
-  async getAvailableSeasons(leagueId: string): Promise<number[]> {
-    const result = await this.gameRepository
-      .createQueryBuilder('game')
-      .select('DISTINCT game.seasonNumber', 'seasonNumber')
-      .where('game.leagueId = :leagueId', { leagueId })
-      .orderBy('game.seasonNumber', 'DESC')
-      .getRawMany();
+  async getUserOwnedLeagues(id: string) {
+    const leagues = await this.leagueRepository.find({
+      where: {
+        owner: {
+          id,
+        },
+      },
+      relations: ["game", "owner", "currentSeason", "members", "members.user", "seasons"],
+    });
+    return leagues.map((league) => this.toDTO(league));
+  }
 
-    return result.map(r => r.seasonNumber);
+  async getUserAvailableLeagues(id: string) {
+    const leagues = await this.leagueRepository.find({
+      where: {
+        members: {
+          user: {
+            id: Not(id),
+          },
+        },
+      },
+      relations: ["game", "owner", "currentSeason", "members", "members.user", "seasons"],
+    });
+    return leagues.map((league) => this.toDTO(league));
+  }
+
+  toDTO(entity: LeagueEntity): LeagueDTO {
+    return {
+      id: entity.id,
+      name: entity.name,
+      game: entity.game.game,
+      owner: {
+        id: entity.owner.id,
+        username: entity.owner.username,
+      },
+      currentSeason: {
+        id: entity.currentSeason.id,
+        seasonNumber: entity.currentSeason.seasonNumber,
+        startAt: entity.currentSeason.startAt,
+        endAt: entity.currentSeason.endAt,
+      },
+      seasons: entity.seasons ? entity.seasons.map((season) => ({
+        id: season.id,
+        seasonNumber: season.seasonNumber,
+        startAt: season.startAt,
+        endAt: season.endAt,
+      })) : [],
+      members: entity.members ? entity.members.map((member) => ({
+        id: member.user.id,
+        username: member.user.username,
+      })) : [],
+    };
   }
 }

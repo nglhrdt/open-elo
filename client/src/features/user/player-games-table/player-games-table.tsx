@@ -1,10 +1,10 @@
-import { type Game } from '@/api/api';
+import { type Match } from '@/api/api';
 import { DataTable } from '@/components/data-table';
 import { type ColumnDef } from '@tanstack/react-table';
 import { Link } from 'react-router';
 
 interface PlayerGamesTableProps {
-  games: Game[];
+  games: Match[];
   userId: string;
   selectedLeagueId?: string;
   pageIndex?: number;
@@ -13,13 +13,13 @@ interface PlayerGamesTableProps {
 }
 
 export function PlayerGamesTable({ games, userId, selectedLeagueId, pageIndex, totalCount, onPaginationChange }: PlayerGamesTableProps) {
-  const gameColumns: ColumnDef<Game>[] = [
+  const gameColumns: ColumnDef<Match>[] = [
     {
       id: 'homePlayers',
       header: 'Home',
       cell: (info) => {
         const game = info.row.original;
-        const homePlayers = game.players.filter(p => p.team === 'home');
+        const homePlayers = game.players.filter(p => p.team === 'HOME');
         return (
           <div className="flex gap-2 flex-wrap">
             {homePlayers.map((p, index) => (
@@ -45,7 +45,7 @@ export function PlayerGamesTable({ games, userId, selectedLeagueId, pageIndex, t
       header: 'Away',
       cell: (info) => {
         const game = info.row.original;
-        const awayPlayers = game.players.filter(p => p.team === 'away');
+        const awayPlayers = game.players.filter(p => p.team === 'AWAY');
         return (
           <div className="flex gap-2 flex-wrap">
             {awayPlayers.map((p, index) => (

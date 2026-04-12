@@ -2,25 +2,20 @@ import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGenerate
 import { LeagueEntity } from "./league.entity";
 import { PlayerEntity } from "./player.entity";
 
+export enum GAME {
+  TABLE_SOCCER = 'TABLE_SOCCER'
+}
+
 @Entity()
 export class GameEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column()
-  score: string;
+  @Column({ type: 'enum', enum: GAME , nullable: false })
+  game: GAME;
 
-  @Column({ default: 1 })
-  seasonNumber: number;
-
-  @OneToMany(() => PlayerEntity, player => player.game, { eager: true, cascade: true })
-  players: PlayerEntity[];
-
-  @ManyToOne(() => LeagueEntity, league => league.games, {
-    nullable: false,
-    eager: false,
-  })
-  league: LeagueEntity;
+  @OneToMany(() => LeagueEntity, league => league.game, { lazy: true })
+  leagues: LeagueEntity[];
 
   @CreateDateColumn()
   createdAt: Date;

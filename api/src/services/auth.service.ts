@@ -1,89 +1,67 @@
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { Action } from "routing-controllers";
-import { Service } from "typedi";
-import { Role, UserEntity } from "../database/entity/user.entity";
-import { TokenService } from "./token.service";
-import { UserService } from "./user.service";
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { Action } from 'routing-controllers';
+import { Service } from 'typedi';
+import { LeagueEntity } from '../database/entity/league.entity';
+import { ROLE, UserEntity } from '../database/entity/user.entity';
+import { CredentialsDTO, RegisterDTO } from '../dtos';
+import { FavoriteLeagueDTO, UserDTO } from '../dtos/user/user.dto';
+import { UserService } from './user.service';
 
 interface JwtPayload {
   sub: string;
-  role: Role;
+  role: ROLE;
   leagueId?: string; // For token-based guest logins
   iat: number;
   exp: number;
 }
 
-export type User = { id: string, username: string, email: string, role: Role }
-
 @Service()
 export class AuthService {
-  private secret = process.env.JWT_SECRET || "dev_secret";
+  private secret = process.env.JWT_SECRET || 'dev_secret';
   private expiresIn = 1000 * 60 * 60 * 24 * 30; // 30 days
 
   constructor(
     private userService: UserService,
-    private tokenService: TokenService,
   ) { }
 
-  async login(username: string, password: string) {
-    const userNameUser = await this.userService.findByUsername(username);
-    const emailUser = await this.userService.findByEmail(username);
-    const user = userNameUser || emailUser;
+  async login({ email, password }: CredentialsDTO) {
+    const user = await this.userService.getUserByEmail(email);
 
-    if (!user) throw new Error("Invalid credentials");
-    if (user.role === "guest") throw new Error("Guest users cannot log in");
-    if (!user.passwordHash) throw new Error("User has no password set");
+    if (!user) throw new Error('Invalid credentials');
+    if (user.role === 'guest') throw new Error('Guest users cannot log in');
+    if (!user.passwordHash) throw new Error('User has no password set');
 
     const ok = await bcrypt.compare(password, user.passwordHash);
-    if (!ok) throw new Error("Invalid credentials");
+    if (!ok) throw new Error('Invalid credentials');
 
-    return this.createTokenAndReturn(user);
+    return this.createAuthToken(user);
   }
 
-  async register(data: { username: string; email: string; password: string }) {
-    const passwordHash = await bcrypt.hash(data.password, 12);
-    const user = await this.userService.createUser({ username: data.username, email: data.email, passwordHash, role: "user" });
-
-    return this.createTokenAndReturn(user);
-  }
-
-  async loginWithToken(tokenString: string) {
-    const accessToken = await this.tokenService.getTokenByString(tokenString);
-
-    if (!accessToken) {
-      throw new Error("Invalid or expired token");
-    }
-
-    // Create a guest user for this token login
-    const timestamp = Date.now();
-    const guestUsername = `guest_${accessToken.league.name}_${timestamp}`.substring(0, 50);
-
-    const guestUser = await this.userService.createUser({
-      username: guestUsername,
-      email: null,
-      passwordHash: null,
-      role: "guest"
+  async register({ username, email, password }: RegisterDTO) {
+    const passwordHash = await bcrypt.hash(password, 12);
+    const user = await this.userService.createUser({
+      username,
+      email,
+      passwordHash,
+      role: ROLE.USER,
     });
 
-    // Don't create a ranking for token-based guests
-    // They can view and create games but won't appear in league rankings
-
-    return this.createTokenAndReturn(guestUser, accessToken.league.id);
+    return this.createAuthToken(user);
   }
 
-  sign(userId: string, role: Role, leagueId?: string) {
-    const payload: Omit<JwtPayload, "sub" | "iat" | "exp"> = { role };
-    if (leagueId) {
-      payload.leagueId = leagueId;
-    }
-    return jwt.sign(payload, this.secret, { subject: userId, expiresIn: this.expiresIn });
+  sign(userId: string, role: ROLE,) {
+    const payload: Omit<JwtPayload, 'sub' | 'iat' | 'exp'> = { role };
+    return jwt.sign(payload, this.secret, {
+      subject: userId,
+      expiresIn: this.expiresIn,
+    });
   }
 
   parseToken(authHeader?: string) {
     if (!authHeader) return null;
-    const [scheme, token] = authHeader.split(" ");
-    if (scheme !== "Bearer" || !token) return null;
+    const [scheme, token] = authHeader.split(' ');
+    if (scheme !== 'Bearer' || !token) return null;
     try {
       return jwt.verify(token, this.secret) as jwt.JwtPayload;
     } catch {
@@ -91,32 +69,50 @@ export class AuthService {
     }
   }
 
-  isAuthenticated(action: Action, roles: string[]) {
-    const payload = this.parseToken(action.request.headers.authorization);
-    if (!payload) return false;
-    (action.request as any).userId = payload.sub;
-    (action.request as any).userRole = (payload as any).role;
-    (action.request as any).leagueId = (payload as any).leagueId;
-    (action.request as any).roles = (payload as any).roles || [];
+  isAuthenticated(action: Action, roles: ROLE[]) {
+    const token = this.parseToken(action.request.headers.authorization);
+    if (!token) return false;
+    (action.request as any).userId = token.sub;
+    (action.request as any).userRole = (token as any).role;
+    (action.request as any).leagueId = (token as any).leagueId;
+    (action.request as any).roles = (token as any).roles || [];
     if (roles.length) {
-      return roles.some(r => (payload as any).roles?.includes(r));
+      return roles.some((r) => (token as any).roles?.includes(r));
     }
     return true;
   }
 
-  async getCurrentUser(action: Action) {
+  async getCurrentUser(action: Action): Promise<UserDTO | null> {
     const userId = (action.request as any).userId;
     if (!userId) return null;
     const user = await this.userService.getUserById(userId);
-    return user ? this.formatUser(user) : null;
+    return user ? this.toDTO(user) : null;
   }
 
-  private createTokenAndReturn(user: UserEntity, leagueId?: string) {
-    const token = this.sign(user.id, user.role, leagueId);
-    return { token, user: this.formatUser(user) };
+  private createAuthToken(user: UserEntity) {
+    const token = this.sign(user.id, user.role);
+    return { token, user: this.toDTO(user) };
   }
 
-  private formatUser(user: UserEntity): User {
-    return { id: user.id, username: user.username, email: user.email, role: user.role };
+  private toDTO(user: UserEntity): UserDTO {
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      favoriteLeague: user.favoriteLeague ? this.toLeagueDTO(user.favoriteLeague) : undefined,
+    };
+  }
+
+  private toLeagueDTO(league: LeagueEntity): FavoriteLeagueDTO {
+    return {
+      id: league.id,
+      name: league.name,
+      game: league.game.game,
+      season: {
+        id: league.currentSeason.id,
+        seasonNumber: league.currentSeason.seasonNumber,
+      },
+    };
   }
 }

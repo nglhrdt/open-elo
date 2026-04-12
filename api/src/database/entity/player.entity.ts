@@ -1,14 +1,19 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { GameEntity } from "./game.entity";
+import { MatchEntity } from "./match.entity";
 import { UserEntity } from "./user.entity";
+
+export enum TEAM {
+  HOME = 'HOME',
+  AWAY = 'AWAY',
+}
 
 @Entity()
 export class PlayerEntity {
   @PrimaryGeneratedColumn("uuid")
   id: string;
 
-  @Column({ enum: ["home", "away"], nullable: false })
-  team: "home" | "away";
+  @Column({ type: 'enum', enum: TEAM, nullable: false })
+  team: TEAM;
 
   @Column({ type: "int", nullable: true })
   eloBefore: number | null;
@@ -16,8 +21,8 @@ export class PlayerEntity {
   @Column({ type: "int", nullable: true })
   eloAfter: number | null;
 
-  @ManyToOne(() => GameEntity, game => game.players)
-  game: GameEntity;
+  @ManyToOne(() => MatchEntity, match => match.players)
+  match: MatchEntity;
 
   @ManyToOne(() => UserEntity, user => user.players)
   user: UserEntity;

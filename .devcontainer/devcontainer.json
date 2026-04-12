@@ -1,47 +1,40 @@
 {
-	"name": "Open Elo",
-	"remoteUser": "node",
-	"dockerComposeFile": "docker-compose.yml",
-	"updateRemoteUserUID": true,
-	"service": "devcontainer",
-	"workspaceFolder": "/workspaces",
-	"features": {
-		"ghcr.io/devcontainers/features/docker-outside-of-docker:1.6.3": {}
-	},
-	"forwardPorts": [
-		3000,
-		5173,
-		5432
-	],
-	"portsAttributes": {
-		"3000": {
-			"label": "API",
-			"onAutoForward": "notify"
-		},
-		"5173": {
-			"label": "Client",
-			"onAutoForward": "notify"
-		},
-		"5432": {
-			"label": "PostgreSQL",
-			"onAutoForward": "notify"
-		}
-	},
-	"shutdownAction": "none",
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"JacobPfeifer.pfeifer-hurl",
-				"ckolkman.vscode-postgres",
-				"esbenp.prettier-vscode",
-				"EditorConfig.EditorConfig",
-				"bradlc.vscode-tailwindcss",
-				"quicktype.quicktype",
-				"solomonkinard.git-blame",
-				"MateuszDrewniak.hurl-runner",
-				"GitHub.vscode-github-actions",
-				"ms-vscode.makefile-tools"
-			]
-		}
-	}
+  "name": "Open Elo",
+  "remoteUser": "node",
+  "dockerComposeFile": "docker-compose.yml",
+  "updateRemoteUserUID": true,
+  "service": "app",
+  "workspaceFolder": "/workspaces",
+  "forwardPorts": [3000, 5173, 5432],
+  "portsAttributes": {
+    "3000": {
+      "label": "API",
+      "onAutoForward": "notify",
+    },
+    "5173": {
+      "label": "Client",
+      "onAutoForward": "notify",
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "notify",
+    },
+  },
+  "shutdownAction": "none",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "JacobPfeifer.pfeifer-hurl",
+        "ckolkman.vscode-postgres",
+        "esbenp.prettier-vscode",
+        "EditorConfig.EditorConfig",
+        "bradlc.vscode-tailwindcss",
+        "quicktype.quicktype",
+        "solomonkinard.git-blame",
+        "MateuszDrewniak.hurl-runner",
+        "GitHub.vscode-github-actions",
+        "ms-vscode.makefile-tools",
+      ],
+    },
+  },
 }

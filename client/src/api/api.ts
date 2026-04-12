@@ -12,17 +12,16 @@ async function apiFetch(input: string, init: RequestInit = {}): Promise<Response
   return fetch(url, { ...init, headers });
 }
 
-export type Team = 'home' | 'away';
+export type Team = 'HOME' | 'AWAY';
 
-export interface Game {
+export interface Match {
   id: string;
   score: string;
-  seasonNumber: number;
+  seasonId: string;
   leagueId: string;
-  league: League;
+  players: Player[];
   createdAt: Date;
   updatedAt: Date;
-  players: Player[];
 }
 
 export interface Player {
@@ -40,10 +39,22 @@ export type User = {
   username: string;
   email: string;
   role: UserRole;
-  leagueId?: string;
+  favoriteLeague: FavoriteLeague;
 }
 
-export type LEAGUE_TYPE = "TABLE_SOCCER" | "INDOOR_SOCCER";
+export type FavoriteLeague = {
+  id: string;
+  name: string;
+  game: string;
+  season: FavoriteLeagueSeason;
+}
+
+export type FavoriteLeagueSeason = {
+  id: string;
+  seasonNumber: number;
+}
+
+export type GAME = "TABLE_SOCCER";
 
 export interface Ranking {
   id: string;
@@ -54,16 +65,34 @@ export interface Ranking {
   leagueRankings: Ranking[];
 }
 
-export interface League {
+export type League = {
   id: string;
   name: string;
-  type: LEAGUE_TYPE;
-  seasonEnabled?: boolean;
-  seasonEndDate?: Date | null;
-  currentSeasonNumber?: number;
-  owner?: User;
-  createdAt?: Date;
-  updatedAt?: Date;
+  game: GAME;
+  owner: Owner;
+  currentSeason: Season;
+  seasons: Season[];
+  members: LeagueMember[];
+}
+
+export type Season = {
+  id: string;
+  seasonNumber: number;
+  startAt: Date;
+  endAt: Date | null;
+}
+
+export type Owner = BaseUser;
+export type LeagueMember = BaseUser;
+
+export type BaseUser = {
+  id: string;
+  username: string;
+}
+
+export type LeagueUser = {
+  id: string;
+  username: string;
 }
 
 export interface Token {
@@ -77,7 +106,12 @@ export interface Token {
   updatedAt: string;
 }
 
-export async function login(data: { user: string, password: string }) {
+export type SeasonRankings = {
+    season:   Season;
+    rankings: Ranking[];
+}
+
+export async function login(data: { email: string, password: string }) {
   const res = await fetch(`${baseUrl}/login`, {
     method: "POST",
     headers: {
@@ -150,7 +184,7 @@ export function getUsers(): Promise<User[]> {
     });
 }
 
-export function getUserById(userId: string): Promise<User> {
+export function fetchUserById(userId: string): Promise<User> {
   return apiFetch(`/users/${userId}`)
     .then(response => {
       if (!response.ok) {
@@ -223,8 +257,8 @@ export function deleteUser(userId: string): Promise<{ success: boolean; message:
 
 export function createLeague(data: {
   name: string;
-  type: LEAGUE_TYPE;
-}): Promise<void> {
+  game: GAME;
+}): Promise<string> {
   return apiFetch(`/leagues`, {
     method: 'POST',
     body: JSON.stringify(data),
@@ -241,11 +275,20 @@ export function createLeague(data: {
     });
 }
 
-export function getLeagueById(leagueId: string): Promise<League> {
+export function fetchLeagueById(leagueId: string): Promise<League> {
   return apiFetch(`/leagues/${leagueId}`)
     .then(response => response.json())
     .catch(error => {
-      console.error('Error fetching leagues:', error);
+      console.error('Error fetching league:', error);
+      throw error;
+    });
+}
+
+export function fetchSeasonById(seasonId: string): Promise<Season> {
+  return apiFetch(`/seasons/${seasonId}`)
+    .then(response => response.json())
+    .catch(error => {
+      console.error('Error fetching season:', error);
       throw error;
     });
 }
@@ -265,19 +308,19 @@ export function getAvailableSeasons(leagueId: string): Promise<number[]> {
     });
 }
 
-export function updateLeague(leagueId: string, data: { seasonEnabled?: boolean, seasonEndDate?: string }): Promise<League> {
-  return apiFetch(`/leagues/${leagueId}`, {
+export function setSeasonEnd(seasonId: string, data: { endAt?: string }): Promise<Season> {
+  return apiFetch(`/seasons/${seasonId}/set-end`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
     .then(response => {
       if (!response.ok) {
-        throw new Error('Failed to update league');
+        throw new Error('Failed to update season');
       }
       return response.json();
     })
     .catch(error => {
-      console.error('Error updating league:', error);
+      console.error('Error updating season:', error);
       throw error;
     });
 }
@@ -319,33 +362,36 @@ export function addPlayerToLeague(data: {
   })
     .then(response => {
       if (!response.ok) {
-        throw new Error('Failed to create league');
+        throw new Error('Failed to add player to league');
       }
       return response.json();
     })
     .catch(error => {
-      console.error('Error creating league:', error);
+      console.error('Error adding player to league:', error);
       throw error;
     });
 }
 
-export function createGame(data: {
+export function createMatch(data: {
   score: string;
   players: { id: string, team: Team }[];
-  leagueId: string;
+  seasonId: string;
 }): Promise<void> {
-  return apiFetch(`/games`, {
+  return apiFetch(`/seasons/${data.seasonId}/matches`, {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify({
+      score: data.score,
+      players: data.players,
+    }),
   })
     .then(response => {
       if (!response.ok) {
-        throw new Error('Failed to create game');
+        throw new Error('Failed to create match');
       }
       return response.json();
     })
     .catch(error => {
-      console.error('Error creating game:', error);
+      console.error('Error creating match:', error);
       throw error;
     });
 }
@@ -366,7 +412,16 @@ export function deleteGame(gameId: string): Promise<void> {
     });
 }
 
-export function getLeagueGames(leagueId: string, params?: { count?: number; seasonNumber?: number }): Promise<Game[]> {
+export function fetchSeasonMatches(seasonId: string, params?: { count?: number; }): Promise<Match[]> {
+  return apiFetch(`/seasons/${seasonId}/matches${params ? `${qs.stringify(params, { addQueryPrefix: true })}` : ''}`)
+    .then(response => response.json())
+    .catch(error => {
+      console.error('Error fetching matches:', error);
+      throw error;
+    });
+}
+
+export function getLeagueGames(leagueId: string, params?: { count?: number; seasonNumber?: number }): Promise<Match[]> {
   return apiFetch(`/leagues/${leagueId}/games${params ? `${qs.stringify(params, { addQueryPrefix: true })}` : ''}`)
     .then(response => response.json())
     .catch(error => {
@@ -375,13 +430,19 @@ export function getLeagueGames(leagueId: string, params?: { count?: number; seas
     });
 }
 
-export function getUserGames(userId: string, params?: { count?: number; leagueId?: string; seasonNumber?: number; skip?: number; take?: number }): Promise<{ data: Game[]; total: number }> {
+export function getUserGames(userId: string, params?: { count?: number; leagueId?: string; seasonNumber?: number; skip?: number; take?: number }): Promise<{ data: Match[]; total: number }> {
   return apiFetch(`/users/${userId}/games${params ? `${qs.stringify(params, { addQueryPrefix: true })}` : ''}`)
     .then(response => response.json())
     .catch(error => {
       console.error('Error fetching games:', error);
       throw error;
     });
+}
+
+export async function fetchSeasonRankings(seasonId: string): Promise<SeasonRankings | null> {
+  const res = await apiFetch(`/seasons/${seasonId}/rankings`);
+  if (!res.ok) return null;
+  return res.json();
 }
 
 export async function fetchUserRankings(): Promise<Ranking[] | null> {
@@ -400,6 +461,24 @@ export async function fetchLeagueRankings(leagueId: string, seasonNumber?: numbe
   const params = seasonNumber ? `?${qs.stringify({ seasonNumber })}` : '';
   const res = await apiFetch(`/rankings/league/${leagueId}${params}`);
   if (!res.ok) return null;
+  return res.json();
+}
+
+export async function fetchOwnedLeagues(userID: string): Promise<League[]> {
+  const res = await apiFetch(`/users/${userID}/owned-leagues`);
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function fetchUserJoinedLeagues(userID: string): Promise<League[]> {
+  const res = await apiFetch(`/users/${userID}/joined-leagues`);
+  if (!res.ok) return [];
+  return res.json();
+}
+
+export async function fetchUserAvailableLeagues(userID: string): Promise<League[]> {
+  const res = await apiFetch(`/users/${userID}/available-leagues`);
+  if (!res.ok) return [];
   return res.json();
 }
 

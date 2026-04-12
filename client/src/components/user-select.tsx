@@ -1,4 +1,4 @@
-import type { User } from "@/api/api";
+import type { LeagueMember } from '@/api/api';
 import {
   Select,
   SelectContent,
@@ -6,24 +6,29 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from './ui/select';
 
 type UserSelectProps = {
-  users: User[];
+  users: LeagueMember[];
   placeholder?: string;
   value?: string;
   onChange?: (userID: string) => void;
 };
 
-export function UserSelect(props: UserSelectProps) {
+export function UserSelect({
+  users,
+  placeholder,
+  value,
+  onChange,
+}: UserSelectProps) {
   return (
-    <Select value={props.value} onValueChange={props.onChange}>
+    <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="w-full">
-        <SelectValue placeholder={props.placeholder ?? "Select a user"} />
+        <SelectValue placeholder={placeholder ?? 'Select a user'} />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          {props.users.map((user) => (
+          {users.map((user) => (
             <SelectItem key={user.id} value={user.id}>
               {user.username}
             </SelectItem>

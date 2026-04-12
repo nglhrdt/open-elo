@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { LeagueEntity } from "./league.entity";
+import { SeasonEntity } from "./season.entity";
 import { UserEntity } from "./user.entity";
 
 @Entity()
@@ -10,11 +10,8 @@ export class RankingEntity {
   @Column({ default: 1000 })
   elo: number;
 
-  @Column({ default: 1 })
-  seasonNumber: number;
-
-  @ManyToOne(() => LeagueEntity, league => league.rankings)
-  league: LeagueEntity;
+  @ManyToOne(() => SeasonEntity, season => season.rankings)
+  season: SeasonEntity;
 
   @ManyToOne(() => UserEntity, user => user.rankings)
   user: UserEntity;

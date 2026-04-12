@@ -11,13 +11,17 @@ import {
   Req,
 } from "routing-controllers";
 import { Service } from "typedi";
-import { Role } from "../database/entity/user.entity";
+import { ROLE } from "../database/entity/user.entity";
+import { LeagueService } from "../services/league.service";
 import { UserService } from "../services/user.service";
 
 @Service()
 @JsonController("/users")
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private leagueService: LeagueService,
+  ) { }
 
   @Authorized()
   @Get()
@@ -39,7 +43,7 @@ export class UserController {
       username: string;
       password: string;
       email: string;
-      role: Role;
+      role: ROLE;
     },
   ) {
     return this.userService.createUser({
@@ -77,6 +81,30 @@ export class UserController {
     @QueryParam("seasonNumber") seasonNumber?: number,
   ) {
     return this.userService.getUserGames(id, { count, leagueId, skip, take, seasonNumber });
+  }
+
+  @Authorized()
+  @Get("/:id/available-leagues")
+  getUserAvailableLeagues(
+    @Param("id") id: string,
+  ) {
+    return this.leagueService.getUserAvailableLeagues(id);
+  }
+
+  @Authorized()
+  @Get("/:id/owned-leagues")
+  getUserOwnedLeagues(
+    @Param("id") id: string,
+  ) {
+    return this.leagueService.getUserOwnedLeagues(id);
+  }
+
+  @Authorized()
+  @Get("/:id/joined-leagues")
+  getUserJoinedLeagues(
+    @Param("id") id: string,
+  ) {
+    return this.leagueService.getUserJoinedLeagues(id);
   }
 
   @Post("/:id/convert-to-registered")

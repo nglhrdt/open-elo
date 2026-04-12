@@ -1,4 +1,4 @@
-import { createLeague, type LEAGUE_TYPE } from "@/api/api";
+import { createLeague, type GAME } from "@/api/api";
 import { LeagueTypeSelect } from "@/components/league-type-select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { useState } from "react";
 
 function CreateLeague() {
   const [name, setName] = useState<string>('');
-  const [type, setType] = useState<LEAGUE_TYPE>('TABLE_SOCCER');
+  const [type, setType] = useState<GAME>('TABLE_SOCCER');
 
   const queryClient = useQueryClient()
 
@@ -22,7 +22,7 @@ function CreateLeague() {
   async function handleClick() {
     await mutation.mutateAsync({
       name,
-      type,
+      game: type,
     })
 
     setName('');
