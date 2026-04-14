@@ -1,4 +1,4 @@
-import { fetchOwnedLeagues, joinLeague } from '@/api/api';
+import { fetchUserJoinedLeagues, joinLeague } from '@/api/api';
 import { AuthContext } from '@/components/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -19,7 +19,7 @@ export function JoinLeagueButton(props: { leagueId: string }) {
 
   const { data: userLeagues } = useQuery({
     queryKey: ['users', user?.id, 'leagues'],
-    queryFn: () => fetchOwnedLeagues(user!.id),
+    queryFn: () => fetchUserJoinedLeagues(user!.id),
     enabled: !!user,
   });
 
