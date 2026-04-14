@@ -1,6 +1,6 @@
 import { startOfDay } from "date-fns";
 import { Service } from "typedi";
-import { FindManyOptions, Not } from "typeorm";
+import { FindManyOptions, In, Not, } from "typeorm";
 import { AppDataSource } from "../database/data-source";
 import { GameEntity } from "../database/entity/game.entity";
 import { LeagueEntity } from "../database/entity/league.entity";
@@ -130,13 +130,21 @@ export class LeagueService {
       where: {
         members: {
           user: {
-            id: Not(id),
+            id,
           },
         },
       },
       relations: ["game", "owner", "currentSeason", "members", "members.user", "seasons"],
     });
-    return leagues.map((league) => this.toDTO(league));
+
+    const availableLeagues = await this.leagueRepository.find({
+      where: {
+        id: Not(In(leagues.map((league) => league.id))),
+      },
+      relations: ["game", "owner", "currentSeason", "members", "members.user", "seasons"],
+    });
+
+    return availableLeagues.map((league) => this.toDTO(league));
   }
 
   toDTO(entity: LeagueEntity): LeagueDTO {
