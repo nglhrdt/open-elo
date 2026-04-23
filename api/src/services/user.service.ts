@@ -86,6 +86,13 @@ export class UserService {
     });
   }
 
+  getUserByUsername(username: string) {
+    return this.repository.findOne({
+      where: { username },
+      relations: ["favoriteLeague", "favoriteLeague.currentSeason", "favoriteLeague.game"],
+    });
+  }
+
   async getUserGames(
     userId: string,
     options: {

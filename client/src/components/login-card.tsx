@@ -51,10 +51,10 @@ export function LoginCard() {
       <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Username / Email</Label>
             <Input
               id="email"
-              placeholder="Email"
+              placeholder="Username or Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />

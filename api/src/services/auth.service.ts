@@ -26,7 +26,7 @@ export class AuthService {
   ) { }
 
   async login({ email, password }: CredentialsDTO) {
-    const user = await this.userService.getUserByEmail(email);
+    const user = (await this.userService.getUserByEmail(email)) || (await this.userService.getUserByUsername(email));
 
     if (!user) throw new Error('Invalid credentials');
     if (user.role === 'guest') throw new Error('Guest users cannot log in');
