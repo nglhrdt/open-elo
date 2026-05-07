@@ -1,13 +1,14 @@
+import { GetLeaguesParams, League } from "@open-elo/shared";
 import { startOfDay } from "date-fns";
 import { Service } from "typedi";
-import { FindManyOptions, In, Not, } from "typeorm";
+import { In, Not } from "typeorm";
 import { AppDataSource } from "../database/data-source";
 import { GameEntity } from "../database/entity/game.entity";
 import { LeagueEntity } from "../database/entity/league.entity";
 import { MemberEntity } from "../database/entity/member.entity";
 import { SeasonEntity } from "../database/entity/season.entity";
 import { UserEntity } from "../database/entity/user.entity";
-import { LeagueDTO, UserDTO } from "../dtos";
+import { UserDTO } from "../dtos";
 import { CreateLeagueDTO } from "../dtos/league/create-league.dto";
 
 @Service()
@@ -19,10 +20,16 @@ export class LeagueService {
   private seasonRepository = AppDataSource.getRepository(SeasonEntity);
 
   async getAllLeagues(
-    options: FindManyOptions<LeagueEntity> = {},
-  ): Promise<LeagueDTO[]> {
+    options: GetLeaguesParams = {},
+  ) {
     const leagues = await this.leagueRepository.find({
-      ...options,
+      where: options.playerId ? {
+        members: {
+          user: {
+            id: options.playerId,
+          },
+        },
+      } : {},
       relations: ["owner", "game", "members", "members.user", "seasons", "currentSeason"],
     });
     return leagues.map((league) => this.toDTO(league));
@@ -104,11 +111,8 @@ export class LeagueService {
             id,
           },
         },
-        owner: {
-          id: Not(id),
-        },
       },
-      relations: ["game", "owner", "currentSeason", "members", "members.user", "seasons"],
+      relations: ["game", "owner", "currentSeason", "members", "members.user"],
     });
     return leagues.map((league) => this.toDTO(league));
   }
@@ -120,7 +124,7 @@ export class LeagueService {
           id,
         },
       },
-      relations: ["game", "owner", "currentSeason", "members", "members.user", "seasons"],
+      relations: ["game", "owner", "currentSeason", "members", "members.user"],
     });
     return leagues.map((league) => this.toDTO(league));
   }
@@ -134,44 +138,27 @@ export class LeagueService {
           },
         },
       },
-      relations: ["game", "owner", "currentSeason", "members", "members.user", "seasons"],
+      relations: ["game", "owner", "currentSeason", "members", "members.user"],
     });
 
     const availableLeagues = await this.leagueRepository.find({
       where: {
         id: Not(In(leagues.map((league) => league.id))),
       },
-      relations: ["game", "owner", "currentSeason", "members", "members.user", "seasons"],
+      relations: ["game", "owner", "currentSeason", "members", "members.user"],
     });
 
     return availableLeagues.map((league) => this.toDTO(league));
   }
 
-  toDTO(entity: LeagueEntity): LeagueDTO {
+  toDTO(entity: LeagueEntity): League {
     return {
       id: entity.id,
       name: entity.name,
       game: entity.game.game,
-      owner: {
-        id: entity.owner.id,
-        username: entity.owner.username,
-      },
-      currentSeason: {
-        id: entity.currentSeason.id,
-        seasonNumber: entity.currentSeason.seasonNumber,
-        startAt: entity.currentSeason.startAt,
-        endAt: entity.currentSeason.endAt,
-      },
-      seasons: entity.seasons ? entity.seasons.map((season) => ({
-        id: season.id,
-        seasonNumber: season.seasonNumber,
-        startAt: season.startAt,
-        endAt: season.endAt,
-      })) : [],
-      members: entity.members ? entity.members.map((member) => ({
-        id: member.user.id,
-        username: member.user.username,
-      })) : [],
+      ownerId: entity.owner.id,
+      memberCount: entity.members.length,
+      currentSeasonId: entity.currentSeason.id,
     };
   }
 }

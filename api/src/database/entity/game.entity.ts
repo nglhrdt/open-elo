@@ -1,6 +1,5 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { LeagueEntity } from "./league.entity";
-import { PlayerEntity } from "./player.entity";
 
 export enum GAME {
   TABLE_SOCCER = 'TABLE_SOCCER'

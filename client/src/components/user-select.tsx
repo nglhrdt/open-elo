@@ -1,4 +1,3 @@
-import type { LeagueMember } from '@/api/api';
 import {
   Select,
   SelectContent,
@@ -9,7 +8,7 @@ import {
 } from './ui/select';
 
 type UserSelectProps = {
-  users: LeagueMember[];
+  users: { id: string; username: string }[];
   placeholder?: string;
   value?: string;
   onChange?: (userID: string) => void;

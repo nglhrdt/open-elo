@@ -91,7 +91,7 @@ export class AuthService {
 
   private createAuthToken(user: UserEntity) {
     const token = this.sign(user.id, user.role);
-    return { token, user: this.toDTO(user) };
+    return{ token, user: this.toDTO(user) };
   }
 
   private toDTO(user: UserEntity): UserDTO {

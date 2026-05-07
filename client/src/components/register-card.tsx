@@ -1,73 +1,80 @@
-import { register } from '@/api/api'
-import { Button } from '@/components/ui/button'
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { useMutation } from '@tanstack/react-query'
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { useRegister } from '@/api/hooks/use-register';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router';
 
 export function RegisterCard() {
-  const navigate = useNavigate()
-  const [username, setUsername] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const mutation = useMutation({
-    mutationFn: () => register({ username, email, password }),
-    onSuccess: () => {
-      navigate('/login')
-    },
-  })
+  const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const mutation = useRegister();
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Register</CardTitle>
         <CardAction>
-          <Button variant='link'>
-            <Link to={"/login"}>Login</Link>
+          <Button variant="link">
+            <Link to={'/login'}>Login</Link>
           </Button>
         </CardAction>
       </CardHeader>
       <CardContent>
         <form
           onSubmit={(e) => {
-            e.preventDefault()
-            mutation.mutate()
+            e.preventDefault();
+            mutation.mutate(
+              { username, email, password },
+              {
+                onSuccess: () => {
+                  navigate('/login');
+                },
+              },
+            );
           }}
-          className='flex flex-col gap-4'
+          className="flex flex-col gap-4"
         >
-          <div className='flex flex-col gap-1'>
-            <Label htmlFor='username'>Username</Label>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="username">Username</Label>
             <Input
-              id='username'
+              id="username"
               placeholder="Username"
               value={username}
-              onChange={e => setUsername(e.target.value)}
+              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
-          <div className='flex flex-col gap-1'>
-            <Label htmlFor='email'>Email</Label>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="email">Email</Label>
             <Input
-              id='email'
+              id="email"
               placeholder="Email"
-              type='email'
+              type="email"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <div className='flex flex-col gap-1'>
-            <Label htmlFor='password'>Password</Label>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="password">Password</Label>
             <Input
-              id='password'
+              id="password"
               placeholder="Password"
               type="password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <div className='pt-4 flex justify-end'>
-            <Button disabled={mutation.isPending} type='submit'>
+          <div className="pt-4 flex justify-end">
+            <Button disabled={mutation.isPending} type="submit">
               {mutation.isPending ? 'Registering...' : 'Register'}
             </Button>
           </div>
@@ -79,5 +86,5 @@ export function RegisterCard() {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

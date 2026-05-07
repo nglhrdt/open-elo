@@ -1,6 +1,6 @@
-import type { Match } from '@/api/api';
 import { useMemo } from 'react';
 import { MatchTeam } from './match-team';
+import type { Match } from '@open-elo/shared';
 
 type MatchListItemProps = { match: Match };
 

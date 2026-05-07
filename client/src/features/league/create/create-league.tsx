@@ -1,31 +1,31 @@
-import { createLeague, type GAME } from "@/api/api";
-import { LeagueTypeSelect } from "@/components/league-type-select";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useCreateLeague } from '@/api/hooks/use-leagues';
+import { LeagueTypeSelect } from '@/components/league-type-select';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import type { GAME } from '@open-elo/shared';
+import { useState } from 'react';
 
 function CreateLeague() {
   const [name, setName] = useState<string>('');
   const [type, setType] = useState<GAME>('TABLE_SOCCER');
 
-  const queryClient = useQueryClient()
-
-  const mutation = useMutation({
-    mutationFn: createLeague,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['leagues'] });
-    },
-  })
+  const mutation = useCreateLeague();
 
   async function handleClick() {
     await mutation.mutateAsync({
       name,
       game: type,
-    })
+    });
 
     setName('');
+    setType('TABLE_SOCCER');
   }
 
   return (
@@ -37,7 +37,7 @@ function CreateLeague() {
         <Input
           type="text"
           value={name}
-          onChange={e => setName(e.target.value)}
+          onChange={(e) => setName(e.target.value)}
         />
         <LeagueTypeSelect onChange={setType} value={type} />
       </CardContent>

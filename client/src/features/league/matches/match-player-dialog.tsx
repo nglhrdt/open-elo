@@ -1,24 +1,24 @@
-import type { User } from '@/api/api';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router';
 
 type MatchPlayerDialogProps = {
-  user: User;
+  playerId: string;
+  playername: string;
   bold?: boolean;
   leagueId: string;
   seasonId: string;
 };
 
 export function MatchPlayerDialog(props: MatchPlayerDialogProps) {
-  const { bold, leagueId, seasonId, user } = props;
+  const { bold, leagueId, seasonId, playerId, playername } = props;
 
   const userUsernameStyle = `${bold ? 'font-extrabold underline' : ''}`;
-  const playerUrl = `/leagues/${leagueId}/seasons/${seasonId}/player/${user.id}`;
+  const playerUrl = `/leagues/${leagueId}/seasons/${seasonId}/player/${playerId}`;
 
   return (
     <Link to={playerUrl}>
       <Button variant="link">
-        <span className={userUsernameStyle}>{user.username}</span>
+        <span className={userUsernameStyle}>{playername}</span>
       </Button>
     </Link>
   );

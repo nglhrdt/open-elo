@@ -1,7 +1,4 @@
 import { IsDate, IsEnum, IsInt, IsISO8601, IsPositive, IsString, IsUUID, ValidateNested } from "class-validator";
-import { RankingDTO } from "..";
-import { LeagueDTO } from "../league";
-import { MatchDTO } from "../match/match.dto";
 import { GAME } from "../../database/entity/game.entity";
 
 export class SeasonLeagueDTO {

@@ -62,7 +62,7 @@ export class UserService {
           email: email ?? null,
           passwordHash: passwordHash ?? null,
         });
-        return await repo.save(entity);
+        return repo.save(entity);
       } catch (e: any) {
         if (e?.code === "23505") {
           throw new Error("Email or username already in use");

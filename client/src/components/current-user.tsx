@@ -1,17 +1,9 @@
-import { fetchCurrentUser } from "@/api/api";
-import { useQuery } from "@tanstack/react-query";
+import { useGetMe } from '@/api/hooks/use-me';
 
 export function CurrentUser() {
-  const { isPending, data: user } = useQuery({
-    queryKey: ['current-user'],
-    queryFn: fetchCurrentUser,
-  })
+  const { isPending, data: user } = useGetMe();
 
   if (isPending || !user) return null;
 
-  return (
-    <div className="flex items-center gap-2">
-      {user.username}
-    </div>
-  );
+  return <div className="flex items-center gap-2">{user.username}</div>;
 }

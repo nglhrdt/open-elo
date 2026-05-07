@@ -2,13 +2,13 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react-swc'
 import path from "path"
 import { defineConfig } from 'vite'
+import type { PluginOption } from 'vite'
+
+const plugins = [react(), tailwindcss()] as unknown as PluginOption[]
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
+  plugins,
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -24,6 +24,9 @@ export default defineConfig({
             return 'vendor';
           }
           // Feature-based splitting for source code only
+          if (id.includes('/src/components/')) {
+            return 'shared-components';
+          }
           if (id.includes('/src/features/match/')) {
             return 'match-features';
           }

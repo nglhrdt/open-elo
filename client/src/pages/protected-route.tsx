@@ -1,16 +1,12 @@
-import { fetchCurrentUser } from "@/api/api";
-import { AuthContext } from "@/components/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { useContext, useEffect } from "react";
-import { Outlet, useNavigate } from "react-router";
+import { useGetMe } from '@/api/hooks/use-me';
+import { AuthContext } from '@/components/AuthContext';
+import { useContext, useEffect } from 'react';
+import { Outlet, useNavigate } from 'react-router';
 
 export function ProtectedRoute() {
   const auth = useContext(AuthContext);
   const navigate = useNavigate();
-  const { isPending, data: user } = useQuery({
-    queryKey: ['current-user'],
-    queryFn: fetchCurrentUser,
-  });
+  const { isPending, data: user } = useGetMe();
 
   // Sync fetched user into auth context (avoid setState during render)
   useEffect(() => {

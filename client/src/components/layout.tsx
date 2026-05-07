@@ -1,11 +1,13 @@
-import { Outlet, useLocation } from "react-router";
-import { AppSidebar } from './app-sidebar';
-import { SidebarProvider, SidebarInset, SidebarTrigger } from './ui/sidebar';
 import { Menu } from 'lucide-react';
+import { Outlet, useLocation } from 'react-router';
+import { AppSidebar } from './sidebar/app-sidebar';
+import { SidebarInset, SidebarProvider, SidebarTrigger } from './ui/sidebar';
 
 export function Layout() {
   const location = useLocation();
-  const showSidebar = !location.pathname.startsWith('/login') && !location.pathname.startsWith('/register');
+  const showSidebar =
+    !location.pathname.startsWith('/login') &&
+    !location.pathname.startsWith('/register');
 
   if (!showSidebar) {
     return (
@@ -31,5 +33,5 @@ export function Layout() {
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

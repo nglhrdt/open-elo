@@ -1,3 +1,4 @@
+import { GetSeasonsParams } from "@open-elo/shared";
 import {
   Authorized,
   Body,
@@ -6,7 +7,8 @@ import {
   Param,
   Post,
   Put,
-  QueryParam
+  QueryParam,
+  QueryParams
 } from "routing-controllers";
 import { Service } from "typedi";
 import { CreateMatchDTO, CreateSeasonDTO } from "../dtos";
@@ -20,6 +22,12 @@ export class SeasonController {
     private seasonService: SeasonService,
     private matchService: MatchService,
   ) { }
+
+  @Authorized()
+  @Get("/")
+  async getSeasons(@QueryParams() params: GetSeasonsParams) {
+    return this.seasonService.getSeasons(params.leagueId);
+  }
 
   @Authorized()
   @Get("/:id")

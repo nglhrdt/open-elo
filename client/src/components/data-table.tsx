@@ -15,64 +15,41 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { useEffect } from 'react';
+import { useState } from 'react';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   pageSize?: number;
-  pageIndex?: number;
   totalCount?: number;
-  manualPagination?: boolean;
   onPaginationChange?: (pageIndex: number, pageSize: number) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  pageSize = 10,
-  pageIndex,
+  pageSize: initialPageSize = 10,
   totalCount,
-  manualPagination = false,
   onPaginationChange,
 }: DataTableProps<TData, TValue>) {
+  const isManual = onPaginationChange !== undefined;
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: initialPageSize });
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    ...(!manualPagination && { getPaginationRowModel: getPaginationRowModel() }),
-    manualPagination,
-    pageCount: manualPagination && totalCount !== undefined ? Math.ceil(totalCount / pageSize) : undefined,
-    ...(pageIndex !== undefined && {
-      state: {
-        pagination: {
-          pageIndex,
-          pageSize,
-        },
-      },
-      onPaginationChange: (updater) => {
-        const currentState = { pageIndex, pageSize };
-        const newState = typeof updater === 'function'
-          ? updater(currentState)
-          : updater;
-        onPaginationChange?.(newState.pageIndex, newState.pageSize);
-      },
-    }),
-    initialState: {
-      pagination: {
-        pageSize,
-      },
+    ...(!isManual && { getPaginationRowModel: getPaginationRowModel() }),
+    manualPagination: isManual,
+    pageCount: isManual && totalCount !== undefined ? Math.ceil(totalCount / pagination.pageSize) : undefined,
+    state: { pagination },
+    onPaginationChange: (updater) => {
+      const newState = typeof updater === 'function' ? updater(pagination) : updater;
+      setPagination(newState);
+      onPaginationChange?.(newState.pageIndex, newState.pageSize);
     },
   });
 
-  const paginationState = table.getState().pagination;
-
-  useEffect(() => {
-    // Only call onPaginationChange if we're not using controlled state (pageIndex is undefined)
-    if (pageIndex === undefined && onPaginationChange) {
-      onPaginationChange(paginationState.pageIndex, paginationState.pageSize);
-    }
-  }, [paginationState.pageIndex, paginationState.pageSize, pageIndex, onPaginationChange]);
 
   return (
     <div className="space-y-4">

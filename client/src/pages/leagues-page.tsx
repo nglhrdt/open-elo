@@ -1,6 +1,6 @@
 import { AuthContext } from '@/components/AuthContext'
 import { CreateLeagueDialog } from '@/features/league/create-league-dialog/create-league-dialog'
-import { LeagueList } from '@/features/league/matches/league-list'
+import { LeagueList } from '@/features/league/list/league-list'
 import { useContext } from 'react'
 
 export function LeaguesPage() {

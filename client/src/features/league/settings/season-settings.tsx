@@ -1,43 +1,32 @@
-import { setSeasonEnd, type League, type Season } from '@/api/api';
+import { useGetSeasonById, useSetSeasonEnd } from '@/api/hooks/use-seasons';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useState } from 'react';
 
 interface SeasonSettingsProps {
-  league: League;
+  seasonId: string;
 }
 
-export function SeasonSettings({ league }: SeasonSettingsProps) {
-  const queryClient = useQueryClient();
+export function SeasonSettings({ seasonId }: SeasonSettingsProps) {
+  const { data: season } = useGetSeasonById(seasonId);
+  const mutation = useSetSeasonEnd(seasonId);
   const [seasonEndDate, setSeasonEndDate] = useState(
-    league.currentSeason.endAt
-      ? new Date(league.currentSeason.endAt).toISOString().split('T')[0]
-      : '',
+    season?.endAt ? new Date(season.endAt).toISOString().split('T')[0] : '',
   );
-  const mutation = useMutation<Season, Error, { endAt?: string }> ({
-    mutationFn: (data: { endAt?: string }) =>
-      setSeasonEnd(league.currentSeason.id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['leagues', league.id] });
-      alert('Season settings updated successfully');
-    },
-    onError: (error: Error) => {
-      alert(error.message || 'Failed to update season settings');
-    },
-  });
 
   const handleSave = () => {
     mutation.mutate({
       endAt: seasonEndDate || undefined,
     });
   };
+
+  if (!season) return null;
 
   return (
     <>
@@ -62,12 +51,11 @@ export function SeasonSettings({ league }: SeasonSettingsProps) {
             season will end and a new one will start automatically.
           </p>
         </div>
-        {league.currentSeason.seasonNumber &&
-          league.currentSeason.seasonNumber > 1 && (
-            <div className="text-sm text-muted-foreground">
-              Current Season: {league.currentSeason.seasonNumber}
-            </div>
-          )}
+        {season.seasonNumber && season.seasonNumber > 1 && (
+          <div className="text-sm text-muted-foreground">
+            Current Season: {season.seasonNumber}
+          </div>
+        )}
 
         <Button onClick={handleSave} disabled={mutation.isPending}>
           {mutation.isPending ? 'Saving...' : 'Save Settings'}

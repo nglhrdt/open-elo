@@ -1,0 +1,9 @@
+{
+  "name": "open-elo",
+  "private": true,
+  "workspaces": [
+    "api",
+    "client",
+    "shared"
+  ]
+}
