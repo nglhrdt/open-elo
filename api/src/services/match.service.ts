@@ -2,7 +2,7 @@ import { GetMatchesParams, Match } from "@open-elo/shared";
 import { Service } from "typedi";
 import { In } from "typeorm";
 import { AppDataSource } from "../database/data-source";
-import { MatchEntity } from "../database/entity/match.entity";
+import { MatchEntity, WINNER } from "../database/entity/match.entity";
 import { SeasonEntity } from "../database/entity/season.entity";
 import { UserEntity } from "../database/entity/user.entity";
 import { CreateMatchDTO } from "../dtos";
@@ -47,7 +47,8 @@ export class MatchService {
     });
 
     return this.matchRepository.save({
-      score,
+      homeScore: parseInt(score.split("-")[0], 10),
+      awayScore: parseInt(score.split("-")[1], 10),
       season,
       players: playerEntities,
     });
@@ -100,7 +101,8 @@ export class MatchService {
     });
 
     return this.matchRepository.save({
-      score,
+      homeScore: parseInt(score.split("-")[0], 10),
+      awayScore: parseInt(score.split("-")[1], 10),
       season,
       createdAt,
       players: playerEntities,
@@ -148,10 +150,11 @@ export class MatchService {
   toDto(match: MatchEntity): Match {
     return {
       id: match.id,
-      score: match.score,
+      score: `${match.homeScore}-${match.awayScore}`,
       seasonId: match.season.id,
       leagueId: match.season.league.id,
       createdAt: match.createdAt,
+      winningTeam: match.homeScore > match.awayScore ? WINNER.HOME : match.awayScore > match.homeScore ? WINNER.AWAY : WINNER.DRAW,
       players: match.players.map((player) => ({
         userId: player.user.id,
         username: player.user.username,

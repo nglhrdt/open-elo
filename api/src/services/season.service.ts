@@ -3,12 +3,10 @@ import { Service } from "typedi";
 import { And, IsNull, LessThan, Not } from "typeorm";
 import { AppDataSource } from "../database/data-source";
 import { LeagueEntity } from "../database/entity/league.entity";
-import { MatchEntity } from "../database/entity/match.entity";
+import { MatchEntity, WINNER } from "../database/entity/match.entity";
 import { RankingEntity } from "../database/entity/ranking.entity";
 import { SeasonEntity } from "../database/entity/season.entity";
-import { MatchDTO } from "../dtos";
 import { CreateSeasonDTO } from "../dtos/season";
-import e from "express";
 
 @Service()
 export class SeasonService {
@@ -96,10 +94,11 @@ export class SeasonService {
 
     return matches.map(match => ({
       id: match.id,
-      score: match.score,
+      score: `${match.homeScore}-${match.awayScore}`,
       seasonId: match.season.id,
       leagueId: match.season.league.id,
       createdAt: match.createdAt,
+      winningTeam: match.homeScore > match.awayScore ? WINNER.HOME : match.awayScore > match.homeScore ? WINNER.AWAY : WINNER.DRAW,
       players: match.players.map(player => ({
         userId: player.user.id,
         username: player.user.username,

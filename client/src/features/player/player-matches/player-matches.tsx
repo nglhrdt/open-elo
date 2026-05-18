@@ -1,6 +1,6 @@
 import { useGetMatches } from '@/api/hooks/use-matches';
 import { DataTable } from '@/components/data-table';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Match } from '@open-elo/shared';
 import { type ColumnDef } from '@tanstack/react-table';
 import { useState } from 'react';
@@ -43,7 +43,9 @@ export function PlayerMatches({ playerId, seasonId }: PlayerMatchesProps) {
 
   return (
     <Card>
-      <CardHeader>Matches</CardHeader>
+      <CardHeader>
+        <CardTitle>Matches</CardTitle>
+      </CardHeader>
       <CardContent className="space-y-6">
         <DataTable
           columns={columns}

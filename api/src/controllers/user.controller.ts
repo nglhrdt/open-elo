@@ -14,6 +14,7 @@ import { Service } from "typedi";
 import { ROLE } from "../database/entity/user.entity";
 import { LeagueService } from "../services/league.service";
 import { UserService } from "../services/user.service";
+import { StatsService } from "../services/stats.service";
 
 @Service()
 @JsonController("/users")
@@ -21,6 +22,7 @@ export class UserController {
   constructor(
     private userService: UserService,
     private leagueService: LeagueService,
+    private statsService: StatsService,
   ) { }
 
   @Authorized()
@@ -117,5 +119,13 @@ export class UserController {
       body.email,
       body.password,
     );
+  }
+
+  @Get("/:id/seasons/:seasonId/stats")
+  getUserSeasonStats(
+    @Param("id") userId: string,
+    @Param("seasonId") seasonId: string,
+  ) {
+    return this.statsService.getUserSeasonStats(userId, seasonId);
   }
 }

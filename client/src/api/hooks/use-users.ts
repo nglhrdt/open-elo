@@ -1,4 +1,4 @@
-import type { League, User } from '@open-elo/shared';
+import type { League, SeasonStats, User } from '@open-elo/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../api-client';
 
@@ -99,5 +99,16 @@ export const useGetUserAvailableLeagues = (userId: string) => {
   return useQuery<League[], Error>({
     queryKey: ['users', userId, 'available-leagues'],
     queryFn: () => fetchUserAvailableLeagues(userId),
+  });
+}
+
+export async function fetchUserSeasonStats(userId: string, seasonId: string): Promise<SeasonStats> {
+  return apiClient.get<SeasonStats>(`/users/${userId}/seasons/${seasonId}/stats`);
+}
+
+export const useGetUserSeasonStats = (userId: string, seasonId: string) => {
+  return useQuery({
+    queryKey: ['users', userId, 'seasons', seasonId, 'stats'],
+    queryFn: () => fetchUserSeasonStats(userId, seasonId),
   });
 }

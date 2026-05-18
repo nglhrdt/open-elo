@@ -1,3 +1,5 @@
+import { WINNER } from "../../api/src/database/entity/match.entity";
+
 export type GetMatchesParams = {
     playerId: string;
     seasonId: string;
@@ -22,6 +24,7 @@ export type Match = {
     seasonId: string;
     leagueId: string;
     createdAt: Date;
+    winningTeam: WINNER;
     players: MatchPlayer[];
 };
 
@@ -31,7 +34,7 @@ export type GetMatchesResponse = {
 };
 
 export type CreateMatchData = {
-  score: string;
-  players: { id: string, team: Team }[];
-  seasonId: string;
+    score: string;
+    players: { id: string, team: Team }[];
+    seasonId: string;
 }

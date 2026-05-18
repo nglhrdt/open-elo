@@ -6,4 +6,5 @@ export * from './player';
 export * from './ranking';
 export * from './register';
 export * from './season';
+export * from './stats';
 export * from './user';
