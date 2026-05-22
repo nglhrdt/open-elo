@@ -1,20 +1,30 @@
-import { IsEnum, IsInt, IsUUID, ValidateNested } from "class-validator";
+import { IsEnum, IsInt, IsString, IsUUID, ValidateNested } from "class-validator";
 import { TEAM } from "../../database/entity/player.entity";
 import { UserDTO } from "../user";
+import { MatchPlayer } from "@open-elo/shared";
 
-export class PlayerDTO {
+export class PlayerDTO implements MatchPlayer {
     @IsUUID()
-    id: string;
+    userId!: string;
+
+    @IsString()
+    username!: string;
+
+    @IsInt()
+    eloChange!: number | null;
+
+    @IsUUID()
+    id!: string;
 
     @IsEnum(TEAM)
-    team: TEAM;
+    team!: TEAM;
 
     @ValidateNested()
-    user: UserDTO;
+    user!: UserDTO;
 
     @IsInt()
-    eloBefore: number | null;
+    eloBefore!: number | null;
 
     @IsInt()
-    eloAfter: number | null;
+    eloAfter!: number | null;
 }

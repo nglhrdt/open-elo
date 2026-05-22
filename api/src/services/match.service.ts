@@ -31,7 +31,7 @@ export class MatchService {
 
     const eloSnapshot = await this.eloService.updatePlayerElosWithSnapshot(
       players,
-      this.getResult({ players, score }),
+      this.getResult({ players, score, seasonId }),
       seasonId,
     );
 
@@ -46,15 +46,19 @@ export class MatchService {
       }];
     });
 
+    const homeScore = parseInt(score.split("-")[0], 10);
+    const awayScore = parseInt(score.split("-")[1], 10);
+
     return this.matchRepository.save({
-      homeScore: parseInt(score.split("-")[0], 10),
-      awayScore: parseInt(score.split("-")[1], 10),
+      homeScore,
+      awayScore,
+      winner: homeScore > awayScore ? WINNER.HOME : awayScore > homeScore ? WINNER.AWAY : WINNER.DRAW,
       season,
       players: playerEntities,
     });
   }
 
-  private getResult(matchData: CreateMatchDTO): Result {
+  private getResult(matchData: CreateMatchDTO & { seasonId: string }): Result {
     const [homeScore, awayScore] = matchData.score
       .split("-")
       .map((s) => parseInt(s, 10));
@@ -85,7 +89,7 @@ export class MatchService {
 
     const eloSnapshot = await this.eloService.updatePlayerElosWithSnapshot(
       players,
-      this.getResult({ players, score }),
+      this.getResult({ players, score, seasonId }),
       seasonId,
     );
 
@@ -100,11 +104,15 @@ export class MatchService {
       }];
     });
 
+    const homeScore = parseInt(score.split("-")[0], 10);
+    const awayScore = parseInt(score.split("-")[1], 10);
+
     return this.matchRepository.save({
-      homeScore: parseInt(score.split("-")[0], 10),
-      awayScore: parseInt(score.split("-")[1], 10),
+      homeScore,
+      awayScore,
       season,
       createdAt,
+      winner: homeScore > awayScore ? WINNER.HOME : awayScore > homeScore ? WINNER.AWAY : WINNER.DRAW,
       players: playerEntities,
     });
   }
@@ -154,7 +162,7 @@ export class MatchService {
       seasonId: match.season.id,
       leagueId: match.season.league.id,
       createdAt: match.createdAt,
-      winningTeam: match.homeScore > match.awayScore ? WINNER.HOME : match.awayScore > match.homeScore ? WINNER.AWAY : WINNER.DRAW,
+      winningTeam: match.winner,
       players: match.players.map((player) => ({
         userId: player.user.id,
         username: player.user.username,

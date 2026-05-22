@@ -13,7 +13,7 @@ export function MatchPlayerDialog(props: MatchPlayerDialogProps) {
   const { bold, leagueId, seasonId, playerId, playername } = props;
 
   const userUsernameStyle = `${bold ? 'font-extrabold underline' : ''}`;
-  const playerUrl = `/leagues/${leagueId}/seasons/${seasonId}/player/${playerId}`;
+  const playerUrl = `/leagues/${leagueId}/seasons/${seasonId}/players/${playerId}`;
 
   return (
     <Link to={playerUrl}>

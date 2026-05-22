@@ -97,7 +97,7 @@ export function CreateMatchForm({ seasonId, onGameCreated }: CreateGameProps) {
       />
       <SelectGoals goals={awayScore} onSelect={setAwayScore} />
       <Button
-        disabled={selectedIDs.length < 4}
+        disabled={selectedIDs.length < 4 || (homeScore === 0 && awayScore === 0)}
         onClick={handleCreateButtonClick}
       >
         Create Game

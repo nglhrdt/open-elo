@@ -1,27 +1,6 @@
-
-// export type SeasonStats = {
-//     matchesCount: number;
-//     winningRate: number;
-//     losingRate: number;
-//     drawRate: number;
-//     mate: Mate | null;
-//     rival: Mate | null;
-//     mateWinCounter: Map<string, { userId: string, username: string, count: number }>;
-//     mateLossCounter: Map<string, { userId: string, username: string, count: number }>;
-//     rivalWinCounter: Map<string, { userId: string, username: string, count: number }>;
-//     rivalLossCounter: Map<string, { userId: string, username: string, count: number }>;
-// }
-
-// export type Mate = {
-//     id: string;
-//     username: string;
-//     winCount: number;
-//     lossCount: number;
-//     winningRate: number;
-//     losingRate: number;
-// }
-
 export type SeasonStats = {
+  elo: number | null;
+  position: number | null;
   byPlayer: Map<string, PlayerStats>;
   total: Total;
   summary: SeasonSummary
@@ -56,4 +35,9 @@ export type Total = {
   won: number;
   lost: number;
   draw: number;
+}
+
+export type EloChartData = {
+  date: string;
+  [username: string]: string | number;
 }

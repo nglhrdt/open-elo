@@ -17,6 +17,11 @@ export class MemberService {
         },
       },
       relations: ["user"],
+      order: {
+        user: {
+          username: "ASC",
+        },
+      },
     });
     return this.toDTOs(members.map((member) => member.user));
   }

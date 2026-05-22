@@ -8,17 +8,17 @@ export enum GAME {
 @Entity()
 export class GameEntity {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
   @Column({ type: 'enum', enum: GAME , nullable: false })
-  game: GAME;
+  game!: GAME;
 
   @OneToMany(() => LeagueEntity, league => league.game, { lazy: true })
-  leagues: LeagueEntity[];
+  leagues!: LeagueEntity[];
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt?: Date;
 }

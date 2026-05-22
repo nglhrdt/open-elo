@@ -1,5 +1,4 @@
 import { useGetSeasons } from '@/api/hooks/use-seasons';
-import { useNavigate } from 'react-router';
 import {
   Select,
   SelectContent,
@@ -11,20 +10,16 @@ import {
 export function SeasonSelect({
   seasonId,
   leagueId,
-  playerId,
+  onSeasonChange,
 }: {
   seasonId: string;
   leagueId: string;
-  playerId: string;
+  onSeasonChange: (seasonId: string) => void;
 }) {
   const { data: seasons } = useGetSeasons({ leagueId });
 
-  const navigate = useNavigate();
-
   function handleSeasonChange(selectedSeasonId: string): void {
-    navigate(
-      `/leagues/${leagueId}/seasons/${selectedSeasonId}/players/${playerId}`,
-    );
+    onSeasonChange(selectedSeasonId);
   }
 
   return (

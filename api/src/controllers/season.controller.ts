@@ -11,7 +11,7 @@ import {
   QueryParams
 } from "routing-controllers";
 import { Service } from "typedi";
-import { CreateMatchDTO, CreateSeasonDTO } from "../dtos";
+import { CreateMatchDTO } from "../dtos";
 import { MatchService } from "../services/match.service";
 import { SeasonService } from "../services/season.service";
 
@@ -36,12 +36,6 @@ export class SeasonController {
   }
 
   @Authorized()
-  @Post("/")
-  async createSeason(@Body() dto: CreateSeasonDTO) {
-    return this.seasonService.createSeason(dto);
-  }
-
-  @Authorized()
   @Put("/:id/set-end")
   async setSeasonEnd(@Param("id") id: string, @Body() body: { endAt?: Date }) {
     return this.seasonService.setSeasonEnd(id, body.endAt);
@@ -63,6 +57,12 @@ export class SeasonController {
   @Get("/:id/matches")
   async getSeasonMatches(@Param("id") id: string, @QueryParam("count") count?: number) {
     return this.seasonService.getSeasonMatches(id, count);
+  }
+
+  @Authorized()
+  @Get("/:id/elo-chart")
+  async getSeasonEloChart(@Param("id") id: string) {
+    return this.seasonService.getSeasonEloChart(id);
   }
 
   @Post("/stop-seasons")

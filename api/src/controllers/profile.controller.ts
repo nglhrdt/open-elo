@@ -4,14 +4,20 @@ import { UserDTO } from "../dtos";
 import { ProfileService } from "../services/profile.service";
 
 @Service()
-@JsonController("/me")
+@JsonController()
 export class ProfileController {
 
   constructor(private profileService: ProfileService) { }
 
   @Authorized()
-  @Get("/")
+  @Get("/me")
   me(@CurrentUser() user: UserDTO) {
     return this.profileService.getMe(user);
+  }
+
+  @Authorized()
+  @Get("/profile")
+  getProfile(@CurrentUser() user: UserDTO) {
+    return this.profileService.getProfile(user);
   }
 }

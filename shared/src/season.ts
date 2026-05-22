@@ -1,3 +1,5 @@
+import type { GAME } from "./league";
+
 export type GetSeasonsParams = {
     leagueId: string;
 };
@@ -7,7 +9,7 @@ export type Season = {
     league: {
         id: string;
         name: string;
-        game: 'TABLE_SOCCER';
+        game: GAME;
     };
     seasonNumber: number;
     isCurrentSeason: boolean;

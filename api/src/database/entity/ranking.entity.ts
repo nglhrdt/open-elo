@@ -5,14 +5,14 @@ import { UserEntity } from "./user.entity";
 @Entity()
 export class RankingEntity {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
   @Column({ default: 1000 })
-  elo: number;
+  elo!: number;
 
   @ManyToOne(() => SeasonEntity, season => season.rankings)
-  season: SeasonEntity;
+  season!: SeasonEntity;
 
   @ManyToOne(() => UserEntity, user => user.rankings)
-  user: UserEntity;
+  user!: UserEntity;
 }

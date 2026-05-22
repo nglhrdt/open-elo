@@ -3,8 +3,8 @@ import { GAME } from "../../database/entity/game.entity";
 
 export class CreateGameDTO {
   @IsString()
-  name: string;
+  name!: string;
 
   @IsEnum(GAME)
-  game: GAME;
+  game!: GAME;
 }

@@ -1,4 +1,4 @@
-import { Match, Ranking, Season } from "@open-elo/shared";
+import { EloChartData, Match, Season } from "@open-elo/shared";
 import { Service } from "typedi";
 import { And, IsNull, LessThan, Not } from "typeorm";
 import { AppDataSource } from "../database/data-source";
@@ -6,7 +6,7 @@ import { LeagueEntity } from "../database/entity/league.entity";
 import { MatchEntity, WINNER } from "../database/entity/match.entity";
 import { RankingEntity } from "../database/entity/ranking.entity";
 import { SeasonEntity } from "../database/entity/season.entity";
-import { CreateSeasonDTO } from "../dtos/season";
+import { RankingDTO } from "../dtos";
 
 @Service()
 export class SeasonService {
@@ -23,21 +23,6 @@ export class SeasonService {
     });
 
     return seasons.map(season => this.toDTO(season));
-  }
-
-  async createSeason(dto: CreateSeasonDTO) {
-    const league = await this.leagueRepository.findOne({
-      where: { id: dto.leagueId },
-      relations: ["league"],
-    });
-    if (!league) throw new Error("League not found");
-
-    return this.seasonRepository.save({
-      league,
-      seasonNumber: 1,
-      startAt: dto.startAt,
-      endAt: dto.endAt,
-    }).then(season => this.toDTO(season));
   }
 
   async getSeasonById(id: string) {
@@ -68,16 +53,18 @@ export class SeasonService {
     return this.getSeasonById(id);
   }
 
-  createRankingDTOs(rankings: RankingEntity[]): Ranking[] {
+  createRankingDTOs(rankings: RankingEntity[]): RankingDTO[] {
     let positionCounter = 1;
-    return rankings.sort((r1, r2) => r2.elo - r1.elo).map((ranking, i, rankings) => ({
-      id: ranking.id,
-      position: i === 0 || rankings[i - 1].elo === ranking.elo ? positionCounter : ++positionCounter,
-      userId: ranking.user.id,
-      username: ranking.user.username,
-      elo: ranking.elo,
-      leagueId: ranking.season.league.id,
-    }));
+    return rankings
+      .sort((r1, r2) => r2.elo - r1.elo)
+      .map((ranking, i, rankings) => ({
+        id: ranking.id,
+        position: i === 0 || rankings[i - 1].elo === ranking.elo ? positionCounter : ++positionCounter,
+        userId: ranking.user.id,
+        username: ranking.user.username,
+        elo: ranking.elo,
+        leagueId: ranking.season.league.id,
+      }));
   }
 
   async getSeasonMatches(id: string, count?: number): Promise<Match[] | null> {
@@ -108,6 +95,32 @@ export class SeasonService {
         eloChange: 0,
       })),
     }));
+  }
+
+  async getSeasonEloChart(seasonId: string, lastMatchesCount = 10): Promise<EloChartData[]> {
+    const matches = await this.matchRepository.find({
+      where: {
+        season: {
+          id: seasonId,
+        },
+      },
+      order: { createdAt: "ASC" },
+      relations: ["players", "players.user"],
+    });
+
+    const chartData = matches.reduce((acc, match) => {
+      match.players.forEach(player => {
+        acc.lastPlayerElos.set(player.user.id, { username: player.user.username, elo: player.eloAfter ?? 1000 });
+      });
+      const dataSet: { date: string, [username: string]: string | number } = { date: match.createdAt.toISOString() };
+      acc.lastPlayerElos.forEach((value, key) => {
+        dataSet[value.username] = value.elo;
+      });
+      acc.data.push(dataSet);
+      return acc;
+    }, { lastPlayerElos: new Map<string, { username: string, elo: number }>(), data: [] as EloChartData[] });
+
+    return chartData.data.slice(-lastMatchesCount);
   }
 
   async stopSeasons() {

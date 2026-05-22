@@ -1,5 +1,3 @@
-import { WINNER } from "../../api/src/database/entity/match.entity";
-
 export type GetMatchesParams = {
     playerId: string;
     seasonId: string;
@@ -8,6 +6,8 @@ export type GetMatchesParams = {
 };
 
 export type Team = 'HOME' | 'AWAY';
+
+export type WINNER = 'HOME' | 'AWAY' | 'DRAW';
 
 export type MatchPlayer = {
     userId: string;

@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { PlayerEntity, TEAM } from "./player.entity";
+import { PlayerEntity } from "./player.entity";
 import { SeasonEntity } from "./season.entity";
 
 export enum WINNER {
@@ -11,29 +11,29 @@ export enum WINNER {
 @Entity()
 export class MatchEntity {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
   @Column({ name: 'home_score' })
-  homeScore: number;
+  homeScore!: number;
 
   @Column({ name: 'away_score' })
-  awayScore: number;
+  awayScore!: number;
 
-  @Column()
-  winner: WINNER;
+  @Column({ type: 'enum', enum: WINNER, nullable: false })
+  winner!: WINNER;
 
   @OneToMany(() => PlayerEntity, player => player.match, { eager: true, cascade: true })
-  players: PlayerEntity[];
+  players!: PlayerEntity[];
 
   @ManyToOne(() => SeasonEntity, season => season.matches, {
     nullable: false,
     eager: false,
   })
-  season: SeasonEntity;
+  season!: SeasonEntity;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt?: Date;
 }

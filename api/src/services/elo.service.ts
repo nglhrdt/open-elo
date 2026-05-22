@@ -77,7 +77,7 @@ export class EloService {
     await this.rankingRepository.save([...homeTeamRankings, ...awayTeamRankings]);
   }
 
-  private async getElo(playerId: string, seasonId: string) {
+  public async getElo(playerId: string, seasonId: string) {
     const ranking = await this.rankingRepository.findOne({
       where: { user: { id: playerId }, season: { id: seasonId } },
     });

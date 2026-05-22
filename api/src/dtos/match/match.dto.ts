@@ -1,27 +1,30 @@
-import { IsISO8601, IsString, IsUUID, ValidateNested } from "class-validator";
+import { IsEnum, IsISO8601, IsString, IsUUID, ValidateNested } from "class-validator";
 import { PlayerDTO } from "../player";
-import { SeasonDTO } from "../season";
+import { Match } from "@open-elo/shared";
+import { WINNER } from "../../database/entity/match.entity";
 
-export class MatchDTO {
+export class MatchDTO implements Match {
   @IsUUID()
-  id: string;
+  id!: string;
+
+  @IsEnum(WINNER)
+  winningTeam!: WINNER;
 
   @IsString()
-  score: string;
+  score!: string;
 
   @ValidateNested({ each: true })
-  players: PlayerDTO[];
+  players!: PlayerDTO[];
 
   @IsUUID()
-  seasonId: string;
+  seasonId!: string;
 
   @IsUUID()
-  leagueId: string;
+  leagueId!: string;
 
   @IsISO8601()
-  createdAt: string;
+  createdAt!: Date;
 
   @IsISO8601()
-  updatedAt: string;
-
+  updatedAt!: Date;
 }

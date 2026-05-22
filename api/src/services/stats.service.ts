@@ -2,8 +2,7 @@ import { Match, PlayerStats, SeasonStats, SeasonSummary } from "@open-elo/shared
 import { Service } from "typedi";
 import { AppDataSource } from "../database/data-source";
 import { WINNER } from "../database/entity/match.entity";
-import { TEAM } from "../database/entity/player.entity";
-import { UserEntity } from "../database/entity/user.entity";
+import { RankingEntity } from "../database/entity/ranking.entity";
 import { MatchService } from "./match.service";
 
 export enum RESULT {
@@ -14,14 +13,14 @@ export enum RESULT {
 
 @Service()
 export class StatsService {
-  private userRepository = AppDataSource.getRepository(UserEntity);
-
   constructor(
     private matchService: MatchService,
   ) { }
 
   async getUserSeasonStats(userId: string, seasonId: string): Promise<SeasonStats> {
     const matches = await this.matchService.getMatches({ playerId: userId, seasonId, skip: 0, take: 10000 })
+    const elo = await this.getPlayerEloInSeason(userId, seasonId);
+    const position = await this.getPlayerPositionInSeason(userId, seasonId);
 
     const stats = matches
       .matches
@@ -59,6 +58,8 @@ export class StatsService {
 
         return stats;
       }, {
+        elo,
+        position,
         byPlayer: new Map(),
         total: {
           won: 0,
@@ -116,7 +117,7 @@ export class StatsService {
 
       const result = m.winningTeam === WINNER.DRAW
         ? RESULT.DRAW
-        : playerTeam === TEAM.HOME && WINNER.HOME
+        : playerTeam === m.winningTeam
           ? RESULT.WON
           : RESULT.LOST;
 
@@ -126,5 +127,35 @@ export class StatsService {
         result,
       };
     }
+  }
+
+  private async getPlayerPositionInSeason(userId: string, seasonId: string): Promise<number | null> {
+    const exists = await AppDataSource
+      .getRepository(RankingEntity)
+      .exists({ where: { season: { id: seasonId }, user: { id: userId } } });
+
+    if (!exists) return null;
+
+    const rankings = await AppDataSource.getRepository(RankingEntity).find({
+      where: { season: { id: seasonId } },
+      order: { elo: "DESC" },
+      relations: ["user"],
+    });
+
+    let positionCounter = 1;
+
+    return rankings
+      .map((ranking, i, rankings) => ({
+        userId: ranking.user.id,
+        position: i === 0 || rankings[i - 1].elo === ranking.elo ? positionCounter : ++positionCounter,
+      }))
+      .find(ranking => ranking.userId === userId)?.position ?? null;
+  }
+
+  private getPlayerEloInSeason(userId: string, seasonId: string): Promise<number | null> {
+    return AppDataSource
+      .getRepository(RankingEntity)
+      .findOne({ where: { user: { id: userId }, season: { id: seasonId } } })
+      .then(ranking => ranking?.elo ?? null);
   }
 }

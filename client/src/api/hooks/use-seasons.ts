@@ -1,4 +1,4 @@
-import type { CreateMatchData, GetSeasonsParams, Match, Ranking, Season } from '@open-elo/shared';
+import type { CreateMatchData, EloChartData, GetSeasonsParams, Match, Ranking, Season } from '@open-elo/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '../api-client';
 
@@ -34,6 +34,14 @@ const fetchSeasonMatches = async (seasonId: string, params: { count?: number }):
 
 export const useGetSeasonMatches = (seasonId: string, params: { count?: number }) => {
   return useQuery<Match[], Error>({ queryKey: [...SEASONS_QUERY_KEY, seasonId, 'matches', params], queryFn: () => fetchSeasonMatches(seasonId, params) });
+}
+
+const fetchSeasonEloChart = async (seasonId: string): Promise<EloChartData[]> => {
+  return apiClient.get<EloChartData[]>(`/seasons/${seasonId}/elo-chart`);
+}
+
+export const useGetSeasonEloChart = (seasonId: string) => {
+  return useQuery<EloChartData[], Error>({ queryKey: [...SEASONS_QUERY_KEY, seasonId, 'elo-chart'], queryFn: () => fetchSeasonEloChart(seasonId) });
 }
 
 const createMatch = async (match: CreateMatchData) => {

@@ -16,29 +16,29 @@ import { RankingEntity } from './ranking.entity';
 @Index(['seasonNumber', 'league'], { unique: true })
 export class SeasonEntity {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @ManyToOne(() => LeagueEntity, (league) => league.seasons)
-  league: LeagueEntity;
+  league!: LeagueEntity;
 
   @OneToMany(() => MatchEntity, (match) => match.season)
-  matches: MatchEntity[];
+  matches!: MatchEntity[];
 
   @OneToMany(() => RankingEntity, (ranking) => ranking.season)
-  rankings: RankingEntity[];
+  rankings!: RankingEntity[];
 
   @Column({ nullable: false })
-  seasonNumber: number;
+  seasonNumber!: number;
 
   @Column({ nullable: false })
-  startAt: Date;
+  startAt!: Date;
 
   @Column({ nullable: true })
   endAt?: Date;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt?: Date;
 }

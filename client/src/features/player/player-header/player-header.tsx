@@ -1,9 +1,9 @@
 import { PlayerLeagueSelect } from '@/components/player-league-select';
 import { PlayerSelect } from '@/components/player-select';
 import { SeasonSelect } from '@/components/season-select';
+import { useNavigate } from 'react-router';
 import { ConvertGuestDialog } from './convert-guest-dialog';
 import { DeleteGuestDialog } from './delete-guest-dialog';
-import { RenameUserDialog } from './rename-user-dialog';
 
 interface PlayerHeaderProps {
   leagueId: string;
@@ -14,8 +14,16 @@ interface PlayerHeaderProps {
 export function PlayerHeader(props: PlayerHeaderProps) {
   const { leagueId, seasonId, playerId } = props;
 
+  const navigate = useNavigate();
+
+  function handleSeasonChange(selectedSeasonId: string): void {
+    navigate(
+      `/leagues/${leagueId}/seasons/${selectedSeasonId}/players/${playerId}`,
+    );
+  }
+
   return (
-    <div className="flex justify-between gap-4 grow">
+    <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
         <PlayerLeagueSelect
           leagueId={leagueId}
@@ -25,7 +33,7 @@ export function PlayerHeader(props: PlayerHeaderProps) {
         <SeasonSelect
           leagueId={leagueId}
           seasonId={seasonId}
-          playerId={playerId}
+          onSeasonChange={handleSeasonChange}
         />
         <PlayerSelect
           leagueId={leagueId}
@@ -33,11 +41,8 @@ export function PlayerHeader(props: PlayerHeaderProps) {
           seasonId={seasonId}
         />
       </div>
-      <div className="flex items-center gap-4">
-        <ConvertGuestDialog userId={playerId} />
-        <DeleteGuestDialog userId={playerId} />
-        <RenameUserDialog userId={playerId} />
-      </div>
+      <ConvertGuestDialog userId={playerId} />
+      <DeleteGuestDialog userId={playerId} />
     </div>
   );
 }

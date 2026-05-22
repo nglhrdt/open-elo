@@ -12,5 +12,6 @@ export const useGetMe = () => {
   return useQuery<User | null, Error>({
     queryKey: [...ME_QUERY_KEY],
     queryFn: () => fetchMe(),
+    retry: false,
   });
 }

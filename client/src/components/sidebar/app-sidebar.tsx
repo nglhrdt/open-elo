@@ -61,9 +61,9 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     asChild
-                    isActive={location.pathname === `/players/${user.id}`}
+                    isActive={location.pathname === `/profile`}
                   >
-                    <Link to={`/players/${user.id}`}>
+                    <Link to={`/profile`}>
                       <User />
                       <span>My Profile</span>
                     </Link>
