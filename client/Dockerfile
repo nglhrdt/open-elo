@@ -3,11 +3,9 @@ FROM node:24-alpine AS build
 
 WORKDIR /app
 
-COPY package.json yarn.lock ./
+COPY . .
 
 RUN yarn install --frozen-lockfile
-
-COPY . .
 
 WORKDIR /app/client
 
