@@ -1,6 +1,6 @@
-import { createLeague, type GAME } from "@/api/api";
-import { LeagueTypeSelect } from "@/components/league-type-select";
-import { Button } from "@/components/ui/button";
+import { useCreateLeague } from '@/api/hooks/use-leagues';
+import { LeagueTypeSelect } from '@/components/league-type-select';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -10,20 +10,13 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import type { GAME } from '@open-elo/shared';
+import { useState } from 'react';
 
 export function CreateLeagueDialog() {
-  const queryClient = useQueryClient()
-  const mutation = useMutation({
-    mutationFn: createLeague,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['leagues'] });
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-    },
-  })
+  const mutation = useCreateLeague();
 
   const [name, setName] = useState<string>('');
   const [game, setGame] = useState<GAME>('TABLE_SOCCER');
@@ -33,7 +26,7 @@ export function CreateLeagueDialog() {
     await mutation.mutateAsync({
       name,
       game: game,
-    })
+    });
 
     setName('');
     setGame('TABLE_SOCCER');
@@ -55,7 +48,7 @@ export function CreateLeagueDialog() {
         <Input
           type="text"
           value={name}
-          onChange={e => setName(e.target.value)}
+          onChange={(e) => setName(e.target.value)}
         />
         <LeagueTypeSelect onChange={setGame} value={game} />
         <DialogFooter>
@@ -68,5 +61,5 @@ export function CreateLeagueDialog() {
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

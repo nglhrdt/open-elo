@@ -1,4 +1,4 @@
-import type { Match, Player } from '@/api/api';
+import type { Match, MatchPlayer } from '@open-elo/shared';
 import { MatchPlayerDialog } from './match-player-dialog';
 
 type MatchTeamProps = {
@@ -6,7 +6,7 @@ type MatchTeamProps = {
   team: 'HOME' | 'AWAY';
 };
 
-function getEloChange(player?: Player): number | null {
+function getEloChange(player?: MatchPlayer): number | null {
   if (!player?.eloAfter || !player.eloBefore) return null;
 
   return player.eloAfter - player.eloBefore;
@@ -27,8 +27,9 @@ export function MatchTeam(props: MatchTeamProps) {
     >
       {players.map((player) => (
         <MatchPlayerDialog
-          key={player.user.id}
-          user={player.user}
+          key={`${match.id}-${player.userId}`}
+          playerId={player.userId}
+          playername={player.username}
           bold={isWinner}
           leagueId={match.leagueId}
           seasonId={match.seasonId}

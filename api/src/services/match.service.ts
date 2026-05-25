@@ -1,7 +1,8 @@
+import { GetMatchesParams, Match } from "@open-elo/shared";
 import { Service } from "typedi";
 import { In } from "typeorm";
 import { AppDataSource } from "../database/data-source";
-import { MatchEntity } from "../database/entity/match.entity";
+import { MatchEntity, WINNER } from "../database/entity/match.entity";
 import { SeasonEntity } from "../database/entity/season.entity";
 import { UserEntity } from "../database/entity/user.entity";
 import { CreateMatchDTO } from "../dtos";
@@ -30,7 +31,7 @@ export class MatchService {
 
     const eloSnapshot = await this.eloService.updatePlayerElosWithSnapshot(
       players,
-      this.getResult({ players, score }),
+      this.getResult({ players, score, seasonId }),
       seasonId,
     );
 
@@ -45,14 +46,19 @@ export class MatchService {
       }];
     });
 
+    const homeScore = parseInt(score.split("-")[0], 10);
+    const awayScore = parseInt(score.split("-")[1], 10);
+
     return this.matchRepository.save({
-      score,
+      homeScore,
+      awayScore,
+      winner: homeScore > awayScore ? WINNER.HOME : awayScore > homeScore ? WINNER.AWAY : WINNER.DRAW,
       season,
       players: playerEntities,
     });
   }
 
-  private getResult(matchData: CreateMatchDTO): Result {
+  private getResult(matchData: CreateMatchDTO & { seasonId: string }): Result {
     const [homeScore, awayScore] = matchData.score
       .split("-")
       .map((s) => parseInt(s, 10));
@@ -66,7 +72,7 @@ export class MatchService {
   getMatchById(id: string) {
     return this.matchRepository.findOne({
       where: { id },
-      relations: ["players", "players.user", "league", "season"],
+      relations: ["players", "players.user", "season", "season.league"],
     });
   }
 
@@ -83,7 +89,7 @@ export class MatchService {
 
     const eloSnapshot = await this.eloService.updatePlayerElosWithSnapshot(
       players,
-      this.getResult({ players, score }),
+      this.getResult({ players, score, seasonId }),
       seasonId,
     );
 
@@ -98,11 +104,75 @@ export class MatchService {
       }];
     });
 
+    const homeScore = parseInt(score.split("-")[0], 10);
+    const awayScore = parseInt(score.split("-")[1], 10);
+
     return this.matchRepository.save({
-      score,
+      homeScore,
+      awayScore,
       season,
       createdAt,
+      winner: homeScore > awayScore ? WINNER.HOME : awayScore > homeScore ? WINNER.AWAY : WINNER.DRAW,
       players: playerEntities,
     });
+  }
+
+  async getMatches(params: GetMatchesParams) {
+    const qb = this.matchRepository.createQueryBuilder("match")
+      .leftJoinAndSelect("match.players", "player")
+      .leftJoinAndSelect("player.user", "user")
+      .innerJoinAndSelect("match.season", "season")
+      .innerJoinAndSelect("season.league", "league")
+      .where("season.id = :seasonId", { seasonId: params.seasonId })
+      .orderBy("match.createdAt", "DESC");
+
+    if (params.playerId) {
+      qb.andWhere(qb2 =>
+        `match.id IN (` +
+        qb2.subQuery()
+          .select("m.id")
+          .from(MatchEntity, "m")
+          .innerJoin("m.players", "fp")
+          .innerJoin("fp.user", "fu")
+          .where("fu.id = :playerId", { playerId: params.playerId })
+          .andWhere("m.seasonId = :seasonId", { seasonId: params.seasonId })
+          .getQuery() +
+        `)`
+      );
+    }
+
+    if (params.take) qb.take(params.take);
+    if (params.skip) qb.skip(params.skip);
+
+    const matches = await qb.getMany();
+    return {
+      matches: this.toDtos(matches),
+      totalCount: await qb.getCount(),
+    };
+  }
+
+  toDtos(matches: MatchEntity[]): Match[] {
+    return matches.map((match) => this.toDto(match));
+  }
+
+  toDto(match: MatchEntity): Match {
+    return {
+      id: match.id,
+      score: `${match.homeScore}-${match.awayScore}`,
+      seasonId: match.season.id,
+      leagueId: match.season.league.id,
+      createdAt: match.createdAt,
+      winningTeam: match.winner,
+      players: match.players.map((player) => ({
+        userId: player.user.id,
+        username: player.user.username,
+        team: player.team,
+        eloBefore: player.eloBefore,
+        eloAfter: player.eloAfter,
+        eloChange: player.eloAfter !== null && player.eloBefore !== null
+          ? player.eloAfter - player.eloBefore
+          : null,
+      })),
+    };
   }
 }

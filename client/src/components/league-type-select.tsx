@@ -1,4 +1,4 @@
-import { type GAME } from "@/api/api";
+import type { GAME } from "@open-elo/shared";
 import {
   Select,
   SelectContent,

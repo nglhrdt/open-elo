@@ -62,7 +62,7 @@ export class UserService {
           email: email ?? null,
           passwordHash: passwordHash ?? null,
         });
-        return await repo.save(entity);
+        return repo.save(entity);
       } catch (e: any) {
         if (e?.code === "23505") {
           throw new Error("Email or username already in use");
@@ -82,6 +82,13 @@ export class UserService {
   getUserByEmail(email: string) {
     return this.repository.findOne({
       where: { email },
+      relations: ["favoriteLeague", "favoriteLeague.currentSeason", "favoriteLeague.game"],
+    });
+  }
+
+  getUserByUsername(username: string) {
+    return this.repository.findOne({
+      where: { username },
       relations: ["favoriteLeague", "favoriteLeague.currentSeason", "favoriteLeague.game"],
     });
   }

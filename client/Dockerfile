@@ -1,31 +1,24 @@
 # Build stage
-FROM node:22-alpine AS build
+FROM node:24-alpine AS build
 
 WORKDIR /app
 
-# Copy package file
-COPY package.json ./
+COPY package.json yarn.lock ./
 
-COPY yarn.lock ./
-
-# Install dependencies
 RUN yarn install --frozen-lockfile
 
-# Copy source code
 COPY . .
 
-# Build the application
+WORKDIR /app/client
+
 RUN yarn build
 
-# Production stage
 FROM nginx:alpine
 
-# Remove default config & add ours (with SPA fallback)
 RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy built files from build stage
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY client/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/client/dist /usr/share/nginx/html
 
 EXPOSE 80
 

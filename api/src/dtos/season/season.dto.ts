@@ -1,34 +1,35 @@
-import { IsDate, IsEnum, IsInt, IsISO8601, IsPositive, IsString, IsUUID, ValidateNested } from "class-validator";
-import { RankingDTO } from "..";
-import { LeagueDTO } from "../league";
-import { MatchDTO } from "../match/match.dto";
+import { Season } from "@open-elo/shared";
+import { IsBoolean, IsDate, IsEnum, IsInt, IsISO8601, IsPositive, IsString, IsUUID, ValidateNested } from "class-validator";
 import { GAME } from "../../database/entity/game.entity";
 
 export class SeasonLeagueDTO {
   @IsUUID()
-  id: string;
+  id!: string;
 
   @IsString()
-  name: string;
+  name!: string;
 
   @IsEnum(GAME)
-  game: GAME;
+  game!: GAME;
 }
 
-export class SeasonDTO {
+export class SeasonDTO implements Season {
+  @IsBoolean()
+  isCurrentSeason!: boolean;
+
   @IsUUID()
-  id: string;
+  id!: string;
 
   @ValidateNested()
-  league: SeasonLeagueDTO;
+  league!: SeasonLeagueDTO;
 
   @IsInt()
   @IsPositive()
-  seasonNumber: number
+  seasonNumber!: number
 
   @IsDate()
   @IsISO8601({ strict: true })
-  startAt: Date;
+  startAt!: Date;
 
   @IsDate()
   @IsISO8601({ strict: true })

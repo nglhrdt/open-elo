@@ -1,59 +1,22 @@
 import {
-  createMatch,
-  fetchLeagueById,
-  fetchSeasonById,
-  type Team,
-} from '@/api/api';
+  useCreateSeasonMatch,
+  useGetSeasonById,
+} from '@/api/hooks/use-seasons';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { useMutation, useQueries, useQueryClient } from '@tanstack/react-query';
+import type { Team } from '@open-elo/shared';
 import { useMemo, useState } from 'react';
 import { LeagueUserSelect } from './league-user-select';
 import { SelectGoals } from './select-goals';
 
 type CreateGameProps = {
-  leagueId: string;
   seasonId: string;
   onGameCreated?: () => void;
 };
 
-export function CreateMatchForm({
-  leagueId,
-  seasonId,
-  onGameCreated,
-}: CreateGameProps) {
-  const queryClient = useQueryClient();
-
-  const [{ data: league }, { data: season }] = useQueries({
-    queries: [
-      {
-        queryKey: ['leagues', leagueId],
-        queryFn: () => fetchLeagueById(leagueId!),
-      },
-      {
-        queryKey: ['seasons', seasonId],
-        queryFn: () => fetchSeasonById(seasonId!),
-      },
-    ],
-  });
-
-  const mutation = useMutation({
-    mutationFn: createMatch,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['matches'] });
-      queryClient.invalidateQueries({ queryKey: ['seasons'] });
-      queryClient.invalidateQueries({ queryKey: ['leagues'] });
-
-      setHomeScore(0);
-      setAwayScore(0);
-      setPlayer1('');
-      setPlayer2('');
-      setPlayer3('');
-      setPlayer4('');
-
-      onGameCreated?.();
-    },
-  });
+export function CreateMatchForm({ seasonId, onGameCreated }: CreateGameProps) {
+  const { data: season } = useGetSeasonById(seasonId);
+  const createSeasonMatch = useCreateSeasonMatch();
 
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
@@ -71,11 +34,20 @@ export function CreateMatchForm({
     if (player3) players.push({ id: player3, team: 'AWAY' as Team });
     if (player4) players.push({ id: player4, team: 'AWAY' as Team });
 
-    await mutation.mutateAsync({
+    createSeasonMatch.mutate({
       score,
       players,
       seasonId,
     });
+
+    setHomeScore(0);
+    setAwayScore(0);
+    setPlayer1('');
+    setPlayer2('');
+    setPlayer3('');
+    setPlayer4('');
+
+    onGameCreated?.();
   }
 
   const selectedIDs = useMemo(() => {
@@ -87,11 +59,7 @@ export function CreateMatchForm({
     return ids;
   }, [player1, player2, player3, player4]);
 
-  if (!league || !season) return null;
-  if (league.members.length < 4)
-    return (
-      <p className="text-muted-foreground">Not enough members in the league</p>
-    );
+  if (!season) return null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -101,14 +69,14 @@ export function CreateMatchForm({
         placeholder="Player 1"
         value={player1}
         onChange={setPlayer1}
-        leagueId={leagueId}
+        leagueId={season.league.id}
         selectedIds={selectedIDs}
       />
       <LeagueUserSelect
         placeholder="Player 2"
         value={player2}
         onChange={setPlayer2}
-        leagueId={leagueId}
+        leagueId={season.league.id}
         selectedIds={selectedIDs}
       />
       <Separator orientation="horizontal" />
@@ -117,19 +85,19 @@ export function CreateMatchForm({
         placeholder="Player 3"
         value={player3}
         onChange={setPlayer3}
-        leagueId={leagueId}
+        leagueId={season.league.id}
         selectedIds={selectedIDs}
       />
       <LeagueUserSelect
         placeholder="Player 4"
         value={player4}
         onChange={setPlayer4}
-        leagueId={leagueId}
+        leagueId={season.league.id}
         selectedIds={selectedIDs}
       />
       <SelectGoals goals={awayScore} onSelect={setAwayScore} />
       <Button
-        disabled={selectedIDs.length < 4}
+        disabled={selectedIDs.length < 4 || (homeScore === 0 && awayScore === 0)}
         onClick={handleCreateButtonClick}
       >
         Create Game

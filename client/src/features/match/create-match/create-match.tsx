@@ -1,21 +1,17 @@
-import { fetchLeagueById, fetchSeasonById } from '@/api/api';
-import { useQueries } from '@tanstack/react-query';
+import { useGetSeasonById } from '@/api/hooks/use-seasons';
 import { useCallback, useState } from 'react';
 import { CreateMatchCard } from './create-match-card';
 import { CreateMatchDialog } from './create-match-dialog';
 import { CreateMatchForm } from './create-match-form';
 
 type CreateMatchProps = {
-  leagueId: string;
   seasonId: string;
   onGameCreated?: () => void;
 };
 
-export function CreateMatch({
-  leagueId,
-  seasonId,
-  onGameCreated,
-}: CreateMatchProps) {
+export function CreateMatch({ seasonId, onGameCreated }: CreateMatchProps) {
+  const { data: season } = useGetSeasonById(seasonId);
+
   const [open, setOpen] = useState(false);
 
   const handleGameCreated = useCallback(() => {
@@ -23,30 +19,13 @@ export function CreateMatch({
     onGameCreated?.();
   }, [onGameCreated]);
 
-  const [{ data: league }, { data: season }] = useQueries({
-    queries: [
-      {
-        queryKey: ['leagues', leagueId],
-        queryFn: () => fetchLeagueById(leagueId!),
-      },
-      {
-        queryKey: ['seasons', seasonId],
-        queryFn: () => fetchSeasonById(seasonId!),
-      },
-    ],
-  });
-
-  if (!league || !season) return <div>Loading...</div>;
-
-  const isCurrentSeason = league.currentSeason.id === season.id;
-  if (!isCurrentSeason) return null;
+  if (!season?.isCurrentSeason) return null;
 
   return (
     <>
       <div className="md:hidden">
         <CreateMatchDialog open={open} onOpenChange={setOpen}>
           <CreateMatchForm
-            leagueId={leagueId}
             seasonId={seasonId}
             onGameCreated={handleGameCreated}
           />
@@ -55,7 +34,6 @@ export function CreateMatch({
       <div className="hidden md:block">
         <CreateMatchCard>
           <CreateMatchForm
-            leagueId={leagueId}
             seasonId={seasonId}
             onGameCreated={handleGameCreated}
           />

@@ -13,42 +13,42 @@ export enum ROLE {
 @Entity()
 export class UserEntity {
   @PrimaryGeneratedColumn("uuid")
-  id: string
+  id!: string
 
   @Column({ unique: true })
-  username: string
+  username!: string
 
   @Column({ unique: true, nullable: true })
-  email: string
+  email!: string
 
   @Column({ nullable: true })
-  passwordHash: string
+  passwordHash!: string
 
   @OneToOne(() => LeagueEntity, { nullable: true })
   @JoinColumn()
-  favoriteLeague: LeagueEntity
+  favoriteLeague!: LeagueEntity
 
   @Column({ type: 'enum', enum: ROLE, nullable: false, default: ROLE.GUEST })
-  role: ROLE
+  role!: ROLE
 
   @OneToMany(() => MemberEntity, member => member.user, { lazy: true })
-  leagues: MemberEntity[]
+  leagues!: MemberEntity[]
 
   @OneToMany(() => LeagueEntity, league => league.owner, { lazy: true })
-  leaguesOwned: LeagueEntity[]
+  leaguesOwned!: LeagueEntity[]
 
   @OneToMany(() => PlayerEntity, player => player.user, { lazy: true })
-  players: PlayerEntity[]
+  players!: PlayerEntity[]
 
   @OneToMany(() => RankingEntity, ranking => ranking.user, { lazy: true })
-  rankings: RankingEntity[]
+  rankings!: RankingEntity[]
 
   @Column({ default: false })
-  deleted: boolean
+  deleted!: boolean
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt?: Date;
 }

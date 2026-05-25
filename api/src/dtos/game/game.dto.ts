@@ -3,11 +3,11 @@ import { GAME } from "../../database/entity/game.entity";
 
 export class GameDTO {
   @IsUUID()
-  id: string;
+  id!: string;
 
   @IsString()
-  name: string;
+  name!: string;
 
   @IsEnum(GAME)
-  game: GAME;
+  game!: GAME;
 }

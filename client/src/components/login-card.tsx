@@ -1,5 +1,4 @@
-import { login, type User } from '@/api/api';
-import { AuthContext } from '@/components/AuthContext';
+import { useLogin } from '@/api/hooks/use-login';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -10,32 +9,32 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
+import { AuthContext } from './AuthContext';
+import type { LoginResponse } from '@open-elo/shared';
 
 export function LoginCard() {
+  const { setToken, setUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const login = useLogin();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const auth = useContext(AuthContext);
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  const loginMutation = useMutation({
-    mutationFn: () => login({ email, password }),
-    onSuccess: (data: { token: string; user: User }) => {
-      sessionStorage.setItem('auth_token', data.token);
-      auth.setToken(data.token);
-      auth.setUser(data.user);
-      queryClient.setQueryData(['current-user'], data.user);
-      navigate('/');
-    },
-  });
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    loginMutation.mutate();
+    login.mutate(
+      { email, password },
+      {
+        onSuccess: (data: LoginResponse) => {
+          sessionStorage.setItem('auth_token', data.token);
+          setToken(data.token);
+          setUser(data.user);
+          navigate('/');
+        },
+      },
+    );
   };
 
   return (
@@ -51,10 +50,10 @@ export function LoginCard() {
       <CardContent>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Username / Email</Label>
             <Input
               id="email"
-              placeholder="Email"
+              placeholder="Username or Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -70,13 +69,13 @@ export function LoginCard() {
             />
           </div>
           <div className="pt-4 flex justify-end">
-            <Button disabled={loginMutation.isPending}>
-              {loginMutation.isPending ? 'Logging in...' : 'Login'}
+            <Button disabled={login.isPending}>
+              {login.isPending ? 'Logging in...' : 'Login'}
             </Button>
           </div>
-          {loginMutation.isError && (
+          {login.isError && (
             <div className="text-red-300 text-sm">
-              {(loginMutation.error as Error).message}
+              {(login.error as Error).message}
             </div>
           )}
         </form>

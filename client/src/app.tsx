@@ -7,6 +7,7 @@ import { Layout } from './components/layout';
 import { LoadingSpinner } from './components/loading-spinner';
 import { ReleaseNotesDialog } from './components/release-notes-dialog';
 import { ThemeProvider } from './components/theme-provider';
+import { ProfilePage } from './pages/profile-page';
 
 // Lazy load page components
 const HomeRedirect = lazy(() =>
@@ -60,6 +61,7 @@ export function App() {
                       path="leagues/:leagueId/seasons/:seasonId"
                       element={<LeaguePage />}
                     />
+                    <Route path="profile" element={<ProfilePage />} />
                   </Route>
                   <Route path="login" element={<LoginPage />} />
                   <Route path="register" element={<RegisterPage />} />

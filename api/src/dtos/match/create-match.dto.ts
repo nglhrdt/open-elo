@@ -1,18 +1,20 @@
 import { IsEnum, IsString, IsUUID, ValidateNested } from "class-validator";
 import { TEAM } from "../../database/entity/player.entity";
+import { CreateMatchData } from "@open-elo/shared";
 
-export class CreateMatchPlayerDTO {
+export class CreateMatchPlayerDTO  {
   @IsUUID()
-  id: string;
+  id!: string;
 
   @IsEnum(TEAM)
-  team: TEAM;
+  team!: TEAM;
 }
 
-export class CreateMatchDTO {
+export class CreateMatchDTO implements CreateMatchData {
+  @IsUUID()
+  seasonId!: string;
   @IsString()
-  score: string;
-
+  score!: string;
   @ValidateNested({ each: true })
-  players: CreateMatchPlayerDTO[];
+  players!: CreateMatchPlayerDTO[];
 }

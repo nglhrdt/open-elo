@@ -1,5 +1,5 @@
 # Build stage
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -7,17 +7,18 @@ COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
 COPY . .
+
+WORKDIR /app/api
+
 RUN yarn build
 
 # Production stage
-FROM node:22-alpine
-
-WORKDIR /app
+FROM node:24-alpine
 
 COPY --from=builder /app/package.json /app/yarn.lock ./
 RUN yarn install --production --frozen-lockfile
 
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/api/dist ./dist
 
 EXPOSE 3000
 

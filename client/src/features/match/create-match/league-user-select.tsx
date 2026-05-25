@@ -1,8 +1,7 @@
-import { fetchLeagueById } from '@/api/api';
-import { CreateUserDialog } from './create-user-dialog';
-import { useQuery } from '@tanstack/react-query';
+import { useGetLeagueMembers } from '@/api/hooks/use-leagues';
 import { useMemo } from 'react';
 import { UserSelect } from '../../../components/user-select';
+import { CreateGuestUserDialog } from './create-guest-user-dialog';
 
 type LeagueUserSelectProps = {
   leagueId: string;
@@ -19,23 +18,20 @@ export function LeagueUserSelect({
   placeholder,
   onChange,
 }: LeagueUserSelectProps) {
-  const { data: league, isPending } = useQuery({
-    queryKey: ['leagues', leagueId],
-    queryFn: () => fetchLeagueById(leagueId),
-  });
+  const { data: members } = useGetLeagueMembers(leagueId);
 
   const filteredUsers = useMemo(() => {
-    if (!league?.members || !Array.isArray(league.members)) return [];
-    return league.members
+    if (!members || !Array.isArray(members)) return [];
+    return members
       .filter((user) => user.id === value || !selectedIds.includes(user.id))
       .sort((a, b) => a.username.localeCompare(b.username));
-  }, [league?.members, value, selectedIds]);
+  }, [members, value, selectedIds]);
 
   const handleChange = (val: string) => {
     onChange?.(val);
   };
 
-  if (!league?.members || isPending || !Array.isArray(league.members)) {
+  if (!members || !Array.isArray(members)) {
     return <div>Loading...</div>;
   }
 
@@ -47,7 +43,7 @@ export function LeagueUserSelect({
         placeholder={placeholder}
         onChange={handleChange}
       />
-      <CreateUserDialog
+      <CreateGuestUserDialog
         leagueId={leagueId}
         onUserCreated={(user) => onChange?.(user.id)}
       />

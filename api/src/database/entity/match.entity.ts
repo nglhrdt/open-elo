@@ -2,26 +2,38 @@ import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGenerate
 import { PlayerEntity } from "./player.entity";
 import { SeasonEntity } from "./season.entity";
 
+export enum WINNER {
+  HOME = 'HOME',
+  AWAY = 'AWAY',
+  DRAW = 'DRAW',
+}
+
 @Entity()
 export class MatchEntity {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
-  @Column()
-  score: string;
+  @Column({ name: 'home_score' })
+  homeScore!: number;
+
+  @Column({ name: 'away_score' })
+  awayScore!: number;
+
+  @Column({ type: 'enum', enum: WINNER, nullable: false })
+  winner!: WINNER;
 
   @OneToMany(() => PlayerEntity, player => player.match, { eager: true, cascade: true })
-  players: PlayerEntity[];
+  players!: PlayerEntity[];
 
   @ManyToOne(() => SeasonEntity, season => season.matches, {
     nullable: false,
     eager: false,
   })
-  season: SeasonEntity;
+  season!: SeasonEntity;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt?: Date;
 }

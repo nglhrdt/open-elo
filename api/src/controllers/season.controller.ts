@@ -1,3 +1,4 @@
+import { GetSeasonsParams } from "@open-elo/shared";
 import {
   Authorized,
   Body,
@@ -6,10 +7,11 @@ import {
   Param,
   Post,
   Put,
-  QueryParam
+  QueryParam,
+  QueryParams
 } from "routing-controllers";
 import { Service } from "typedi";
-import { CreateMatchDTO, CreateSeasonDTO } from "../dtos";
+import { CreateMatchDTO } from "../dtos";
 import { MatchService } from "../services/match.service";
 import { SeasonService } from "../services/season.service";
 
@@ -22,15 +24,15 @@ export class SeasonController {
   ) { }
 
   @Authorized()
-  @Get("/:id")
-  async getSeasonById(@Param("id") id: string) {
-    return this.seasonService.getSeasonById(id);
+  @Get("/")
+  async getSeasons(@QueryParams() params: GetSeasonsParams) {
+    return this.seasonService.getSeasons(params.leagueId);
   }
 
   @Authorized()
-  @Post("/")
-  async createSeason(@Body() dto: CreateSeasonDTO) {
-    return this.seasonService.createSeason(dto);
+  @Get("/:id")
+  async getSeasonById(@Param("id") id: string) {
+    return this.seasonService.getSeasonById(id);
   }
 
   @Authorized()
@@ -55,6 +57,12 @@ export class SeasonController {
   @Get("/:id/matches")
   async getSeasonMatches(@Param("id") id: string, @QueryParam("count") count?: number) {
     return this.seasonService.getSeasonMatches(id, count);
+  }
+
+  @Authorized()
+  @Get("/:id/elo-chart")
+  async getSeasonEloChart(@Param("id") id: string) {
+    return this.seasonService.getSeasonEloChart(id);
   }
 
   @Post("/stop-seasons")

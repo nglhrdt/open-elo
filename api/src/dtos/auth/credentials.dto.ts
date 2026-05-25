@@ -1,9 +1,10 @@
-import { IsEmail, IsString } from 'class-validator';
+import { Credentials } from '@open-elo/shared';
+import { IsString } from 'class-validator';
 
-export class CredentialsDTO {
-  @IsEmail()
-  email: string;
+export class CredentialsDTO implements Credentials {
+  @IsString()
+  email!: string;
 
   @IsString()
-  password: string;
+  password!: string;
 }

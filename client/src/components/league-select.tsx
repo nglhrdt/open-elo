@@ -1,35 +1,34 @@
-import type { League } from "@/api/api";
-import { useState } from "react";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { useGetLeagues } from '@/api/hooks/use-leagues';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
 
 type LeagueSelectProps = {
-  leagues: League[];
-  blackList?: string[];
-  placeholder?: string;
-  value?: string;
-  onChange?: (leagueId: string) => void;
+  leagueId?: string;
+  playerId?: string;
+  onSelectionChange?: (leagueId: string) => void;
 };
 
 export function LeagueSelect(props: LeagueSelectProps) {
-  const [internalValue, setInternalValue] = useState<string | undefined>(props?.value);
+  const { leagueId, playerId, onSelectionChange } = props;
 
-  const value = props?.value !== undefined ? props.value : internalValue;
-
-  const handleChange = (val: string) => {
-    setInternalValue(val);
-    props?.onChange?.(val);
-  };
+  const { data: leagues } = useGetLeagues({ playerId });
 
   return (
-    <Select value={value} onValueChange={handleChange}>
+    <Select value={leagueId} onValueChange={onSelectionChange}>
       <SelectTrigger className="w-full">
-        <SelectValue placeholder={props?.placeholder ?? "Select a league"} />
+        <SelectValue placeholder={'Select a league'} />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          {props.leagues.map((league) => (
+          {leagues?.map((league) => (
             <SelectItem key={league.id} value={league.id}>
-              {league.name} ({league.game})
+              {league.name}
             </SelectItem>
           ))}
         </SelectGroup>

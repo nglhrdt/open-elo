@@ -1,8 +1,8 @@
 import { LeagueHeader } from '@/features/league/header/league-header';
 import { JoinLeagueButton } from '@/features/league/join/join-league-button';
-import { LeagueMatches } from '@/features/league/matches/league-matches';
+import { SeasonMatches } from '@/features/league/matches/season-matches';
 import { SeasonSettingsDialog } from '@/features/league/settings/season-settings-dialog';
-import { LeagueTable } from '@/features/league/table/league-table';
+import { SeasonTable } from '@/features/league/table/season-table';
 import { CreateMatch } from '@/features/match/create-match/create-match';
 import { useParams } from 'react-router';
 
@@ -24,9 +24,9 @@ export function LeaguePage() {
         </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-12 items-start">
-        <LeagueTable leagueId={leagueId} seasonId={seasonId} />
-        <LeagueMatches leagueId={leagueId} seasonId={seasonId} />
-        <CreateMatch leagueId={leagueId} seasonId={seasonId} />
+        <SeasonTable seasonId={seasonId} />
+        <SeasonMatches seasonId={seasonId} />
+        <CreateMatch seasonId={seasonId} />
       </div>
     </div>
   );

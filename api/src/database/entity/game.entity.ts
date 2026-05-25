@@ -1,6 +1,5 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { LeagueEntity } from "./league.entity";
-import { PlayerEntity } from "./player.entity";
 
 export enum GAME {
   TABLE_SOCCER = 'TABLE_SOCCER'
@@ -9,17 +8,17 @@ export enum GAME {
 @Entity()
 export class GameEntity {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
   @Column({ type: 'enum', enum: GAME , nullable: false })
-  game: GAME;
+  game!: GAME;
 
   @OneToMany(() => LeagueEntity, league => league.game, { lazy: true })
-  leagues: LeagueEntity[];
+  leagues!: LeagueEntity[];
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt?: Date;
 }

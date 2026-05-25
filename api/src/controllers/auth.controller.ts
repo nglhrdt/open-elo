@@ -2,6 +2,7 @@ import { Authorized, Body, JsonController, Post } from 'routing-controllers';
 import { Service } from 'typedi';
 import { CredentialsDTO, RegisterDTO } from '../dtos';
 import { AuthService } from '../services/auth.service';
+import { Credentials } from '@open-elo/shared';
 
 @Service()
 @JsonController()
@@ -9,7 +10,7 @@ export class AuthController {
   constructor(private service: AuthService) {}
 
   @Post('/login')
-  login(@Body() credentials: CredentialsDTO) {
+  login(@Body() credentials: Credentials) {
     return this.service.login(credentials);
   }
 

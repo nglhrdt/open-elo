@@ -1,19 +1,22 @@
-import { IsInt, IsString, IsUUID, ValidateNested } from "class-validator";
-import { SeasonDTO } from "../season";
-import { UserDTO } from "../user";
+import { Ranking } from "@open-elo/shared";
+import { IsInt, IsString, IsUUID } from "class-validator";
 
-export class RankingUserDTO {
+export class RankingDTO implements Ranking {
   @IsUUID()
-  id: string;
+  id!: string;
+
+  @IsInt()
+  elo!: number;
+
+  @IsInt()
+  position!: number;
+
+  @IsUUID()
+  leagueId!: string;
+
+  @IsUUID()
+  userId!: string;
 
   @IsString()
-  name: string;
-}
-
-export class RankingDTO {
-  @IsInt()
-  elo: number;
-
-  @ValidateNested()
-  user: RankingUserDTO;
+  username!: string;
 }

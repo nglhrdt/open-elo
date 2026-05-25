@@ -1,42 +1,44 @@
-import { IsEmail, IsEnum, IsInt, IsString, IsUUID, ValidateNested } from "class-validator";
+import { IsEmail, IsEnum, IsInt, IsPositive, IsString, IsUUID, ValidateNested } from "class-validator";
 import { GAME } from "../../database/entity/game.entity";
 import { ROLE } from "../../database/entity/user.entity";
+import { User } from "@open-elo/shared";
 
 export class FavoriteLeagueSeasonDTO {
   @IsUUID()
-  id: string;
+  id!: string;
 
   @IsInt()
-  seasonNumber: number;
+  @IsPositive()
+  seasonNumber!: number;
 }
 
 export class FavoriteLeagueDTO {
   @IsUUID()
-  id: string;
+  id!: string;
 
   @IsString()
-  name: string;
+  name!: string;
 
   @IsEnum(GAME)
-  game: GAME;
+  game!: GAME;
 
   @ValidateNested()
-  season?: FavoriteLeagueSeasonDTO;
+  season!: FavoriteLeagueSeasonDTO;
 }
 
-export class UserDTO {
+export class UserDTO implements User {
   @IsUUID()
-  id: string;
+  id!: string;
 
   @IsString()
-  username: string;
+  username!: string;
 
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsEnum(ROLE)
-  role: ROLE
+  role!: ROLE
 
   @ValidateNested()
-  favoriteLeague?: FavoriteLeagueDTO;
+  favoriteLeague!: FavoriteLeagueDTO;
 };

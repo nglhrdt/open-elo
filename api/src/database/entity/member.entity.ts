@@ -1,15 +1,15 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { LeagueEntity } from "./league.entity";
 import { UserEntity } from "./user.entity";
 
 @Entity()
 export class MemberEntity {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
   @ManyToOne(() => LeagueEntity, league => league.members)
-  league: LeagueEntity;
+  league!: LeagueEntity;
 
   @ManyToOne(() => UserEntity, user => user.leagues)
-  user: UserEntity;
+  user!: UserEntity;
 }

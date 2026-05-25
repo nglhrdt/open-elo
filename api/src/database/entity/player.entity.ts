@@ -10,20 +10,20 @@ export enum TEAM {
 @Entity()
 export class PlayerEntity {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
   @Column({ type: 'enum', enum: TEAM, nullable: false })
-  team: TEAM;
+  team!: TEAM;
 
   @Column({ type: "int", nullable: true })
-  eloBefore: number | null;
+  eloBefore!: number | null;
 
   @Column({ type: "int", nullable: true })
-  eloAfter: number | null;
+  eloAfter!: number | null;
 
   @ManyToOne(() => MatchEntity, match => match.players)
-  match: MatchEntity;
+  match!: MatchEntity;
 
   @ManyToOne(() => UserEntity, user => user.players)
-  user: UserEntity;
+  user!: UserEntity;
 }
