@@ -14,9 +14,10 @@ RUN yarn build
 # Production stage
 FROM node:24-alpine
 
-COPY --from=builder /app/package.json /app/yarn.lock ./
-RUN yarn install --production --frozen-lockfile
+WORKDIR /app
 
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/shared ./shared
 COPY --from=builder /app/api/dist ./dist
 
 EXPOSE 3000
