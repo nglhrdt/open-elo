@@ -24,11 +24,11 @@ jobs:
       matrix:
         include:
           - service: api
-            context: api
+            context: .
             dockerfile: api/Dockerfile
             image: open-elo-api
           - service: client
-            context: client
+            context: .
             dockerfile: client/Dockerfile
             image: open-elo-client
     steps:
