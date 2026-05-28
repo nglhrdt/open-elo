@@ -1,8 +1,8 @@
 import {
   useGetUserAvailableLeagues,
   useGetUserJoinedLeagues,
-  useGetUserOwnedLeagues,
-} from '@/api/hooks/use-users';
+} from '@/api/hooks/use-leagues';
+import { useGetUserOwnedLeagues } from '@/api/hooks/use-users';
 import type { User } from '@open-elo/shared';
 import { LeagueListItem } from './league-list-item';
 

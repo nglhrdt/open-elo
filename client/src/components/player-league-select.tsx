@@ -1,4 +1,3 @@
-import { useGetUserJoinedLeagues } from '@/api/hooks/use-users';
 import { useNavigate } from 'react-router';
 import {
   Select,
@@ -8,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
+import { useGetUserJoinedLeagues } from '@/api/hooks/use-leagues';
 
 type LeagueSelectProps = {
   leagueId: string;

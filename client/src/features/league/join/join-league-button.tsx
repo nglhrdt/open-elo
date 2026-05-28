@@ -6,7 +6,7 @@ import { useContext } from 'react';
 export function JoinLeagueButton(props: { leagueId: string }) {
   const { user } = useContext(AuthContext);
 
-  const mutation = useJoinLeague(props.leagueId);
+  const joinLeagueMutation = useJoinLeague(props.leagueId);
   const { data: leagueMembers } = useGetLeagueMembers(props.leagueId);
 
   const isMember =
@@ -14,13 +14,13 @@ export function JoinLeagueButton(props: { leagueId: string }) {
   const isGuest = user?.role === 'guest';
 
   function handleJoin() {
-    mutation.mutate();
+    joinLeagueMutation.mutate();
   }
 
   if (isMember || isGuest) return null;
 
   return (
-    <Button onClick={handleJoin} disabled={mutation.isPending}>
+    <Button onClick={handleJoin} disabled={joinLeagueMutation.isPending}>
       Join
     </Button>
   );

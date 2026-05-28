@@ -53,7 +53,6 @@ export const useUpdateUser = () => {
   });
 }
 
-
 const deleteUser = (userId: string): Promise<{ success: boolean; message: string }> => {
   return apiClient.delete(`/users/${userId}`)
 }
@@ -64,7 +63,7 @@ export const useDeleteUser = () => {
   return useMutation({
     mutationFn: (userId: string) => deleteUser(userId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: [...USERS_QUERY_KEY] });
     },
   });
 }
@@ -75,30 +74,8 @@ export async function fetchOwnedLeagues(userID: string): Promise<League[]> {
 
 export const useGetUserOwnedLeagues = (userId: string) => {
   return useQuery<League[], Error>({
-    queryKey: ['users', userId, 'owned-leagues'],
+    queryKey: [...USERS_QUERY_KEY, userId, 'owned-leagues'],
     queryFn: () => fetchOwnedLeagues(userId),
-  });
-}
-
-export async function fetchUserJoinedLeagues(userID: string): Promise<League[]> {
-  return apiClient.get<League[]>(`/users/${userID}/joined-leagues`);
-}
-
-export const useGetUserJoinedLeagues = (userId: string) => {
-  return useQuery<League[], Error>({
-    queryKey: ['users', userId, 'joined-leagues'],
-    queryFn: () => fetchUserJoinedLeagues(userId),
-  });
-}
-
-export async function fetchUserAvailableLeagues(userID: string): Promise<League[]> {
-  return apiClient.get<League[]>(`/users/${userID}/available-leagues`);
-}
-
-export const useGetUserAvailableLeagues = (userId: string) => {
-  return useQuery<League[], Error>({
-    queryKey: ['users', userId, 'available-leagues'],
-    queryFn: () => fetchUserAvailableLeagues(userId),
   });
 }
 
@@ -108,7 +85,7 @@ export async function fetchUserSeasonStats(userId: string, seasonId: string): Pr
 
 export const useGetUserSeasonStats = (userId: string, seasonId: string) => {
   return useQuery({
-    queryKey: ['users', userId, 'seasons', seasonId, 'stats'],
+    queryKey: [...USERS_QUERY_KEY, userId, 'seasons', seasonId, 'stats'],
     queryFn: () => fetchUserSeasonStats(userId, seasonId),
   });
 }

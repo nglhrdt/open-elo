@@ -63,6 +63,28 @@ export const useCreateLeague = () => {
   });
 }
 
+const fetchUserJoinedLeagues = (userID: string): Promise<League[]> => {
+  return apiClient.get<League[]>(`/users/${userID}/joined-leagues`);
+}
+
+export const useGetUserJoinedLeagues = (userId: string) => {
+  return useQuery<League[], Error>({
+    queryKey: [...LEAGUES_QUERY_KEY, userId, 'joined-leagues'],
+    queryFn: () => fetchUserJoinedLeagues(userId),
+  });
+}
+
+const fetchUserAvailableLeagues = (userID: string): Promise<League[]> => {
+  return apiClient.get<League[]>(`/users/${userID}/available-leagues`);
+}
+
+export const useGetUserAvailableLeagues = (userId: string) => {
+  return useQuery<League[], Error>({
+    queryKey: [...LEAGUES_QUERY_KEY, userId, 'available-leagues'],
+    queryFn: () => fetchUserAvailableLeagues(userId),
+  });
+}
+
 const joinLeague = async (leagueId: string) => {
   return apiClient.post(`/leagues/${leagueId}/join`, {});
 }
@@ -72,7 +94,7 @@ export const useJoinLeague = (leagueId: string) => {
   return useMutation({
     mutationFn: () => joinLeague(leagueId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: LEAGUES_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: [...LEAGUES_QUERY_KEY] });
     },
   });
 }

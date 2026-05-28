@@ -1,4 +1,4 @@
-import { useGetUserOwnedLeagues } from '@/api/hooks/use-users';
+import { useGetUserJoinedLeagues } from '@/api/hooks/use-leagues';
 import { Trophy } from 'lucide-react';
 import { Link, useLocation } from 'react-router';
 import {
@@ -17,7 +17,7 @@ type UserLeaguesNavProps = {
 export function UserLeaguesNav({ userId }: UserLeaguesNavProps) {
   const location = useLocation();
 
-  const { data: leagues } = useGetUserOwnedLeagues(userId);
+  const { data: leagues } = useGetUserJoinedLeagues(userId);
 
   if (!leagues || leagues.length === 0) {
     return null;
