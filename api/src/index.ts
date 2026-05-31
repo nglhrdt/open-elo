@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { createExpressServer, useContainer } from 'routing-controllers';
 import { Container } from 'typedi';
 import { AuthController } from "./controllers/auth.controller";
+import { AvatarController } from "./controllers/avatar.controller";
 import { GameController } from "./controllers/game.controller";
 import { HealthController } from "./controllers/health.controller";
 import { LeagueController } from "./controllers/league.controller";
@@ -34,6 +35,7 @@ async function main() {
       },
       controllers: [
         AuthController,
+        AvatarController,
         GameController,
         HealthController,
         LeagueController,

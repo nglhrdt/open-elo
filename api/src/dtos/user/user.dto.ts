@@ -41,4 +41,7 @@ export class UserDTO implements User {
 
   @ValidateNested()
   favoriteLeague!: FavoriteLeagueDTO;
+
+  @IsString()
+  avatarUrl?: string | null;
 };

@@ -4,6 +4,8 @@ services:
   api:
     image: ghcr.io/nglhrdt/open-elo-api:latest
     container_name: api
+    volumes:
+      - avatars_data:/data/avatars
     labels:
       - 'traefik.enable=true'
       - 'traefik.http.routers.elo-api-path.rule=Host(`elo.${DOMAIN}`) && PathPrefix(`/api`)'
@@ -105,3 +107,4 @@ networks:
 volumes:
   traefik_letsencrypt:
   postgres-data:
+  avatars_data:

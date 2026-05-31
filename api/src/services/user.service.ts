@@ -221,6 +221,16 @@ export class UserService {
     });
   }
 
+  async updateAvatar(userId: string, avatarUrl: string | null) {
+    return this.repository.manager.transaction(async (mgr) => {
+      const repo = mgr.getRepository(UserEntity);
+      const user = await repo.findOneBy({ id: userId });
+      if (!user) throw new Error("User not found");
+      user.avatarUrl = avatarUrl;
+      return repo.save(user);
+    });
+  }
+
   async deleteUser(userId: string) {
     //TODO delete user
     return { success: true, message: "User deleted successfully" };

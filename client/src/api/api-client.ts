@@ -39,6 +39,17 @@ export const apiClient = {
     if (!res.ok) throw new Error(`DELETE ${path} failed: ${res.status}`);
     return res.json() as Promise<T>;
   },
+
+  async upload<T>(path: string, formData: FormData): Promise<T> {
+    // Do NOT set Content-Type — browser must set it with the multipart boundary
+    const url = path.startsWith('http') ? path : `${baseUrl}${path}`;
+    const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token') || '';
+    const headers = new Headers();
+    if (token) headers.set('Authorization', `Bearer ${token}`);
+    const res = await fetch(url, { method: 'PUT', headers, body: formData });
+    if (!res.ok) throw new Error(`PUT ${path} failed: ${res.status}`);
+    return res.json() as Promise<T>;
+  },
 };
 
 function urlWithParams(path: string, params: Record<string, number | string> | undefined): string {

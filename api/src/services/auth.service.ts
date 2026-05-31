@@ -100,6 +100,7 @@ export class AuthService {
       username: user.username,
       email: user.email,
       role: user.role,
+      avatarUrl: user.avatarUrl,
       favoriteLeague: user.favoriteLeague ? this.toLeagueDTO(user.favoriteLeague) : undefined,
     };
   }

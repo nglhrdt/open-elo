@@ -7,6 +7,7 @@ import { PlayerEntity } from './entity/player.entity';
 import { RankingEntity } from './entity/ranking.entity';
 import { SeasonEntity } from './entity/season.entity';
 import { UserEntity } from './entity/user.entity';
+import { AddAvatarUrlToUser1780207543363 } from './migrations/1780207543363-AddAvatarUrlToUser';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -16,6 +17,7 @@ export const AppDataSource = new DataSource({
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_NAME || 'postgres',
   synchronize: false,
+  migrationsRun: true,
   logging: false,
   entities: [
     GameEntity,
@@ -27,6 +29,8 @@ export const AppDataSource = new DataSource({
     SeasonEntity,
     UserEntity,
   ],
-  migrations: [],
+  migrations: [
+    AddAvatarUrlToUser1780207543363
+  ],
   subscribers: [],
 });

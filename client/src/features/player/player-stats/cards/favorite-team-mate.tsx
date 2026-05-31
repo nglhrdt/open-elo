@@ -1,6 +1,6 @@
 import { useGetUserSeasonStats } from '@/api/hooks/use-users';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import UserAvatar from '@/components/user-avatar';
 
 type FavoriteTeamMateProps = {
   playerId: string;
@@ -16,12 +16,15 @@ function FavoriteTeamMate({ playerId, seasonId }: FavoriteTeamMateProps) {
         <CardTitle>Most wins with</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-4">
-        <Avatar className="aspect-square w-32 h-32">
-          <AvatarImage src="https://github.com/shadcn.png" />
-          <AvatarFallback>CN</AvatarFallback>
-        </Avatar>
-        <div>{stats?.summary.with.mostWins?.username}</div>
-        <div>{stats?.summary.with.mostWins?.count}</div>
+        {stats?.summary.with.mostWins ? (
+          <>
+            <UserAvatar userId={stats.summary.with.mostWins.userId} size="size-32" />
+            <div>{stats.summary.with.mostWins.username}</div>
+            <div>{stats.summary.with.mostWins.count}</div>
+          </>
+        ) : (
+          <div>No data</div>
+        )}
       </CardContent>
     </Card>
   );

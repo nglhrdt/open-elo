@@ -7,6 +7,7 @@ export type User = {
     username: string;
     email: string;
     role: ROLE;
+    avatarUrl?: string | null;
     favoriteLeague: {
         id: string;
         name: string;
@@ -23,6 +24,7 @@ export type Profile = {
     username: string;
     email: string;
     role: ROLE;
+    avatarUrl?: string | null;
     favoriteLeague: {
         id: string;
         name: string;

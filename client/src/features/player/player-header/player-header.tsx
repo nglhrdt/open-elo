@@ -4,6 +4,7 @@ import { SeasonSelect } from '@/components/season-select';
 import { useNavigate } from 'react-router';
 import { ConvertGuestDialog } from './convert-guest-dialog';
 import { DeleteGuestDialog } from './delete-guest-dialog';
+import UserAvatar from '@/components/user-avatar';
 
 interface PlayerHeaderProps {
   leagueId: string;
@@ -25,6 +26,7 @@ export function PlayerHeader(props: PlayerHeaderProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center gap-4">
+        <UserAvatar userId={playerId} />
         <PlayerLeagueSelect
           leagueId={leagueId}
           playerId={playerId}

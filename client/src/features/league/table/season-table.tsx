@@ -2,6 +2,7 @@ import { useGetSeasonRanking } from '@/api/hooks/use-seasons';
 import { AuthContext } from '@/components/AuthContext';
 import { DataTable } from '@/components/data-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import UserAvatar from '@/components/user-avatar';
 import type { Ranking } from '@open-elo/shared';
 import { type ColumnDef } from '@tanstack/react-table';
 import { useContext } from 'react';
@@ -27,9 +28,8 @@ export function SeasonTable(props: { seasonId: string }) {
         return (
           <Link
             to={`/leagues/${ranking.leagueId}/seasons/${seasonId}/players/${ranking.userId}`}
-            className="text-primary hover:underline"
           >
-            {ranking.username}
+            <UserAvatar userId={ranking.userId} showName size="size-8" />
           </Link>
         );
       },

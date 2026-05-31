@@ -1,5 +1,6 @@
 volumes:
   postgres-data:
+  avatars_data:
 
 services:
   app:
@@ -9,6 +10,7 @@ services:
 
     volumes:
       - ..:/workspaces:cached
+      - avatars_data:/data/avatars
 
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity

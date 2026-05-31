@@ -1,0 +1,1 @@
+ALTER TABLE user_entity ADD COLUMN IF NOT EXISTS "avatarUrl" VARCHAR NULL;

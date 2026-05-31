@@ -29,8 +29,6 @@ export function MatchTeam(props: MatchTeamProps) {
         <MatchPlayerDialog
           key={`${match.id}-${player.userId}`}
           playerId={player.userId}
-          playername={player.username}
-          bold={isWinner}
           leagueId={match.leagueId}
           seasonId={match.seasonId}
         />

@@ -21,6 +21,10 @@ COPY --from=builder /app/api/node_modules ./api/node_modules
 COPY --from=builder /app/shared ./shared
 COPY --from=builder /app/api/dist ./api/dist
 
+RUN mkdir -p /data/avatars && chown node:node /data/avatars
+
+USER node
+
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \

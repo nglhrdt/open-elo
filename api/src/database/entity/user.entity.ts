@@ -43,6 +43,9 @@ export class UserEntity {
   @OneToMany(() => RankingEntity, ranking => ranking.user, { lazy: true })
   rankings!: RankingEntity[]
 
+  @Column({ nullable: true, type: 'varchar' })
+  avatarUrl!: string | null
+
   @Column({ default: false })
   deleted!: boolean
 

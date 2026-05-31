@@ -20,6 +20,7 @@
       "onAutoForward": "notify",
     },
   },
+  "postCreateCommand": "sudo mkdir -p /data/avatars && sudo chown node:node /data/avatars",
   "shutdownAction": "none",
   "customizations": {
     "vscode": {
