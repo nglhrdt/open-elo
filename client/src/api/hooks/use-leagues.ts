@@ -98,3 +98,17 @@ export const useJoinLeague = (leagueId: string) => {
     },
   });
 }
+
+const removeMember = async (leagueId: string, userId: string) => {
+  return apiClient.post(`/leagues/${leagueId}/members/${userId}/remove`, {});
+}
+
+export const useRemoveMember = (leagueId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) => removeMember(leagueId, userId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [...LEAGUES_QUERY_KEY, leagueId, 'members'] });
+    },
+  });
+}

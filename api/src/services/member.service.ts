@@ -44,6 +44,21 @@ export class MemberService {
     });
   }
 
+  async removeMember(leagueId: string, userId: string) {
+    const member = await this.memberRepository.findOne({
+      where: {
+        league: { id: leagueId },
+        user: { id: userId },
+      },
+      relations: ["user"],
+    });
+
+    if (!member) {
+      throw new Error("Member not found");
+    }
+    await this.memberRepository.remove(member);
+  }
+
   toDTOs(entities: UserEntity[]): Member[] {
     return entities.map((entity) => this.toDTO(entity));
   }

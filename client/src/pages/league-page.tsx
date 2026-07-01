@@ -1,6 +1,7 @@
 import { LeagueHeader } from '@/features/league/header/league-header';
 import { JoinLeagueButton } from '@/features/league/join/join-league-button';
 import { SeasonMatches } from '@/features/league/matches/season-matches';
+import LeagueMembersDialog from '@/features/league/members/league-members-dialog';
 import { SeasonSettingsDialog } from '@/features/league/settings/season-settings-dialog';
 import { SeasonTable } from '@/features/league/table/season-table';
 import { CreateMatch } from '@/features/match/create-match/create-match';
@@ -20,6 +21,7 @@ export function LeaguePage() {
         <LeagueHeader leagueId={leagueId} seasonId={seasonId} />
         <div className="flex items-center gap-4">
           <JoinLeagueButton leagueId={leagueId} />
+          <LeagueMembersDialog leagueId={leagueId} />
           <SeasonSettingsDialog leagueId={leagueId} />
         </div>
       </div>

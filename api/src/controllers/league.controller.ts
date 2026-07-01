@@ -1,3 +1,4 @@
+import { GetLeaguesParams } from "@open-elo/shared";
 import {
   Authorized,
   Body,
@@ -12,7 +13,6 @@ import { Service } from "typedi";
 import { UserDTO } from "../dtos";
 import { CreateLeagueDTO } from "../dtos/league/create-league.dto";
 import { LeagueService } from "../services/league.service";
-import { GetLeaguesParams } from "@open-elo/shared";
 import { MemberService } from "../services/member.service";
 
 @Service()
@@ -57,6 +57,12 @@ export class LeagueController {
   @Get("/:id/members")
   async getLeagueMembers(@Param("id") id: string) {
     return this.memberService.getLeagueMembers(id);
+  }
+
+  @Authorized()
+  @Post("/:id/members/:userId/remove")
+  async removeMember(@Param("id") leagueId: string, @Param("userId") userId: string) {
+    return this.memberService.removeMember(leagueId, userId);
   }
 
   @Authorized()
