@@ -15,6 +15,9 @@ export class MemberService {
         league: {
           id: leagueId,
         },
+        user: {
+          deleted: false,
+        }
       },
       relations: ["user"],
       order: {
