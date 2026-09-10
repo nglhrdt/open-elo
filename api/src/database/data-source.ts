@@ -7,7 +7,8 @@ import { PlayerEntity } from './entity/player.entity';
 import { RankingEntity } from './entity/ranking.entity';
 import { SeasonEntity } from './entity/season.entity';
 import { UserEntity } from './entity/user.entity';
-import { AddAvatarUrlToUser1780207543363 } from './migrations/1780207543363-AddAvatarUrlToUser';
+import { InitialSchema1789068168087 } from './migrations/1789068168087-InitialSchema';
+import { SeedTableSoccerGame1789068422156 } from './migrations/1789068422156-SeedTableSoccerGame';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -30,7 +31,8 @@ export const AppDataSource = new DataSource({
     UserEntity,
   ],
   migrations: [
-    AddAvatarUrlToUser1780207543363
+    InitialSchema1789068168087,
+    SeedTableSoccerGame1789068422156
   ],
   subscribers: [],
 });

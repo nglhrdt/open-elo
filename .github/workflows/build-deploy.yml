@@ -81,6 +81,7 @@ jobs:
   deploy:
     name: Deploy Stack
     needs: build-and-push
+    if: false # deploy disabled - remove this line to re-enable
     runs-on: self-hosted
     environment:
       name: production
