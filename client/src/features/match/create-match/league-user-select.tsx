@@ -8,6 +8,7 @@ type LeagueUserSelectProps = {
   selectedIds: string[];
   value: string;
   placeholder?: string;
+  position?: 'Defense' | 'Offense';
   onChange?: (userID: string) => void;
 };
 
@@ -16,6 +17,7 @@ export function LeagueUserSelect({
   selectedIds,
   value,
   placeholder,
+  position,
   onChange,
 }: LeagueUserSelectProps) {
   const { data: members } = useGetLeagueMembers(leagueId);
@@ -36,7 +38,8 @@ export function LeagueUserSelect({
   }
 
   return (
-    <div className="w-full flex gap-4">
+    <div className="w-full flex gap-4 items-center">
+      {position && position}
       <UserSelect
         users={filteredUsers}
         value={value}
