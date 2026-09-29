@@ -2,6 +2,7 @@ import { IsEmail, IsEnum, IsInt, IsPositive, IsString, IsUUID, ValidateNested } 
 import { GAME } from "../../database/entity/game.entity";
 import { ROLE } from "../../database/entity/user.entity";
 import { User } from "@open-elo/shared";
+import { IsNull } from "typeorm";
 
 export class FavoriteLeagueSeasonDTO {
   @IsUUID()
@@ -40,7 +41,7 @@ export class UserDTO implements User {
   role!: ROLE
 
   @ValidateNested()
-  favoriteLeague!: FavoriteLeagueDTO;
+  favoriteLeague!: FavoriteLeagueDTO | null;
 
   @IsString()
   avatarUrl?: string | null;

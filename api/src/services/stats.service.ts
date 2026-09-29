@@ -139,7 +139,7 @@ export class StatsService {
     const rankings = await AppDataSource.getRepository(RankingEntity).find({
       where: { season: { id: seasonId } },
       order: { elo: "DESC" },
-      relations: ["user"],
+      relations: { user: true },
     });
 
     let positionCounter = 1;

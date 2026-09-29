@@ -21,7 +21,7 @@ export class MatchService {
   async createMatch(seasonId: string, { players, score }: CreateMatchDTO) {
     const season = await this.seasonRepository.findOne({
       where: { id: seasonId },
-      relations: ["league"],
+      relations: { league: true },
     });
     if (!season) throw new Error("Season not found");
 
@@ -72,14 +72,14 @@ export class MatchService {
   getMatchById(id: string) {
     return this.matchRepository.findOne({
       where: { id },
-      relations: ["players", "players.user", "season", "season.league"],
+      relations: { players: { user: true }, season: { league: true } },
     });
   }
 
   async migrateMatch(seasonId: string, createdAt: Date, { players, score }: CreateMatchDTO) {
     const season = await this.seasonRepository.findOne({
       where: { id: seasonId },
-      relations: ["league"],
+      relations: { league: true },
     });
     if (!season) throw new Error("Season not found");
 

@@ -19,7 +19,7 @@ export class MemberService {
           deleted: false,
         }
       },
-      relations: ["user"],
+      relations: { user: true },
       order: {
         user: {
           username: "ASC",

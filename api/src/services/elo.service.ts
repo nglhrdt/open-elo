@@ -3,9 +3,9 @@ import { In } from "typeorm";
 import { AppDataSource } from "../database/data-source";
 import { TEAM } from "../database/entity/player.entity";
 import { RankingEntity } from "../database/entity/ranking.entity";
-import { CreateMatchPlayerDTO } from "../dtos";
 import { SeasonEntity } from "../database/entity/season.entity";
 import { UserEntity } from "../database/entity/user.entity";
+import { CreateMatchPlayerDTO } from "../dtos";
 
 @Service()
 export class EloService {
@@ -135,7 +135,7 @@ export class EloService {
   private getRankingByUserIdsAndSeasonId(userIDs: string[], seasonId: string): Promise<RankingEntity[]> {
     return this.rankingRepository.find({
       where: { user: { id: In(userIDs) }, season: { id: seasonId } },
-      relations: ["season", "user"],
+      relations: { season: true, user: true },
     });
   }
 }

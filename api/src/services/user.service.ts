@@ -24,7 +24,7 @@ export class UserService {
     email?: string | null;
     passwordHash?: string | null;
     role: ROLE;
-  }) {
+  }): Promise<UserEntity> {
     const role = user.role;
     const username = user.username?.trim();
     let email = user.email?.trim().toLowerCase() || null;
@@ -61,7 +61,7 @@ export class UserService {
           username,
           email: email ?? null,
           passwordHash: passwordHash ?? null,
-        });
+        } as Partial<UserEntity>);
         return repo.save(entity);
       } catch (e: any) {
         if (e?.code === "23505") {
@@ -75,21 +75,21 @@ export class UserService {
   getUserById(id: string) {
     return this.repository.findOne({
       where: { id },
-      relations: ["favoriteLeague", "favoriteLeague.currentSeason", "favoriteLeague.game"],
+      relations: { favoriteLeague: { currentSeason: true, game: true } }  ,
     });
   }
 
   getUserByEmail(email: string) {
     return this.repository.findOne({
       where: { email },
-      relations: ["favoriteLeague", "favoriteLeague.currentSeason", "favoriteLeague.game"],
+      relations: { favoriteLeague: { currentSeason: true, game: true } },
     });
   }
 
   getUserByUsername(username: string) {
     return this.repository.findOne({
       where: { username },
-      relations: ["favoriteLeague", "favoriteLeague.currentSeason", "favoriteLeague.game"],
+      relations: { favoriteLeague: { currentSeason: true, game: true } },
     });
   }
 
