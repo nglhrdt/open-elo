@@ -18,7 +18,7 @@ export class SeasonService {
   async getSeasons(leagueId: string) {
     const seasons = await this.seasonRepository.find({
       where: { league: { id: leagueId } },
-      relations: ["league", "league.game"],
+      relations: { league: { game: true } },
       order: { seasonNumber: "DESC" },
     });
 
@@ -28,7 +28,7 @@ export class SeasonService {
   async getSeasonById(id: string) {
     const season = await this.seasonRepository.findOne({
       where: { id },
-      relations: ["league", "league.game", "league.currentSeason"],
+      relations: { league: { game: true, currentSeason: true } },
     });
 
     if (!season) return null;
@@ -39,7 +39,7 @@ export class SeasonService {
   async getSeasonRankings(id: string) {
     const rankings = await this.rankingRepository.find({
       where: { season: { id } },
-      relations: ["user", "season", "season.league"],
+      relations: { user: true, season: { league: true } },
     });
 
     return this.createRankingDTOs(rankings);
@@ -75,7 +75,7 @@ export class SeasonService {
         },
       },
       order: { createdAt: "DESC" },
-      relations: ["players", "players.user", "season", "season.league", "season.league.game"],
+      relations: { players: { user: true }, season: { league: { game: true } } },
       take: count,
     });
 
@@ -105,7 +105,7 @@ export class SeasonService {
         },
       },
       order: { createdAt: "ASC" },
-      relations: ["players", "players.user"],
+      relations: { players: { user: true } },
     });
 
     const chartData = matches.reduce((acc, match) => {
@@ -126,7 +126,7 @@ export class SeasonService {
   async stopSeasons() {
     const leaguesWithEndedSeason = await this.leagueRepository.find({
       where: { currentSeason: { endAt: And(Not(IsNull()), LessThan(new Date())) } },
-      relations: ["currentSeason"],
+      relations: { currentSeason: true },
     });
 
     for (const league of leaguesWithEndedSeason) {

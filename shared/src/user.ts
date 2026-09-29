@@ -16,22 +16,7 @@ export type User = {
             id: string;
             seasonNumber: number;
         };
-    };
+    } | null;
 }
 
-export type Profile = {
-    id: string;
-    username: string;
-    email: string;
-    role: ROLE;
-    avatarUrl?: string | null;
-    favoriteLeague: {
-        id: string;
-        name: string;
-        game: GAME;
-        season: {
-            id: string;
-            seasonNumber: number;
-        };
-    };
-}
+export type Profile = User;

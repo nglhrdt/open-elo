@@ -30,7 +30,7 @@ export class LeagueService {
           },
         },
       } : {},
-      relations: ["owner", "game", "members", "members.user", "seasons", "currentSeason"],
+      relations: { owner: true, game: true, members: { user: true }, seasons: true, currentSeason: true },
     });
     return leagues.map((league) => this.toDTO(league));
   }
@@ -38,7 +38,7 @@ export class LeagueService {
   async getLeagueById(id: string) {
     const league = await this.leagueRepository.findOne({
       where: { id },
-      relations: ["owner", "game", "currentSeason", "members", "members.user", "seasons"],
+      relations: { owner: true, game: true, members: { user: true }, seasons: true, currentSeason: true },
     });
     return league ? this.toDTO(league) : null;
   }
@@ -85,7 +85,7 @@ export class LeagueService {
   async joinLeague({ leagueId, user }: { leagueId: string; user: UserDTO }) {
     const league = await this.leagueRepository.findOne({
       where: { id: leagueId },
-      relations: ["members", "members.user"],
+      relations: { members: { user: true } },
     });
     if (!league) throw new Error("League not found");
 
@@ -112,7 +112,7 @@ export class LeagueService {
           },
         },
       },
-      relations: ["game", "owner", "currentSeason", "members", "members.user"],
+      relations: { game: true, owner: true, currentSeason: true, members: { user: true } },
     });
     return leagues.map((league) => this.toDTO(league));
   }
@@ -124,7 +124,7 @@ export class LeagueService {
           id,
         },
       },
-      relations: ["game", "owner", "currentSeason", "members", "members.user"],
+      relations: { game: true, owner: true, currentSeason: true, members: { user: true } },
     });
     return leagues.map((league) => this.toDTO(league));
   }
@@ -138,14 +138,14 @@ export class LeagueService {
           },
         },
       },
-      relations: ["game", "owner", "currentSeason", "members", "members.user"],
+      relations: { game: true, owner: true, currentSeason: true, members: { user: true } },
     });
 
     const availableLeagues = await this.leagueRepository.find({
       where: {
         id: Not(In(leagues.map((league) => league.id))),
       },
-      relations: ["game", "owner", "currentSeason", "members", "members.user"],
+      relations: { game: true, owner: true, currentSeason: true, members: { user: true } },
     });
 
     return availableLeagues.map((league) => this.toDTO(league));

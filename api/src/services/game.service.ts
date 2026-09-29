@@ -20,7 +20,7 @@ export class GameService {
   getLeaguesForGame(gameId: string) {
     return this.repository.findOne({
       where: { id: gameId },
-      relations: ['leagues'],
+      relations: { leagues: true },
     });
   }
 }
