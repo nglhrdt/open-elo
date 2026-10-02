@@ -24,7 +24,7 @@ export const useGetUserById = (userId: string) => {
 }
 
 const convertGuestToRegistered = async (userId: string, data: { email: string; password: string }) => {
-  return apiClient.post<User>(`/users/${userId}/convert`, data);
+  return apiClient.post<User>(`/users/${userId}/convert-to-registered`, data);
 }
 
 export const useConvertGuestToRegistered = () => {
