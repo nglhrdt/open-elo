@@ -1,6 +1,7 @@
 import { useGetSeasonMatches } from '@/api/hooks/use-seasons';
 import { Separator } from '@/components/ui/separator';
 import { Fragment } from 'react';
+import { DeleteMatchButton } from './delete-match-button';
 import { MatchListItem } from './match-list-item';
 
 type SeasonMatchListProps = {
@@ -24,6 +25,7 @@ export function SeasonMatchList(props: SeasonMatchListProps) {
           <Fragment key={match.id}>
             <div className="flex flex-col gap-2">
               <MatchListItem key={match.id} match={match} />
+              {i === 0 && <DeleteMatchButton matchId={match.id} />}
             </div>
             {i < matches.length - 1 && <Separator orientation="horizontal" />}
           </Fragment>

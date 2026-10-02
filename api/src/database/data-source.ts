@@ -9,6 +9,7 @@ import { SeasonEntity } from './entity/season.entity';
 import { UserEntity } from './entity/user.entity';
 import { InitialSchema1789068168087 } from './migrations/1789068168087-InitialSchema';
 import { SeedTableSoccerGame1789068422156 } from './migrations/1789068422156-SeedTableSoccerGame';
+import { PlayerMatchCascadeDelete1789068500000 } from './migrations/1789068500000-PlayerMatchCascadeDelete';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -32,7 +33,8 @@ export const AppDataSource = new DataSource({
   ],
   migrations: [
     InitialSchema1789068168087,
-    SeedTableSoccerGame1789068422156
+    SeedTableSoccerGame1789068422156,
+    PlayerMatchCascadeDelete1789068500000,
   ],
   subscribers: [],
 });

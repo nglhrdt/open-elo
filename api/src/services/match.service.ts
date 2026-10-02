@@ -151,6 +151,19 @@ export class MatchService {
     };
   }
 
+  async deleteMatch(id: string) {
+    const matchToDelete = await this.matchRepository.findOne({ where: { id }, relations: { season: true, players: { user: true } } });
+
+    if (!matchToDelete) throw new Error(`Match with id ${id} not found`);
+
+    const eloSnapshots = this.createEloSnapshotFromMatch(matchToDelete);
+
+    await this.eloService.revertEloToSnapshot(eloSnapshots, matchToDelete.season.id);
+
+    return this.matchRepository.remove(matchToDelete);
+  }
+
+
   toDtos(matches: MatchEntity[]): Match[] {
     return matches.map((match) => this.toDto(match));
   }
@@ -174,5 +187,12 @@ export class MatchService {
           : null,
       })),
     };
+  }
+
+  private createEloSnapshotFromMatch(matchToDelete: MatchEntity) {
+    return matchToDelete.players.reduce<Record<string, number>>((acc, p) => {
+      acc[p.user.id] = p.eloBefore ?? 1000;
+      return acc;
+    }, {});
   }
 }

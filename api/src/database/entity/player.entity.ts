@@ -21,7 +21,7 @@ export class PlayerEntity {
   @Column({ type: "int", nullable: true })
   eloAfter!: number | null;
 
-  @ManyToOne(() => MatchEntity, match => match.players)
+  @ManyToOne(() => MatchEntity, match => match.players, { onDelete: 'CASCADE' })
   match!: MatchEntity;
 
   @ManyToOne(() => UserEntity, user => user.players)

@@ -67,3 +67,18 @@ export const useSetSeasonEnd = (seasonId: string) => {
     }
   });
 };
+
+const deleteMatch = async (matchId: string): Promise<void> => {
+  return apiClient.delete(`/matches/${matchId}`);
+};
+
+export const useDeleteMatch = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: deleteMatch,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: SEASONS_QUERY_KEY });
+    }
+  });
+};
+
