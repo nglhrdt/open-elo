@@ -1,4 +1,4 @@
-import { useGetSeasonMatches } from '@/api/hooks/use-seasons';
+import { useGetSeasonById, useGetSeasonMatches } from '@/api/hooks/use-seasons';
 import { Separator } from '@/components/ui/separator';
 import { Fragment } from 'react';
 import { DeleteMatchButton } from './delete-match-button';
@@ -13,6 +13,7 @@ export function SeasonMatchList(props: SeasonMatchListProps) {
   const { count = 10, seasonId } = props;
 
   const { data: matches } = useGetSeasonMatches(seasonId, { count });
+  const { data: season } = useGetSeasonById(seasonId);
 
   if (!matches || matches.length === 0) {
     return <p className="text-sm text-muted-foreground">No matches found.</p>;
@@ -25,7 +26,9 @@ export function SeasonMatchList(props: SeasonMatchListProps) {
           <Fragment key={match.id}>
             <div className="flex flex-col gap-2">
               <MatchListItem key={match.id} match={match} />
-              {i === 0 && <DeleteMatchButton matchId={match.id} />}
+              {i === 0 && season?.isCurrentSeason && (
+                <DeleteMatchButton matchId={match.id} />
+              )}
             </div>
             {i < matches.length - 1 && <Separator orientation="horizontal" />}
           </Fragment>
